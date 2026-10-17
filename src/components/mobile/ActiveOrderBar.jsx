@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
@@ -17,23 +18,39 @@ export default function ActiveOrderBar() {
       const orders = await getOrders();
       const active = orders.find(o => ['placed', 'preparing', 'ready'].includes(o.status));
       
-      if (active?.id !== activeOrder?.id) {
-        setDismissed(false); // Reset dismiss state if a NEW order comes in
+      if (active) {
+        setActiveOrder(active);
+        // If this specific order was previously dismissed, keep it hidden
+        const dismissedId = localStorage.getItem('ceekay-dismissed-order');
+        if (dismissedId === active.id) {
+          setDismissed(true);
+        } else {
+          setDismissed(false);
+        }
+      } else {
+        // No active order, clear the history so future orders appear
+        setActiveOrder(null);
+        localStorage.removeItem('ceekay-dismissed-order');
       }
-      
-      setActiveOrder(active || null);
     };
 
     checkActive();
     const unsub = subscribeToOrders(checkActive);
     return unsub;
-  }, [activeOrder?.id]);
+  }, []);
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (activeOrder) {
+      localStorage.setItem('ceekay-dismissed-order', activeOrder.id);
+    }
+  };
 
   // Auto-dismiss after 6 seconds
   useEffect(() => {
     if (!activeOrder || dismissed) return;
     const timer = setTimeout(() => {
-      setDismissed(true);
+      handleDismiss();
     }, 6000);
     return () => clearTimeout(timer);
   }, [activeOrder, dismissed]);
@@ -43,7 +60,7 @@ export default function ActiveOrderBar() {
     if (!activeOrder || dismissed) return;
     const handleOutsideClick = (e) => {
       if (barRef.current && !barRef.current.contains(e.target)) {
-        setDismissed(true);
+        handleDismiss();
       }
     };
     document.addEventListener('click', handleOutsideClick);
@@ -74,7 +91,7 @@ export default function ActiveOrderBar() {
         style={{ x }}
         onDragEnd={(e, info) => {
           if (info.offset.x > 80) {
-            setDismissed(true);
+            handleDismiss();
           }
         }}
         className={`active-order-bar status-${activeOrder.status}`}

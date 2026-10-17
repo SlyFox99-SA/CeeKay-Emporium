@@ -1,26 +1,29 @@
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, CheckCircle2 } from 'lucide-react';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function NetworkStatus() {
   const isOnline = useNetworkStatus();
   const [showRestored, setShowRestored] = useState(false);
+  const wasOffline = useRef(false);
 
   useEffect(() => {
-    if (isOnline) {
-      // If we just came back online, show a success message briefly
-      if (showRestored === false) {
-         setShowRestored(true);
-         const timer = setTimeout(() => setShowRestored(false), 3000);
-         return () => clearTimeout(timer);
-      }
-    } else {
+    if (!isOnline) {
+      // If they go offline, remember it
+      wasOffline.current = true;
       setShowRestored(false);
+    } else if (isOnline && wasOffline.current) {
+      // Only show "restored" if they were previously offline
+      setShowRestored(true);
+      wasOffline.current = false;
+      const timer = setTimeout(() => setShowRestored(false), 3000);
+      return () => clearTimeout(timer);
     }
   }, [isOnline]);
 
-  // Hide banner if online and no "restored" message is needed
+  // Hide if online and no "restored" message is needed
   if (isOnline && !showRestored) return null;
 
   return (

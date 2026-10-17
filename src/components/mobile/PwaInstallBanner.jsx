@@ -8,7 +8,12 @@ export default function PwaInstallBanner() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // 1. If the app is already installed, never show the banner
     if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+    // 2. If the user has previously dismissed it, respect their choice
+    const isDismissed = localStorage.getItem('ceekay-pwa-dismissed');
+    if (isDismissed) return;
 
     const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(isIosDevice);
@@ -30,10 +35,22 @@ export default function PwaInstallBanner() {
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
+    
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setShow(false);
+    
+    if (outcome === 'accepted') {
+      setShow(false);
+      localStorage.setItem('ceekay-pwa-dismissed', 'true'); // Save their choice
+    }
+    
     setDeferredPrompt(null);
+  };
+
+  const handleDismiss = () => {
+    setShow(false);
+    // Save their choice so it doesn't pop up again
+    localStorage.setItem('ceekay-pwa-dismissed', 'true');
   };
 
   if (!show) return null;
@@ -52,7 +69,7 @@ export default function PwaInstallBanner() {
       {!isIOS && (
         <button className="m-pwa-btn" onClick={handleInstall}>Install</button>
       )}
-      <button className="m-pwa-close" onClick={() => setShow(false)}><X size={16} /></button>
+      <button className="m-pwa-close" onClick={handleDismiss}><X size={16} /></button>
     </div>
   );
 }
