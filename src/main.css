@@ -3498,3 +3498,1264 @@ body.no-animations *::after {
   cursor: pointer;
 }
 .admin-btn-cancel:hover { color: var(--ck-action); background: var(--ck-action-soft); }
+
+/* ============================================================
+   PURE MOBILE APP SHELL
+   ============================================================ */
+.mobile-app-shell {
+  background: #f7f7f7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ck-font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Top Bar */
+.mobile-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  padding-top: calc(14px + env(safe-area-inset-top));
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ck-font-display);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ck-brand-deep);
+}
+.mobile-store-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ck-cream-warm);
+  color: var(--ck-brand-deep);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(30, 95, 156, 0.1);
+}
+
+/* Content Area */
+.mobile-content {
+  flex: 1;
+  padding-bottom: 100px; /* Space for nav */
+}
+.mobile-menu-view {
+  padding: 20px;
+}
+.mobile-greeting {
+  font-family: var(--ck-font-serif);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--ck-ink);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.mobile-section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ck-ink);
+  margin: 24px 0 12px;
+}
+
+/* App-style Food Cards */
+.mobile-food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mobile-food-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: transform 0.1s;
+}
+.mobile-food-card:active {
+  transform: scale(0.98);
+  background: #fafafa;
+}
+.mobile-food-img {
+  width: 80px;
+  height: 80px;
+  background: var(--ck-cream-warm);
+  border-radius: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.mobile-food-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+.mobile-food-info {
+  flex: 1;
+  min-width: 0;
+}
+.mobile-food-name {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ck-ink);
+  margin-bottom: 2px;
+}
+.mobile-food-desc {
+  font-size: 11px;
+  color: var(--ck-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+.mobile-food-price {
+  font-family: var(--ck-font-serif);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--ck-brand-deep);
+}
+.mobile-add-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ck-brand-deep);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(30, 95, 156, 0.2);
+}
+
+/* Profile View */
+.mobile-profile-view {
+  padding: 20px;
+}
+.mobile-profile-view .prefs-panel {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  padding: 0;
+  animation: none;
+  background: transparent;
+}
+
+/* Native Bottom Nav */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 1000;
+}
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 10px;
+  font-weight: 700;
+  flex: 1;
+  height: 100%;
+}
+.mobile-nav-item.active {
+  color: var(--ck-brand-deep);
+}
+.mobile-cart-icon-wrap {
+  position: relative;
+}
+.mobile-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--ck-action);
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* Force Modals to act like Bottom Sheets on Mobile */
+@media (max-width: 767px) {
+  .cart-side {
+    width: 100% !important;
+    height: 92vh !important;
+    top: auto !important;
+    bottom: 0;
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+  }
+  .cart-side.open {
+    transform: translateY(0);
+  }
+  .item-modal {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    border-radius: 24px 24px 0 0 !important;
+    animation: slideUpSheet 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) forwards !important;
+  }
+  @keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+/* ============================================================
+   PURE NATIVE MOBILE SHELL (STRICT)
+   ============================================================ */
+
+/* Override body to prevent document-level scrolling */
+body:has(.mobile-app-shell) {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  overscroll-behavior-y: none;
+}
+
+.mobile-app-shell {
+  background: #f7f7f7;
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ck-font-body);
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+/* Top Bar - Fixed */
+.mobile-topbar {
+  flex-shrink: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  padding-top: calc(14px + env(safe-area-inset-top));
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ck-font-display);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ck-brand-deep);
+}
+.mobile-store-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ck-cream-warm);
+  color: var(--ck-brand-deep);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(30, 95, 156, 0.1);
+}
+
+/* Scrollable Content Area - The ONLY thing that scrolls */
+.mobile-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+.mobile-menu-view {
+  padding: 20px;
+}
+.mobile-greeting {
+  font-family: var(--ck-font-serif);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--ck-ink);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.mobile-section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ck-ink);
+  margin: 24px 0 12px;
+}
+
+/* App-style Food Cards */
+.mobile-food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mobile-food-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding: 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+  transition: transform 0.1s, background-color 0.1s;
+  cursor: pointer;
+}
+.mobile-food-card:active {
+  transform: scale(0.97);
+  background: #fafafa;
+}
+.mobile-food-img {
+  width: 90px;
+  height: 90px;
+  background: var(--ck-cream-warm);
+  border-radius: 16px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.mobile-food-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+.mobile-food-info {
+  flex: 1;
+  min-width: 0;
+}
+.mobile-food-name {
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ck-ink);
+  margin-bottom: 2px;
+}
+.mobile-food-desc {
+  font-size: 12px;
+  color: var(--ck-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+.mobile-food-price {
+  font-family: var(--ck-font-serif);
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--ck-brand-deep);
+}
+.mobile-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ck-brand-deep);
+  color: #fff;
+  border: none;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 95, 156, 0.25);
+  transition: transform 0.1s;
+}
+.mobile-add-btn:active {
+  transform: scale(0.9);
+}
+
+/* Profile View */
+.mobile-profile-view {
+  padding: 20px;
+}
+.mobile-profile-view .prefs-panel {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  padding: 0;
+  animation: none;
+  background: transparent;
+}
+
+/* Fixed Native Bottom Nav */
+.mobile-bottom-nav {
+  flex-shrink: 0;
+  height: calc(68px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 1000;
+}
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 10px;
+  font-weight: 700;
+  flex: 1;
+  height: 68px;
+  transition: color 0.2s;
+}
+.mobile-nav-item.active {
+  color: var(--ck-brand-deep);
+}
+.mobile-cart-icon-wrap {
+  position: relative;
+}
+.mobile-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--ck-action);
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* ============================================================
+   BOTTOM SHEETS (Cart & Modals)
+   ============================================================ */
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  /* Cart Sidebar -> Bottom Sheet */
+  .cart-side {
+    width: 100% !important;
+    height: 90dvh !important;
+    top: auto !important;
+    bottom: 0;
+    border-radius: 28px 28px 0 0 !important;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .cart-side.open {
+    transform: translateY(0);
+  }
+  .cart-head {
+    padding-top: 0;
+    border-radius: 0;
+  }
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  
+  /* Item Modal -> Bottom Sheet */
+  .item-modal {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 92dvh;
+    border-radius: 28px 28px 0 0 !important;
+    animation: slideUpSheet 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) forwards !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .item-modal-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+  @keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+/* ============================================================
+   ULTIMATE NATIVE MOBILE POLISH
+   ============================================================ */
+
+/* Hide scrollbars everywhere on mobile */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+  
+  /* Make all buttons feel tactile */
+  button, a, .mobile-food-card {
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  button:active, a:active, .mobile-food-card:active {
+    transform: scale(0.96) !important;
+  }
+
+  /* FIX BOTTOM SHEETS (Cart & Item Modal) */
+  .cart-side {
+    display: flex;
+    flex-direction: column;
+    height: 92dvh !important;
+  }
+  .cart-head {
+    flex-shrink: 0;
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+  .cart-foot {
+    flex-shrink: 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    background: var(--ck-paper);
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    z-index: 10;
+  }
+
+  .item-modal {
+    display: flex;
+    flex-direction: column;
+    height: 90dvh !important;
+  }
+  .item-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+  .item-modal-foot {
+    flex-shrink: 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    background: var(--ck-bg);
+    border-top: 1px solid var(--ck-border);
+    z-index: 10;
+  }
+}
+
+/* ============================================================
+   MOBILE PROFILE STYLES
+   ============================================================ */
+.mobile-profile-view {
+  padding: 24px 20px;
+  background: #f7f7f7;
+  min-height: 100%;
+}
+.mobile-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+  margin-bottom: 24px;
+}
+.mobile-profile-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--ck-cream-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mobile-profile-info h2 {
+  font-family: var(--ck-font-serif);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ck-ink);
+  margin: 0 0 4px;
+}
+.mobile-profile-info p {
+  font-size: 14px;
+  color: var(--ck-ink-muted);
+  margin: 0;
+}
+
+.mobile-profile-section {
+  margin-bottom: 24px;
+}
+.mobile-profile-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ck-ink-muted);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.mobile-profile-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+}
+
+/* Inline Preferences inside Profile */
+.inline-prefs {
+  display: flex;
+  flex-direction: column;
+}
+.inline-prefs .pref-row {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ck-border);
+}
+.inline-prefs .pref-row:last-child {
+  border-bottom: none;
+}
+
+/* App Info Rows */
+.mobile-profile-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ck-border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ck-ink);
+}
+.mobile-profile-row:last-child {
+  border-bottom: none;
+}
+.mobile-profile-value {
+  color: var(--ck-ink-muted);
+  font-weight: 500;
+}
+
+/* ============================================================
+   FIX ADD BUTTON ALIGNMENT
+   ============================================================ */
+.mobile-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ck-brand-deep);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 95, 156, 0.25);
+  transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1), background-color 0.2s;
+  /* Reset padding and line-height to prevent text interference */
+  padding: 0;
+  line-height: 0;
+}
+
+.mobile-add-btn svg {
+  /* Ensure the SVG itself is centered */
+  display: block;
+  margin: 0;
+}
+
+.mobile-add-btn:active {
+  transform: scale(0.85) !important;
+  background: var(--ck-brand);
+}
+
+/* ============================================================
+   NATIVE FULL-SCREEN OVERRIDES
+   ============================================================ */
+@media (max-width: 767px) {
+  
+  /* 1. Cart takes over the FULL screen (covers nav bar) */
+  .cart-side {
+    width: 100vw !important;
+    height: 100dvh !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    border-radius: 0 !important;
+    z-index: 2000 !important; /* Above bottom nav (1000) */
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) !important;
+  }
+  .cart-side.open {
+    transform: translateY(0);
+  }
+  .cart-overlay {
+    z-index: 1999 !important;
+  }
+  
+  /* Move the drag handle to the top of the cart */
+  .sheet-handle {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 10;
+  }
+  
+  /* Adjust header padding to accommodate handle */
+  .cart-head {
+    padding-top: 28px; 
+    padding-bottom: 16px;
+    background: var(--ck-brand-deep);
+    color: white;
+  }
+
+  /* 2. Item Modal takes over the FULL screen (covers nav bar) */
+  .item-modal-overlay {
+    z-index: 2000 !important;
+  }
+  .item-modal {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    z-index: 2001 !important;
+    animation: slideUpSheet 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) forwards !important;
+  }
+  .item-modal-close {
+    top: 24px !important;
+    right: 20px !important;
+  }
+
+  /* 3. Fix the Cart Total cut-off */
+  .cart-foot {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+  }
+  
+  /* 4. Hide scrollbars globally for native feel */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   ICON ADJUSTMENTS (EMOJI REPLACEMENTS)
+   ============================================================ */
+.mobile-orders-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--ck-cream-warm);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+}
+.cart-empty-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--ck-cream-warm);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+}
+.store-modal-mark {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   SKELETON LOADERS
+   ============================================================ */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: #e2e2e2;
+  background-image: linear-gradient(90deg, #e2e2e2 0px, #f2f2f2 40px, #e2e2e2 80px);
+  background-size: 400px 100%;
+  animation: shimmer 1.2s infinite linear;
+  border-radius: 8px;
+}
+.skeleton-title { width: 70%; height: 32px; margin-bottom: 24px; }
+.skeleton-subtitle { width: 40%; height: 20px; margin-bottom: 16px; }
+.skeleton-list { display: flex; flex-direction: column; gap: 16px; }
+.skeleton-card { display: flex; gap: 16px; background: #fff; padding: 14px; border-radius: 20px; }
+.skeleton-img { width: 90px; height: 90px; border-radius: 16px; flex-shrink: 0; }
+.skeleton-content { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.skeleton-text { height: 16px; }
+
+/* ============================================================
+   SOLD OUT STATES
+   ============================================================ */
+.mobile-food-card.sold-out {
+  opacity: 0.6;
+  pointer-events: none; /* Disable all clicks */
+  filter: grayscale(0.8);
+}
+.mobile-food-img {
+  position: relative;
+}
+.sold-out-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 16px;
+  z-index: 2;
+}
+
+/* ============================================================
+   NATIVE MOBILE ORDER TRACKING
+   ============================================================ */
+.mobile-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--ck-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.mobile-track-header {
+  padding: 24px 20px;
+  text-align: center;
+}
+.mobile-track-title {
+  font-family: var(--ck-font-serif);
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.mobile-track-sub {
+  color: var(--ck-ink-muted);
+  font-size: 14px;
+}
+.mobile-track-timeline {
+  padding: 0 24px;
+  margin-bottom: 32px;
+}
+.mobile-track-step {
+  display: flex;
+  gap: 16px;
+  min-height: 80px;
+}
+.mobile-track-icon-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mobile-track-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ck-cream-warm);
+  color: var(--ck-ink-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+.mobile-track-step.reached .mobile-track-icon {
+  background: var(--ck-brand-deep);
+  color: white;
+  box-shadow: 0 4px 12px rgba(15, 46, 74, 0.2);
+}
+.mobile-track-step.active .mobile-track-icon {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 6px rgba(30, 95, 156, 0.15);
+}
+.mobile-track-line {
+  width: 2px;
+  flex: 1;
+  background: var(--ck-border-strong);
+  margin: 4px 0;
+}
+.mobile-track-step.reached .mobile-track-line {
+  background: var(--ck-brand-deep);
+}
+.mobile-track-text {
+  padding-top: 10px;
+  padding-bottom: 24px;
+}
+.mobile-track-label {
+  font-family: var(--ck-font-serif);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ck-ink-muted);
+}
+.mobile-track-step.reached .mobile-track-label {
+  color: var(--ck-ink);
+}
+.mobile-track-sub-label {
+  font-size: 13px;
+  color: var(--ck-ink-muted);
+  margin-top: 2px;
+}
+.mobile-track-step.active .mobile-track-sub-label {
+  color: var(--ck-brand);
+  font-weight: 700;
+}
+
+/* Tracking Cards */
+.mobile-track-card {
+  margin: 0 20px 24px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+}
+.mobile-track-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--ck-border);
+  font-size: 14px;
+  font-weight: 600;
+}
+.mobile-track-row:last-child { border-bottom: none; padding-bottom: 0; }
+.mobile-track-row svg { color: var(--ck-brand-deep); }
+
+/* Tracking Items List */
+.mobile-track-items {
+  margin: 0 20px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+}
+.mobile-track-items h3 {
+  font-family: var(--ck-font-serif);
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.mobile-track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.mobile-track-item-img {
+  width: 40px;
+  height: 40px;
+  background: var(--ck-cream-warm);
+  border-radius: 8px;
+  padding: 4px;
+}
+.mobile-track-item-name { flex: 1; font-weight: 700; font-size: 14px; }
+.mobile-track-item-qty { font-weight: 800; color: var(--ck-brand-deep); }
+
+.mobile-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ck-ink-muted);
+  font-style: italic;
+}
+
+/* ============================================================
+   LOYALTY PUNCH CARD
+   ============================================================ */
+.loyalty-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+  margin-bottom: 24px;
+  border: 2px dashed var(--ck-border-strong);
+  transition: all 0.3s ease;
+}
+.loyalty-card.unlocked {
+  border-color: var(--ck-warm);
+  background: #fffaf0;
+}
+
+.loyalty-head {
+  margin-bottom: 16px;
+}
+.loyalty-title {
+  font-family: var(--ck-font-serif);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ck-ink);
+}
+.loyalty-card.unlocked .loyalty-title {
+  color: var(--ck-warm-dark);
+}
+.loyalty-sub {
+  font-size: 13px;
+  color: var(--ck-ink-muted);
+  margin-top: 4px;
+}
+
+.loyalty-slots {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.loyalty-slot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f4f4f4;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  transition: all 0.3s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.loyalty-slot.filled {
+  background: var(--ck-brand-deep);
+  border-color: var(--ck-brand-deep);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(15, 46, 74, 0.2);
+}
+.loyalty-card.unlocked .loyalty-slot.filled {
+  background: var(--ck-warm);
+  border-color: var(--ck-warm);
+  color: var(--ck-charcoal);
+}
+
+.loyalty-redeem-btn {
+  width: 100%;
+  background: var(--ck-warm);
+  color: var(--ck-charcoal);
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.loyalty-redeem-btn:active {
+  transform: scale(0.96);
+}
+
+/* Redeem Modal */
+.loyalty-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.loyalty-modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  position: relative;
+  animation: success-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.loyalty-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #f4f4f4;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.loyalty-modal-icon {
+  width: 80px;
+  height: 80px;
+  background: #fffaf0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: var(--ck-warm);
+}
+.loyalty-modal-title {
+  font-family: var(--ck-font-serif);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ck-ink);
+  margin-bottom: 8px;
+}
+.loyalty-modal-sub {
+  font-size: 14px;
+  color: var(--ck-ink-soft);
+  margin-bottom: 24px;
+}
+.loyalty-modal-btn {
+  width: 100%;
+  background: var(--ck-brand-deep);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ============================================================
+   MOBILE WELCOME BACK CARD
+   ============================================================ */
+.mobile-welcome-back {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--ck-brand-deep), var(--ck-brand));
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 20px rgba(15, 46, 74, 0.15);
+  color: white;
+}
+.mwb-content { flex: 1; min-width: 0; }
+.mwb-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ck-warm);
+  margin-bottom: 4px;
+}
+.mwb-title {
+  font-family: var(--ck-font-serif);
+  font-size: 20px;
+  font-weight: 900;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.mwb-thumbs {
+  display: flex;
+  align-items: center;
+  gap: -8px;
+}
+.mwb-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--ck-brand-deep);
+  margin-left: -8px;
+  overflow: hidden;
+}
+.mwb-thumb:first-child { margin-left: 0; }
+.mwb-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 2px; }
+.mwb-count {
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.mwb-btn {
+  background: var(--ck-warm);
+  color: var(--ck-charcoal);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+}
+.mwb-btn:active { transform: scale(0.95); }
+
+/* ============================================================
+   NOTIFICATION BANNER
+   ============================================================ */
+.notif-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 20px 16px;
+  border-radius: 12px;
+}

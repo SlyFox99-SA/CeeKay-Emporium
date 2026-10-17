@@ -1,14 +1,15 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { MapPin, ArrowLeft, User, Phone, Clock, Check, Package, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowLeft, User, Phone, Clock, Check, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { usePrefs } from '../context/PreferencesContext';
 import { createOrder } from '../services/orderService';
+import { recordOrder, saveProfile } from '../services/customerService';
 import { burstConfetti } from '../lib/confetti';
 import { playSuccess, playError } from '../lib/chime';
 import ItemImage from './ItemImage';
-import { recordOrder, saveProfile } from '../services/customerService';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss';
 
 const CUSTOMER_KEY = 'ceekay-customer';
 
@@ -21,10 +22,7 @@ const PICKUP_OPTIONS = [
 ];
 
 export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
-  const { cart, changeQty, removeItem, restoreLine, clearCart, total, count, lineKey } = useCart();
-  const { store } = useStore();
-  const { prefs } = usePrefs();
-
+  const swipeProps = useSwipeToDismiss(onClose);
   const [step, setStep] = useState('cart');
   const [note, setNote] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
@@ -36,6 +34,10 @@ export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
       return { name: '', phone: '', pickupTime: PICKUP_OPTIONS[0] };
     }
   });
+
+  const { cart, changeQty, removeItem, restoreLine, clearCart, total, count, lineKey } = useCart();
+  const { store } = useStore();
+  const { prefs } = usePrefs();
 
   useEffect(() => {
     localStorage.setItem(CUSTOMER_KEY, JSON.stringify(customer));
@@ -55,18 +57,18 @@ export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
   };
 
   const buildText = (orderId) => {
-    const lines = [`🌟 ${store?.name ?? 'CeeKay Emporium'} — ${store?.branch ?? ''}`, ''];
+    const lines = [`${store?.name ?? 'CeeKay Emporium'} — ${store?.branch ?? ''}`, ''];
     if (orderId) lines.push(`Order #${orderId}`, '');
-    lines.push(`👤 ${customer.name}`);
-    lines.push(`📞 ${customer.phone}`);
-    lines.push(`⏰ ${customer.pickupTime}`, '');
+    lines.push(`Name: ${customer.name}`);
+    lines.push(`Phone: ${customer.phone}`);
+    lines.push(`Pickup: ${customer.pickupTime}`, '');
     cart.forEach(i => {
       lines.push(`${i.name} x${i.qty} — R${(i.price * i.qty).toFixed(2)}`);
       if (i.removedIngredients?.length) lines.push(`   (no ${i.removedIngredients.join(', ')})`);
       if (i.itemNote) lines.push(`   note: ${i.itemNote}`);
     });
-    lines.push('', `💰 Total: R${total.toFixed(2)}`);
-    if (note.trim()) lines.push('', `📝 Notes: ${note.trim()}`);
+    lines.push('', `Total: R${total.toFixed(2)}`);
+    if (note.trim()) lines.push('', `Notes: ${note.trim()}`);
     return lines.join('\n');
   };
 
@@ -120,7 +122,9 @@ export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
     <>
       <div className={`cart-overlay ${open ? 'open' : ''}`} onClick={onClose} />
       <aside className={`cart-side ${open ? 'open' : ''}`}>
-        <div className="cart-head">
+        <div className="sheet-handle" />
+        
+        <div className="cart-head" {...swipeProps} style={{ touchAction: 'none' }}>
           <h3>
             {step === 'cart' && <>Your Order {count > 0 && <span>({count})</span>}</>}
             {step === 'details' && <>Checkout</>}
@@ -140,7 +144,7 @@ export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
             <div className="cart-items">
               {cart.length === 0 ? (
                 <div className="cart-empty">
-                  <div className="cart-empty-emoji">🛒</div>
+                  <div className="cart-empty-emoji"><ShoppingBag size={44} strokeWidth={1.5} color="var(--ck-brand)" /></div>
                   <div className="cart-empty-title">Your cart is empty</div>
                   <div className="cart-empty-sub">Add a kota to get started.</div>
                 </div>

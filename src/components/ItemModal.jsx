@@ -1,10 +1,12 @@
 ﻿import { useEffect, useState } from 'react';
 import { Minus, Plus, X, Check } from 'lucide-react';
 import ItemImage from './ItemImage';
+import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss';
 
 export default function ItemModal({ item, onClose, onConfirm }) {
   const isKota = Array.isArray(item?.ingredients);
 
+  const swipeProps = useSwipeToDismiss(onClose);
   const [qty, setQty] = useState(1);
   const [removed, setRemoved] = useState([]);
   const [note, setNote] = useState('');
@@ -41,7 +43,7 @@ export default function ItemModal({ item, onClose, onConfirm }) {
 
   return (
     <div className="item-modal-overlay" onClick={onClose}>
-      <div className="item-modal" onClick={e => e.stopPropagation()}>
+      <div className="item-modal" onClick={e => e.stopPropagation()}>`r`n        <div className="sheet-handle" />
         <button className="item-modal-close" onClick={onClose} aria-label="Close">
           <X size={18} />
         </button>

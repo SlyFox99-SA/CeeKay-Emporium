@@ -1,8 +1,7 @@
-﻿import { supabase, getDeviceId } from '../lib/supabase';
+import { supabase, getDeviceId } from '../lib/supabase';
 
 const PROFILE_KEY = 'ceekay-customer';
 
-/* ── PROFILE (stays local — it's device-scoped) ── */
 export function getProfile() {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null; }
   catch { return null; }
@@ -13,7 +12,6 @@ export function saveProfile(profile) {
   catch {}
 }
 
-/* ── ORDER HISTORY (from Supabase, filtered to this device) ── */
 export async function getHistory() {
   const deviceId = getDeviceId();
   const { data, error } = await supabase
@@ -23,10 +21,7 @@ export async function getHistory() {
     .order('created_at', { ascending: false })
     .limit(20);
 
-  if (error) {
-    console.error('[getHistory]', error);
-    return [];
-  }
+  if (error) return [];
 
   return (data || []).map((row) => ({
     id: row.id,
@@ -39,30 +34,53 @@ export async function getHistory() {
   }));
 }
 
-/* Called after createOrder succeeds — no-op now, but kept for API stability */
-export function recordOrder(_order) { /* moved to Supabase via createOrder */ }
-
-/* Update status in the local cache — no-op now, kitchen writes to Supabase directly */
-export function updateHistoryStatus(_orderId, _status) { /* kitchen writes go direct to Supabase */ }
-
-/* ── DERIVED ── */
 export async function getLastOrder() {
   const h = await getHistory();
   return h.length > 0 ? h[0] : null;
 }
 
-export async function getLoyaltyProgress(threshold = 5) {
-  const history = await getHistory();
-  const count = history
-    .flatMap((o) => o.items)
-    .filter((i) => [1, 2, 3].includes(i.id))
-    .reduce((sum, i) => sum + i.qty, 0);
+/* ── LEGACY STUBS (Kept so imports don't break) ── */
+export function recordOrder(_order) { /* Supabase handles this now */ }
+export function updateHistoryStatus(_orderId, _status) { /* Supabase handles this now */ }
 
+/* ── LOYALTY ── */
+export async function getLoyaltyProgress() {
+  const deviceId = getDeviceId();
+  const { data } = await supabase
+    .from('loyalty')
+    .select('kotas_count')
+    .eq('device_id', deviceId)
+    .maybeSingle();
+
+  const count = data?.kotas_count || 0;
+  const threshold = 5;
+  
   return {
     count,
     threshold,
-    remaining: Math.max(0, threshold - (count % threshold)),
-    ready: count >= threshold && count % threshold === 0 && count > 0,
     slotsFilled: count % threshold,
+    rewardReady: count >= threshold,
+    rewardsAvailable: Math.floor(count / threshold),
   };
+}
+
+export async function redeemLoyalty() {
+  const deviceId = getDeviceId();
+  const { data } = await supabase
+    .from('loyalty')
+    .select('kotas_count')
+    .eq('device_id', deviceId)
+    .single();
+    
+  if (!data || data.kotas_count < 5) throw new Error("Not enough points");
+
+  const newCount = data.kotas_count - 5;
+  
+  const { error } = await supabase
+    .from('loyalty')
+    .update({ kotas_count: newCount, last_updated: new Date().toISOString() })
+    .eq('device_id', deviceId);
+
+  if (error) throw error;
+  return true;
 }

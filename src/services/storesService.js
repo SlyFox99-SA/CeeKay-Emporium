@@ -1,13 +1,31 @@
-﻿import { STORES, getStoreStatus } from '../data/stores';
+import { supabase } from '../lib/supabase';
 
-/* Simulate async so we can swap to real API later without changing callers */
-const delay = (ms = 0) => new Promise(r => setTimeout(r, ms));
-
-export async function getStores() {
-  await delay();
-  return STORES.map(s => ({ ...s, status: getStoreStatus(s) }));
+export async function getAllStores() {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('*')
+    .order('name');
+  if (error) throw error;
+  return data || [];
 }
 
-export function getStoresSync() {
-  return STORES.map(s => ({ ...s, status: getStoreStatus(s) }));
+export async function updateStore(id, patch) {
+  const { data, error } = await supabase
+    .from('stores')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function createStore(store) {
+  const { data, error } = await supabase
+    .from('stores')
+    .insert(store)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }

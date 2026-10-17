@@ -1,6 +1,7 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Sandwich } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import CKMark from './CKMark';
 
 export default function StoreSelector() {
   const { stores, selectStore, store } = useStore();
@@ -18,7 +19,7 @@ export default function StoreSelector() {
     <div className="store-overlay">
       <div className="store-modal">
         <div className="store-modal-head">
-          <span className="store-modal-mark"><Sandwich size={52} strokeWidth={1.6} /></span>
+          <span className="store-modal-mark"><CKMark size={56} /></span>
           <h2>Choose your store</h2>
           <p>Pick the CeeKay Emporium closest to you.</p>
         </div>
