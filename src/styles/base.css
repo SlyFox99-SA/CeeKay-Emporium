@@ -1,0 +1,5 @@
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--ck-bg); color: var(--ck-ink); font-family: var(--ck-font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+button { font-family: inherit; cursor: pointer; }
+h1, h2, h3 { font-family: var(--ck-font-serif); margin: 0; }

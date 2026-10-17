@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -32,14 +32,15 @@ function AppRoutes() {
   useEffect(() => {
     const unlock = () => {
       primeAudio();
-      document.removeEventListener('touchstart', unlock);
-      document.removeEventListener('click', unlock);
+      // Once unlocked, remove the listeners so we don't spam it
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('click', unlock);
     };
-    document.addEventListener('touchstart', unlock);
-    document.addEventListener('click', unlock);
+    window.addEventListener('touchstart', unlock, { once: true });
+    window.addEventListener('click', unlock, { once: true });
     return () => {
-      document.removeEventListener('touchstart', unlock);
-      document.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('click', unlock);
     };
   }, []);
 

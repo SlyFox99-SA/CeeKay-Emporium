@@ -1,0 +1,62 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* ── PRIMITIVE COLORS ── */
+  --ck-charcoal: #1a1a1a;
+  --ck-cream: #f5ecd9;
+  --ck-cream-warm: #fbf3e3;
+  --ck-paper: #fffdf8;
+  --ck-white: #ffffff;
+
+  --ck-blue-deep: #0f2e4a;
+  --ck-blue-mid: #1e5f9c;
+  --ck-blue-bright: #2ba8d4;
+
+  --ck-gold: #d4952b;
+  --ck-gold-soft: #e8b355;
+  --ck-red: #8b1e12;
+  --ck-red-bright: #c0392b;
+  --ck-green: #2f6f4e;
+
+  /* ── SEMANTIC ALIASES (CRITICAL FIX) ── */
+  --ck-brand: var(--ck-blue-mid);
+  --ck-brand-deep: var(--ck-blue-deep);
+  --ck-brand-bright: var(--ck-blue-bright);
+  --ck-brand-gradient: linear-gradient(135deg, var(--ck-blue-bright) 0%, var(--ck-blue-mid) 55%, var(--ck-blue-deep) 100%);
+
+  --ck-warm: var(--ck-gold);
+  --ck-warm-soft: var(--ck-gold-soft);
+
+  --ck-bg: var(--ck-cream);
+  --ck-bg-raised: var(--ck-paper);
+  --ck-ink: var(--ck-charcoal);
+  --ck-ink-soft: #5a4a3f;
+  --ck-ink-muted: #8a7a6c;
+  
+  --ck-border: rgba(26, 26, 26, 0.08);
+  --ck-border-strong: rgba(26, 26, 26, 0.18);
+  --ck-border-brand: rgba(30, 95, 156, 0.22);
+
+  --ck-action: var(--ck-red);
+  --ck-action-hover: var(--ck-red-bright);
+  --ck-action-soft: #f5e5e2;
+
+  /* ── TYPOGRAPHY ── */
+  --ck-font-display: 'Bricolage Grotesque', 'Playfair Display', serif;
+  --ck-font-serif: 'Fraunces', 'Playfair Display', Georgia, serif;
+  --ck-font-body: 'Inter', system-ui, sans-serif;
+
+  /* ── RADIUS ── */
+  --ck-r-sm: 8px;
+  --ck-r-md: 12px;
+  --ck-r-lg: 18px;
+  --ck-r-xl: 24px;
+  --ck-r-pill: 999px;
+
+  /* ── SHADOWS ── */
+  --ck-shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.06);
+  --ck-shadow-md: 0 8px 24px rgba(26, 26, 26, 0.10);
+  --ck-shadow-lg: 0 20px 50px rgba(26, 26, 26, 0.15);
+  --ck-shadow-brand: 0 8px 24px rgba(30, 95, 156, 0.18);
+}

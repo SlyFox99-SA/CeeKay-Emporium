@@ -1,3 +1,4 @@
+
 let ctx = null;
 
 function getCtx() {
@@ -9,7 +10,7 @@ function getCtx() {
   return ctx;
 }
 
-/* Call this on the VERY FIRST user touch/click */
+// Call this on the VERY FIRST user touch/click
 export function primeAudio() {
   const audio = getCtx();
   if (!audio) return;
@@ -18,10 +19,10 @@ export function primeAudio() {
     audio.resume().catch(() => {});
   }
 
-  // iOS requires a sound to actually play to unlock the context
+  // iOS requires a silent sound to actually play to unlock the context
   const osc = audio.createOscillator();
   const gain = audio.createGain();
-  gain.gain.value = 0; // Silent
+  gain.gain.value = 0.001; // Almost silent, but not 0
   osc.connect(gain).connect(audio.destination);
   osc.start(0);
   osc.stop(0.1);
@@ -52,15 +53,13 @@ function playNote(audio, freq, start, dur, gainPeak = 0.3, type = 'sine') {
   osc.stop(now + start + dur + 0.05);
 }
 
-/* Kitchen Alert */
 export async function playChime() {
   const audio = await prepare();
   if (!audio) return;
-  playNote(audio, 659.25, 0.00, 0.20); // E5
-  playNote(audio, 880.00, 0.15, 0.42); // A5
+  playNote(audio, 659.25, 0.00, 0.20);
+  playNote(audio, 880.00, 0.15, 0.42);
 }
 
-/* Add to Cart Pop */
 export async function playPop() {
   const audio = await prepare();
   if (!audio) return;
@@ -68,16 +67,14 @@ export async function playPop() {
   playNote(audio, 1320, 0.03, 0.09, 0.1, 'sine');
 }
 
-/* Success (Order placed) */
 export async function playSuccess() {
   const audio = await prepare();
   if (!audio) return;
-  playNote(audio, 523.25, 0.00, 0.14); // C5
-  playNote(audio, 659.25, 0.11, 0.14); // E5
-  playNote(audio, 783.99, 0.22, 0.30); // G5
+  playNote(audio, 523.25, 0.00, 0.14);
+  playNote(audio, 659.25, 0.11, 0.14);
+  playNote(audio, 783.99, 0.22, 0.30);
 }
 
-/* Error */
 export async function playError() {
   const audio = await prepare();
   if (!audio) return;

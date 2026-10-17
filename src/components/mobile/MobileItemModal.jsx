@@ -36,11 +36,6 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
     onClose();
   };
 
-  const handleAddUpsell = (drink) => {
-    haptics.light();
-    onConfirm(drink, { qty: 1 }); 
-  };
-
   return (
     <div className="m-modal-overlay" onClick={onClose}>
       <motion.div 
@@ -49,7 +44,7 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
-        {/* Header area with drag handle */}
+        {/* Absolute Header (Floats over image) */}
         <div className="m-modal-header" {...swipeProps} style={{ touchAction: 'none' }}>
           <div className="m-sheet-handle" />
           <button className="m-modal-close" onClick={onClose}><X size={18} /></button>
@@ -57,10 +52,13 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
 
         {/* Scrollable Body */}
         <div className="m-modal-body">
-          <div className="m-modal-photo">
+          
+          {/* Image Container */}
+          <div className="m-modal-photo-wrapper">
             <ItemImage src={item.image} alt={item.name} />
           </div>
 
+          {/* White Info Tile (Overlaps image slightly) */}
           <div className="m-modal-meta">
             <div className="m-modal-title-row">
               <h2 className="m-modal-name">{item.name}</h2>
@@ -87,15 +85,14 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
             )}
           </div>
 
+          {/* Upsell */}
           {isKota && (
             <div className="m-upsell-section">
               <div className="m-upsell-title">Perfect with a cold drink</div>
               <div className="m-upsell-scroll">
                 {DRINKS.map(drink => (
-                  <div key={drink.id} className="m-upsell-card" onClick={() => handleAddUpsell(drink)}>
-                    <div className="m-upsell-img">
-                      <ItemImage src={drink.image} alt={drink.name} />
-                    </div>
+                  <div key={drink.id} className="m-upsell-card" onClick={() => { haptics.light(); onConfirm(drink, { qty: 1 }); }}>
+                    <div className="m-upsell-img"><ItemImage src={drink.image} alt={drink.name} /></div>
                     <div className="m-upsell-info">
                       <div className="m-upsell-name">{drink.name}</div>
                       <div className="m-upsell-price">R {drink.price}</div>
@@ -107,9 +104,10 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
             </div>
           )}
 
+          {/* Notes */}
           <div className="m-modal-note-container">
             <div className="m-modal-section-title">Add a note (optional)</div>
-            <textarea className="m-modal-note" placeholder="e.g. extra crispy..." value={note} onChange={e => setNote(e.target.value)} rows={2} />
+            <textarea className="m-modal-note" placeholder="e.g. extra crispy..." value={note} onChange={e => setNote(e.target.value)} rows={3} />
           </div>
         </div>
 

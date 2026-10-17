@@ -2,11 +2,15 @@
 export function useHaptics() {
   const vibrate = (pattern) => {
     try {
+      // Check if the browser supports it AND if the user has interacted yet
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(pattern);
+        // navigator.userActivation tells us if the user has tapped the screen
+        if (!navigator.userActivation || navigator.userActivation.hasBeenActive) {
+          navigator.vibrate(pattern);
+        }
       }
     } catch (e) {
-      // Silently ignore browser intervention errors
+      // Silently ignore
     }
   };
 
