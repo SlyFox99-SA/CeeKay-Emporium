@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChefHat, ArrowLeft, RefreshCw, Clock, CheckCircle2, Play, X, Phone, Bell, BellOff, Volume2 } from 'lucide-react';
 import {
@@ -11,7 +11,7 @@ import {
 import { STORES } from '../data/stores';
 import ItemImage from '../components/ItemImage';
 import { useNewOrderAlerts } from '../hooks/useNewOrderAlerts';
-import { playChime } from '../lib/chime';
+import { playChime, primeAudio } from '../lib/chime';
 
 const COLUMNS = ['placed', 'preparing', 'ready', 'completed'];
 
@@ -27,7 +27,11 @@ function elapsed(iso) {
 export default function Kitchen() {
   const [orders, setOrders] = useState([]);
   const [storeFilter, setStoreFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('placed');
   const [, setTick] = useState(0);
+  
+  const boardRef = useRef(null);
+  const columnRefs = useRef({});
 
   const { enabled, setEnabled, permission } = useNewOrderAlerts(orders);
 
@@ -42,6 +46,32 @@ export default function Kitchen() {
     const i = setInterval(() => setTick(t => t + 1), 30000);
     return () => clearInterval(i);
   }, []);
+
+  // Unlock audio on first tap
+  useEffect(() => {
+    const unlock = () => { primeAudio(); document.removeEventListener('click', unlock); };
+    document.addEventListener('click', unlock);
+    return () => document.removeEventListener('click', unlock);
+  }, []);
+
+  // Handle scroll to update active tab
+  const handleScroll = () => {
+    if (!boardRef.current) return;
+    const board = boardRef.current;
+    const scrollLeft = board.scrollLeft;
+    const width = board.clientWidth;
+    
+    // Calculate which column is currently in view
+    const index = Math.round(scrollLeft / width);
+    if (COLUMNS[index]) setActiveTab(COLUMNS[index]);
+  };
+
+  const scrollToColumn = (col) => {
+    setActiveTab(col);
+    if (boardRef.current && columnRefs.current[col]) {
+      columnRefs.current[col].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
 
   const filtered = storeFilter === 'all'
     ? orders
@@ -63,16 +93,16 @@ export default function Kitchen() {
   }, []);
 
   const cancel = useCallback((order) => {
-    if (confirm(`Cancel order ${order.id}?`)) updateOrderStatus(order.id, 'cancelled');
+    if (confirm(`Cancel order ${order.id}? This cannot be undone.`)) {
+      updateOrderStatus(order.id, 'cancelled');
+    }
   }, []);
 
   const testAlerts = () => {
     playChime().catch(() => {});
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       try {
-        new Notification('Test notification', {
-          body: 'This is what a new order will look like.',
-        });
+        new Notification('Test notification', { body: 'This is what a new order will look like.' });
       } catch {}
     }
   };
@@ -99,7 +129,7 @@ export default function Kitchen() {
           </select>
 
           {enabled && (
-            <button className="kitchen-icon-btn" onClick={testAlerts} title="Test the alert sound">
+            <button className="kitchen-icon-btn" onClick={testAlerts} title="Test sound">
               <Volume2 size={16} />
             </button>
           )}
@@ -107,16 +137,15 @@ export default function Kitchen() {
           <button
             className={`kitchen-icon-btn ${enabled ? 'active' : ''}`}
             onClick={() => setEnabled(v => !v)}
-            title={enabled ? 'Disable new-order alerts' : 'Enable new-order alerts'}
           >
             {enabled ? <Bell size={16} /> : <BellOff size={16} />}
           </button>
 
-          <button className="kitchen-icon-btn" onClick={() => window.location.reload()} title="Refresh">
+          <button className="kitchen-icon-btn" onClick={() => window.location.reload()}>
             <RefreshCw size={16} />
           </button>
 
-          <Link to="/" className="kitchen-icon-btn" title="Back to storefront">
+          <Link to="/" className="kitchen-icon-btn">
             <ArrowLeft size={16} />
           </Link>
         </div>
@@ -124,13 +153,31 @@ export default function Kitchen() {
 
       {enabled && permission === 'denied' && (
         <div className="kitchen-alert-banner">
-          Browser notifications are blocked. The chime still works â€” enable notifications in your browser settings for pop-ups.
+          Notifications blocked. The chime still works.
         </div>
       )}
 
-      <div className="kitchen-board">
+      {/* MOBILE TABS (Visible only on mobile via CSS) */}
+      <div className="kitchen-mobile-tabs">
         {COLUMNS.map(col => (
-          <section key={col} className={`kitchen-column col-${col}`}>
+          <button 
+            key={col}
+            className={`kitchen-tab-btn ${activeTab === col ? 'active' : ''}`}
+            onClick={() => scrollToColumn(col)}
+          >
+            {STATUS_LABELS[col]} 
+            {grouped[col].length > 0 && <span className="tab-badge">{grouped[col].length}</span>}
+          </button>
+        ))}
+      </div>
+
+      <div className="kitchen-board" ref={boardRef} onScroll={handleScroll}>
+        {COLUMNS.map(col => (
+          <section 
+            key={col} 
+            className={`kitchen-column col-${col}`}
+            ref={el => columnRefs.current[col] = el}
+          >
             <header className="kitchen-column-head">
               <span className="kitchen-column-name">{STATUS_LABELS[col]}</span>
               <span className="kitchen-column-count">{grouped[col].length}</span>
@@ -144,9 +191,17 @@ export default function Kitchen() {
                  </div>
               ) : grouped[col].map(order => (
                 <article key={order.id} className="kitchen-card">
-                  <div className="kitchen-card-head">
-                    <span className="kitchen-order-id">#{order.id}</span>
-                    <span className="kitchen-branch">{order.storeBranch}</span>
+                  
+                  <div className="kitchen-card-head" style={{ alignItems: 'flex-start' }}>
+                    <div>
+                      <div className="kitchen-order-id">#{order.id}</div>
+                      <div className="kitchen-branch" style={{ marginTop: 4 }}>{order.storeBranch}</div>
+                    </div>
+                    {order.status !== 'completed' && order.status !== 'cancelled' && (
+                      <button className="kitchen-btn-cancel-top" onClick={() => cancel(order)}>
+                        <X size={16} />
+                      </button>
+                    )}
                   </div>
 
                   <div className="kitchen-time">
@@ -155,21 +210,14 @@ export default function Kitchen() {
 
                   {order.customer && (order.customer.name || order.customer.phone) && (
                     <div className="kitchen-customer">
-                      {order.customer.name && (
-                        <div className="kitchen-customer-name">{order.customer.name}</div>
-                      )}
+                      {order.customer.name && <div className="kitchen-customer-name">{order.customer.name}</div>}
                       <div className="kitchen-customer-row">
                         {order.customer.phone && (
-                          <a
-                            href={`tel:${order.customer.phone.replace(/\s/g, '')}`}
-                            className="kitchen-customer-phone"
-                          >
+                          <a href={`tel:${order.customer.phone.replace(/\s/g, '')}`} className="kitchen-customer-phone">
                             <Phone size={11} /> {order.customer.phone}
                           </a>
                         )}
-                        {order.customer.pickupTime && (
-                          <span className="kitchen-customer-time">Â· {order.customer.pickupTime}</span>
-                        )}
+                        {order.customer.pickupTime && <span className="kitchen-customer-time">· {order.customer.pickupTime}</span>}
                       </div>
                     </div>
                   )}
@@ -177,47 +225,28 @@ export default function Kitchen() {
                   <ul className="kitchen-items">
                     {order.items.map((it, i) => (
                       <li key={i}>
-                        <span className="kitchen-item-thumb">
-                          <ItemImage src={it.image} alt={it.name} />
-                        </span>
-                        <span className="kitchen-item-qty">{it.qty}Ã—</span>
+                        <span className="kitchen-item-thumb"><ItemImage src={it.image} alt={it.name} /></span>
+                        <span className="kitchen-item-qty">{it.qty}x</span>
                         <span className="kitchen-item-name">{it.name}</span>
                       </li>
                     ))}
                   </ul>
 
                   {order.note && (
-                    <div className="kitchen-note">
-                      <strong>Note:</strong> {order.note}
-                    </div>
+                    <div className="kitchen-note"><strong>Note:</strong> {order.note}</div>
                   )}
 
                   <div className="kitchen-card-foot">
                     <span className="kitchen-total">R {order.total.toFixed(2)}</span>
                     <div className="kitchen-actions">
-                      {order.status !== 'completed' && order.status !== 'cancelled' && (
-                        <button
-                          className="kitchen-btn kitchen-btn-cancel"
-                          onClick={() => cancel(order)}
-                          title="Cancel order"
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
                       {order.status === 'placed' && (
-                        <button className="kitchen-btn kitchen-btn-primary" onClick={() => advance(order)}>
-                          <Play size={14} /> Start
-                        </button>
+                        <button className="kitchen-btn-primary" onClick={() => advance(order)}><Play size={16} /> Start Order</button>
                       )}
                       {order.status === 'preparing' && (
-                        <button className="kitchen-btn kitchen-btn-primary" onClick={() => advance(order)}>
-                          <CheckCircle2 size={14} /> Ready
-                        </button>
+                        <button className="kitchen-btn-primary" onClick={() => advance(order)}><CheckCircle2 size={16} /> Mark Ready</button>
                       )}
                       {order.status === 'ready' && (
-                        <button className="kitchen-btn kitchen-btn-success" onClick={() => advance(order)}>
-                          <CheckCircle2 size={14} /> Collected
-                        </button>
+                        <button className="kitchen-btn-success" onClick={() => advance(order)}><CheckCircle2 size={16} /> Collected</button>
                       )}
                       {order.status === 'completed' && <span className="kitchen-done">Done</span>}
                       {order.status === 'cancelled' && <span className="kitchen-cancelled">Cancelled</span>}

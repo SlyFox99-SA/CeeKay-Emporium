@@ -4,7 +4,6 @@ import { getLastOrder } from '../services/customerService';
 import { useCart } from '../context/CartContext';
 import { usePrefs } from '../context/PreferencesContext';
 import { playPop } from '../lib/chime';
-import { flyToCart } from '../lib/flyToCart';
 import ItemImage from './ItemImage';
 
 export default function MobileWelcomeBack() {
@@ -25,13 +24,9 @@ export default function MobileWelcomeBack() {
 
   const handleReorder = (e) => {
     last.items.forEach((i) => {
-      addToCart(
-        { id: i.id, name: i.name, image: i.image, price: i.price },
-        { qty: i.qty }
-      );
+      addToCart({ id: i.id, name: i.name, image: i.image, price: i.price }, { qty: i.qty });
     });
     if (prefs.sound) playPop();
-    flyToCart(e.currentTarget, last.items[0]?.image);
   };
 
   return (
@@ -51,7 +46,7 @@ export default function MobileWelcomeBack() {
         </div>
       </div>
       <button className="mwb-btn" onClick={handleReorder}>
-        <RotateCcw size={16} /> Reorder
+        <RotateCcw size={14} /> Reorder
       </button>
     </div>
   );

@@ -1,1429 +1,665 @@
 /* ============================================================
-   CEE KAY EMPORIUM — NATIVE MOBILE ENGINE
+   CEE KAY — PURE MOBILE ENGINE (COMPLETE)
    ============================================================ */
 
-@media (max-width: 767px) {
-  /* ── GLOBAL APP SHELL ── */
-  body { overflow: hidden; height: 100dvh; overscroll-behavior-y: none; }
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
-
-  .mobile-app-shell {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    background: var(--ck-bg);
-  }
-
-  /* ── NATIVE MODAL & CART (FULL SCREEN FLEX LAYOUT) ── */
-  .cart-side, .item-modal {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100dvh;
-    max-width: 100vw;
-    max-height: 100dvh;
-    border-radius: 0;
-    background: var(--ck-bg);
-    display: flex;
-    flex-direction: column;
-    z-index: 2000;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
-  }
-  .cart-side.open, .item-modal {
-    transform: translateY(0);
-  }
-  .item-modal {
-    animation: none;
-  }
-  .cart-overlay, .item-modal-overlay { z-index: 1999; }
-
-  /* ── FIXED HEADERS ── */
-  .cart-head, .item-modal-header {
-    flex-shrink: 0;
-    padding: calc(16px + env(safe-area-inset-top)) 20px 16px;
-    background: var(--ck-brand-deep);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .cart-head h3 { margin: 0; font-size: 20px; font-weight: 900; color: white; }
-  
-  .item-modal-header {
-    background: transparent;
-    padding-bottom: 0;
-    justify-content: flex-end;
-  }
-  .item-modal-close {
-    position: static;
-    background: var(--ck-cream-warm);
-    color: var(--ck-ink);
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* Store Banner */
-  .cart-store-banner {
-    flex-shrink: 0;
-    padding: 12px 20px;
-    background: var(--ck-cream-warm);
-    border-bottom: 1px solid var(--ck-border);
-    font-size: 13px;
-  }
-
-  /* ── SCROLLABLE MIDDLE ── */
-  .cart-items, .item-modal-body {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 20px;
-    padding-bottom: 40px;
-  }
-
-  /* ── STICKY FOOTERS (Native Checkout Buttons) ── */
-  .cart-foot, .item-modal-foot {
-    flex-shrink: 0;
-    background: var(--ck-paper);
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--ck-border);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-  }
-
-  .order-btn {
-    width: 100%; height: 56px; border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 800; margin-bottom: 12px;
-    border: none;
-  }
-  .order-btn.whatsapp { background: #25D366; color: white; }
-  .order-btn.primary { background: var(--ck-brand-deep); color: white; }
-  .order-btn.email { background: transparent; border: 2px solid var(--ck-border-strong); }
-
-  /* ── NATIVE FORMS ── */
-  .mobile-form-group { display: flex; flex-direction: column; gap: 16px; }
-  .field { display: flex; flex-direction: column; width: 100%; box-sizing: border-box; }
-  .field-label {
-    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
-    color: var(--ck-ink-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
-  }
-  .field input, .field select, .field textarea {
-    box-sizing: border-box; width: 100%;
-    font-size: 16px; padding: 16px;
-    border-radius: 16px; border: 1px solid var(--ck-border-strong);
-    background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    transition: border-color 0.2s;
-  }
-  .field input:focus, .field textarea:focus {
-    outline: none; border-color: var(--ck-brand); box-shadow: 0 0 0 4px rgba(30,95,156,0.1);
-  }
-
-  /* ── ITEM MODAL SPECIFICS ── */
-  .item-modal-hero { flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .item-modal-photo { width: 100%; height: 200px; border-radius: 20px; }
-  .item-modal-photo img { padding: 24px; }
-  .item-modal-name { font-size: 28px; }
-  .item-modal-price { font-size: 20px; }
-  .item-modal-desc { font-size: 15px; line-height: 1.5; }
-
-  .item-modal-ingredients { display: flex; flex-wrap: wrap; gap: 8px; }
-  .ingredient-toggle {
-    padding: 10px 16px; border-radius: 99px; border: 1.5px solid var(--ck-border-strong);
-    background: white; font-size: 14px; font-weight: 700;
-  }
-
-  /* ── FIX ADD TO CART BUTTON ── */
-  .item-modal-foot { display: flex; flex-direction: row; gap: 12px; align-items: stretch; }
-  
-  .item-modal-qty {
-    display: flex; align-items: center; background: var(--ck-cream-warm);
-    border-radius: 16px; padding: 6px; flex-shrink: 0;
-  }
-  .qty-btn-lg { width: 40px; height: 40px; border-radius: 10px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .qty-val-lg { width: 28px; text-align: center; font-size: 16px; font-weight: 800; }
-
-  .item-modal-add {
-    flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
-    background: var(--ck-action); color: white; border: none;
-    border-radius: 16px; padding: 0 16px; font-size: 16px; font-weight: 800;
-  }
-  .item-modal-add-price { font-size: 14px; opacity: 0.9; font-weight: 600; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.3); }
-
-  /* ── PRICE BREAKDOWN ── */
-  .price-breakdown { background: transparent; padding: 0; border: none; margin-bottom: 16px; }
-  .price-row { font-size: 14px; margin-bottom: 8px; }
-  .price-row-total { border-top: 1px dashed var(--ck-border-strong); padding-top: 12px; font-size: 18px; }
-}
-/* ============================================================
-   NATIVE MENU TILES & CHECKOUT SUMMARY
-   ============================================================ */
-
-/* 1. Checkout Summary Block */
-.checkout-summary {
-  background: var(--ck-paper);
-  border: 1px solid var(--ck-border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-.checkout-summary-title {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ck-ink-muted);
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed var(--ck-border);
-}
-.checkout-summary-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  padding: 6px 0;
-}
-.cs-qty {
-  font-weight: 800;
-  color: var(--ck-brand);
-  min-width: 24px;
-}
-.cs-name {
-  flex: 1;
-  font-weight: 600;
-  color: var(--ck-ink);
-}
-.cs-price {
-  font-weight: 800;
-  color: var(--ck-brand-deep);
-}
-
-/* 2. Perfect Mobile Menu Tiles */
-.mobile-food-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #ffffff;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-  border: 1px solid var(--ck-border);
-  width: 100%; /* Force full width */
-  box-sizing: border-box; /* Prevent padding bleeding */
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.15s ease;
-}
-.mobile-food-card:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-}
-
-.mobile-food-img {
-  width: 90px;
-  height: 90px;
-  background: radial-gradient(circle, #fffaf0 0%, var(--ck-cream-warm) 100%);
-  border-radius: 16px;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(212, 149, 43, 0.2);
-}
-.mobile-food-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 8px;
-}
-
-.mobile-food-info {
-  flex: 1;
-  min-width: 0;
+/* ── 1. GLOBAL MOBILE SHELLS ── */
+.mobile-app-shell {
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-}
-.mobile-food-name {
-  font-family: var(--ck-font-serif);
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--ck-ink);
-  margin-bottom: 2px;
-  letter-spacing: -0.01em;
-}
-.mobile-food-desc {
-  font-size: 12px;
-  color: var(--ck-ink-muted);
-  white-space: nowrap;
+  background: var(--ck-bg);
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 8px;
-}
-.mobile-food-price {
-  font-family: var(--ck-font-serif);
-  font-weight: 900;
-  font-size: 18px;
-  color: var(--ck-brand-deep);
 }
 
-.mobile-add-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--ck-brand-deep);
-  color: #fff;
-  border: none;
+.m-admin-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f2ed;
+  overflow: hidden;
+}
+
+/* ── 2. STOREFRONT HEADER & NAV ── */
+.mobile-topbar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  padding-top: calc(14px + env(safe-area-inset-top));
+  background: #fff;
+  border-bottom: 1px solid var(--ck-border);
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(30, 95, 156, 0.25);
-  transition: transform 0.1s;
+  z-index: 100;
 }
-.mobile-add-btn:active {
-  transform: scale(0.85);
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ck-font-display);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ck-brand-deep);
+}
+.mobile-store-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--ck-cream-warm); color: var(--ck-brand-deep);
+  padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
 }
 
+.mobile-bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(64px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--ck-border);
+  display: flex; align-items: center; justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
+}
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: #999; font-size: 10px; font-weight: 700; flex: 1; height: 100%;
+}
+.mobile-nav-item.active { color: var(--ck-brand-deep); }
+
+/* ── 3. MENU GRID & CARDS ── */
+.mobile-scroll-area {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-top: 16px; padding-bottom: 100px;
+}
+.mobile-menu-view { padding: 0 16px; }
+.mobile-section-title {
+  font-family: var(--ck-font-serif); font-size: 22px; font-weight: 900;
+  margin: 24px 0 12px; color: var(--ck-ink);
+}
+
+.premium-food-grid {
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 12px;
+}
+.premium-food-card {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03);
+  height: 100%;
+}
+.premium-food-img {
+  width: 100%; aspect-ratio: 1 / 1; position: relative; background: #eaeaea;
+}
+.premium-food-img img { width: 100%; height: 100%; object-fit: cover; }
+.premium-food-badge {
+  position: absolute; top: 8px; left: 8px; background: var(--ck-warm);
+  color: var(--ck-charcoal); font-size: 9px; font-weight: 800; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 6px; z-index: 2;
+}
+.premium-food-body {
+  padding: 12px; padding-bottom: 48px; display: flex; flex-direction: column; flex: 1;
+}
+.premium-food-name {
+  font-size: 14px; font-weight: 800; color: var(--ck-ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.premium-food-price { font-family: var(--ck-font-serif); font-size: 15px; font-weight: 900; color: var(--ck-brand-deep); }
+.premium-food-desc {
+  font-size: 11px; color: var(--ck-ink-muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.premium-add-btn {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ck-brand-deep); color: white; border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(15, 46, 74, 0.2); z-index: 10; padding: 0;
+}
+
+/* ── 4. WELCOME BACK ── */
+.mobile-welcome-back {
+  margin: 0 0 20px; background: linear-gradient(135deg, var(--ck-brand-deep), var(--ck-brand));
+  border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; color: white;
+}
+.mwb-title { font-family: var(--ck-font-serif); font-size: 20px; font-weight: 900; font-style: italic; }
+.mwb-btn { background: var(--ck-warm); color: var(--ck-charcoal); padding: 8px 16px; border-radius: 99px; font-weight: 800; font-size: 13px; border: none; display: flex; align-items: center; gap: 6px; }
+
+/* ── 5. MOBILE MODAL (BOTTOM SHEET) ── */
+.m-modal-overlay {
+  position: fixed; inset: 0; background: rgba(15, 46, 74, 0.7);
+  backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: flex-end;
+}
+.m-modal-sheet {
+  width: 100vw; height: 92dvh; background: var(--ck-bg);
+  border-radius: 24px 24px 0 0; display: flex; flex-direction: column; overflow: hidden;
+}
+.m-modal-header {
+  padding: 12px 20px 0; display: flex; justify-content: flex-end; flex-shrink: 0;
+}
+.m-sheet-handle {
+  width: 40px; height: 5px; background: rgba(0,0,0,0.15);
+  border-radius: 3px; position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+}
+.m-modal-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--ck-cream-warm); color: var(--ck-ink);
+  display: flex; align-items: center; justify-content: center; border: none;
+}
+.m-modal-body {
+  flex: 1; overflow-y: auto; padding: 0 20px 20px; -webkit-overflow-scrolling: touch;
+}
+.m-modal-hero { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.m-modal-photo { width: 100%; height: 200px; border-radius: 20px; background: var(--ck-cream-warm); }
+.m-modal-photo img { width: 100%; height: 100%; object-fit: contain; padding: 16px; }
+.m-modal-name { font-family: var(--ck-font-serif); font-size: 28px; font-weight: 900; margin: 0; }
+.m-modal-price { font-family: var(--ck-font-serif); font-size: 20px; font-weight: 900; color: var(--ck-brand-deep); margin: 4px 0 8px 0; }
+.m-modal-desc { font-size: 15px; color: var(--ck-ink-soft); line-height: 1.5; margin: 0; }
+.m-modal-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ck-ink-soft); margin-bottom: 12px; }
+.m-modal-ingredients { display: flex; flex-wrap: wrap; gap: 8px; }
+.m-ingredient-toggle {
+  display: flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 99px;
+  border: 1.5px solid var(--ck-border-strong); background: var(--ck-paper); font-size: 14px; font-weight: 700;
+}
+.m-ingredient-toggle.removed { border-color: var(--ck-action); color: var(--ck-action); text-decoration: line-through; }
+.m-modal-note {
+  width: 100%; padding: 16px; font-size: 16px; border-radius: 16px;
+  border: 1px solid var(--ck-border-strong); background: white; box-sizing: border-box; resize: none;
+}
+.m-modal-foot {
+  display: flex; gap: 12px; padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  background: var(--ck-paper); border-top: 1px solid var(--ck-border); flex-shrink: 0;
+}
+.m-modal-qty {
+  display: flex; align-items: center; gap: 4px; background: var(--ck-cream-warm); border-radius: 16px; padding: 6px;
+}
+.m-qty-btn {
+  width: 40px; height: 40px; border-radius: 12px; background: white;
+  border: none; display: flex; align-items: center; justify-content: center;
+}
+.m-qty-val { width: 30px; text-align: center; font-size: 18px; font-weight: 800; }
+.m-modal-add-btn {
+  flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+  background: var(--ck-action); border-radius: 16px; border: none; padding: 0 16px; height: 52px;
+}
+.m-add-text { font-size: 16px; font-weight: 800; color: white; }
+.m-add-price { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9); padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.3); }
+
+/* ── 6. MOBILE CART (BOTTOM SHEET) ── */
+.m-cart-overlay {
+  position: fixed; inset: 0; background: rgba(15, 46, 74, 0.6);
+  backdrop-filter: blur(4px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.m-cart-overlay.open { opacity: 1; pointer-events: auto; }
+.m-cart-sheet {
+  position: fixed; inset: 0; top: auto; height: 95dvh; background: var(--ck-bg);
+  border-radius: 24px 24px 0 0; z-index: 9999; display: flex; flex-direction: column; overflow: hidden;
+}
+.m-cart-header {
+  padding: 16px 20px; background: var(--ck-bg); display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--ck-border); flex-shrink: 0;
+}
+.m-cart-header h2 { font-family: var(--ck-font-serif); font-size: 20px; font-weight: 900; margin: 0; }
+.m-cart-close { background: var(--ck-cream-warm); color: var(--ck-ink); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.m-cart-banner { padding: 12px 20px; background: var(--ck-cream-warm); font-size: 13px; border-bottom: 1px solid var(--ck-border); flex-shrink: 0; }
+.m-cart-items { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
+.m-cart-item { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px dashed var(--ck-border); }
+.m-cart-thumb { width: 60px; height: 60px; border-radius: 12px; background: var(--ck-cream-warm); overflow: hidden; flex-shrink: 0; }
+.m-cart-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.m-cart-item-info { flex: 1; }
+.m-cart-item-name { font-weight: 800; font-size: 15px; }
+.m-cart-item-price { font-size: 12px; color: var(--ck-ink-muted); margin: 2px 0 8px; }
+.m-cart-qty-row { display: inline-flex; align-items: center; background: var(--ck-cream-warm); border-radius: 99px; padding: 4px; }
+.m-cart-qty-btn { width: 28px; height: 28px; border-radius: 50%; background: white; border: none; display: flex; align-items: center; justify-content: center; }
+.m-cart-qty-val { width: 24px; text-align: center; font-weight: 700; font-size: 14px; }
+.m-cart-item-total { font-weight: 800; font-size: 15px; color: var(--ck-brand-deep); margin-right: 8px; }
+.m-cart-remove { background: transparent; border: none; color: var(--ck-ink-muted); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.m-cart-footer { padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); background: var(--ck-paper); border-top: 1px solid var(--ck-border); flex-shrink: 0; }
+.m-cart-totals { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-weight: 700; color: var(--ck-ink-soft); }
+.m-cart-totals strong { font-family: var(--ck-font-serif); font-size: 24px; color: var(--ck-ink); }
+.m-cart-primary-btn { width: 100%; height: 56px; border-radius: 16px; border: none; background: var(--ck-brand-deep); color: white; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+/* ── 7. MOBILE ADMIN & KITCHEN (as defined earlier) ── */
+@media (max-width: 820px) {
+  /* Kitchen Swipe Tabs */
+  .kitchen-mobile-tabs { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: #1a1a1a; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .kitchen-mobile-tabs::-webkit-scrollbar { display: none; }
+  .kitchen-tab-btn { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: none; padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .kitchen-tab-btn.active { background: var(--ck-warm); color: var(--ck-charcoal); }
+  .tab-badge { background: var(--ck-action); color: white; font-size: 11px; padding: 2px 6px; border-radius: 99px; line-height: 1; }
+  .kitchen-board { display: flex !important; flex-direction: row !important; overflow-x: auto !important; scroll-snap-type: x mandatory !important; gap: 16px !important; padding: 16px !important; height: calc(100dvh - 130px) !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none; }
+  .kitchen-board::-webkit-scrollbar { display: none; }
+  .kitchen-column { min-width: 90vw !important; max-width: 90vw !important; scroll-snap-align: center !important; height: 100% !important; background: #1a1a1a !important; border-radius: 20px !important; border-top: none !important; display: flex !important; flex-direction: column !important; }
+  .kitchen-column-head { display: none !important; }
+  .kitchen-column-body { padding: 16px !important; gap: 16px !important; }
+  
+  /* Admin Mobile */
+  .m-admin-header { padding: 16px 20px; padding-top: calc(16px + env(safe-area-inset-top)); background: var(--ck-charcoal); color: white; display: flex; justify-content: space-between; align-items: center; font-family: var(--ck-font-display); font-size: 16px; font-weight: 900; flex-shrink: 0; }
+  .m-admin-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .m-admin-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(64px + env(safe-area-inset-bottom)); background: var(--ck-charcoal); display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1); }
+  .m-admin-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 10px; font-weight: 700; flex: 1; height: 100%; }
+  .m-admin-nav-item.active { color: var(--ck-warm); }
+}
+
+@media (min-width: 821px) {
+  .kitchen-mobile-tabs { display: none; }
+}
 /* ============================================================
-   FINAL CSS LOCK: PERFECT NATIVE ITEM MODAL
+   3D FLOATING FOOD EFFECTS (TRANSPARENT PNG READY)
    ============================================================ */
-@media (max-width: 767px) {
-  /* 1. Force the modal to be a perfect flex column that fills the viewport */
-  .item-modal {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+@media (max-width: 820px) {
+  
+  /* 1. The Menu Grid Card Image */
+  .premium-food-img {
+    background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
     display: flex !important;
-    flex-direction: column !important;
-    background: var(--ck-bg) !important;
-    z-index: 9999 !important;
-    overflow: hidden !important; /* Stop the whole page from scrolling */
-    border-radius: 0 !important;
-  }
-
-  /* 2. Header takes up only the space it needs */
-  .item-modal-header {
-    flex-shrink: 0 !important;
-    padding: calc(16px + env(safe-area-inset-top)) 20px 0 !important;
-    background: transparent !important;
-  }
-
-  /* 3. Body scrolls, but leaves space for the footer */
-  .item-modal-body {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    padding: 0 20px 24px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 4. Fix the input bleeding off the screen */
-  .item-modal-note {
-    width: 100% !important;
-    box-sizing: border-box !important; /* Forces padding to stay inside */
-    margin: 0 !important;
-    display: block !important;
-    resize: none !important;
-  }
-
-  /* 5. Fix the ingredient chips */
-  .item-modal-ingredients {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-  .ingredient-toggle {
-    flex-shrink: 0 !important;
-    width: auto !important;
-  }
-
-  /* 6. The Footer stays pinned to the bottom */
-  .item-modal-foot {
-    flex-shrink: 0 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-    background: var(--ck-paper) !important;
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
-    border-top: 1px solid var(--ck-border) !important;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05) !important;
-  }
-
-  /* 7. Force the Add button to fit perfectly side-by-side */
-  .item-modal-add {
-    flex: 1 !important;
-    height: 56px !important;
-    display: flex !important;
-    flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important;
-    background: var(--ck-action) !important;
-    border-radius: 12px !important;
-    padding: 0 16px !important;
-  }
-  .item-modal-add span:first-child {
-    font-size: 16px !important;
-    font-weight: 800 !important;
-    margin: 0 !important;
-  }
-  .item-modal-add-price {
-    font-size: 14px !important;
-    border-left: 1px solid rgba(255,255,255,0.3) !important;
-    padding-left: 8px !important;
-    margin: 0 !important;
+    padding: 12px !important;
   }
 
-  /* 8. Quantity Selector */
-  .item-modal-qty {
-    flex-shrink: 0 !important;
+  .premium-food-img img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Essential for transparent PNGs */
+    /* The Magic 3D Shadow */
+    filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.25)) !important;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) !important;
+  }
+
+  /* Make the food "pop" up when you tap the card */
+  .premium-food-card:active .premium-food-img img {
+    transform: scale(1.1) translateY(-5px) !important;
+  }
+
+  /* 2. The Item Modal Hero Image */
+  .m-modal-photo {
+    background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+    border-radius: 24px !important;
     display: flex !important;
     align-items: center !important;
-    background: var(--ck-cream-warm) !important;
-    border-radius: 12px !important;
-    padding: 6px !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    height: 240px !important; /* Make it taller */
+    overflow: visible !important; /* Allow the shadow to bleed out */
   }
-  .qty-btn-lg {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 8px !important;
-    background: white !important;
+
+  .m-modal-photo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 25px 25px rgba(0, 0, 0, 0.3)) !important;
   }
-  .qty-val-lg {
-    width: 32px !important;
-    font-size: 18px !important;
-    font-weight: 800 !important;
+
+  /* 3. Cart Item Thumbnails */
+  .m-cart-thumb {
+    background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+    padding: 4px !important;
+  }
+  .m-cart-thumb img {
+    object-fit: contain !important;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15)) !important;
   }
 }
 
 /* ============================================================
-   DEDICATED MOBILE MODAL ENGINE (NO CONFLICTS)
+   MOBILE MODAL ALIGNMENT & 3D FIX
    ============================================================ */
-@media (max-width: 767px) {
-  /* Overlay */
-  .mobile-modal-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    background: rgba(15, 46, 74, 0.7) !important;
-    backdrop-filter: blur(4px) !important;
-    z-index: 99999 !important;
+@media (max-width: 820px) {
+  /* 1. Modal Sheet Container */
+  .m-modal-sheet {
+    height: 100dvh !important; /* Take full screen */
     display: flex !important;
-    align-items: flex-end !important; /* Slide up from bottom */
-  }
-
-  /* The Sheet */
-  .mobile-modal-sheet {
-    width: 100vw !important;
-    height: 95dvh !important;
+    flex-direction: column !important;
     background: var(--ck-bg) !important;
     border-radius: 24px 24px 0 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
     overflow: hidden !important;
-    animation: slideUpSheet 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) forwards !important;
   }
 
-  @keyframes slideUpSheet {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-
-  /* Header */
-  .mobile-modal-header {
-    flex-shrink: 0 !important;
-    padding: 16px 20px 0 !important;
+  /* 2. Header (Sticky) */
+  .m-modal-header {
+    padding: 16px 20px !important;
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
     display: flex !important;
-    justify-content: flex-end !important;
-  }
-  .mobile-modal-close {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    background: var(--ck-cream-warm) !important;
-    color: var(--ck-ink) !important;
-    border: none !important;
-    display: flex !important;
+    justify-content: center !important; /* Center the handle */
     align-items: center !important;
-    justify-content: center !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    background: var(--ck-bg) !important;
+  }
+  .m-sheet-handle {
+    position: static !important; /* Remove absolute so it sits in flexbox */
+    margin: 0 !important;
+  }
+  .m-modal-close {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
-  /* Scrollable Body */
-  .mobile-modal-body {
+  /* 3. Scrollable Body */
+  .m-modal-body {
     flex: 1 !important;
     overflow-y: auto !important;
     padding: 0 20px 20px !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Hero Section */
-  .mobile-modal-hero {
+  /* 4. The 3D Image Container */
+  .m-modal-photo {
+    background: transparent !important; /* Remove the white box */
+    height: 220px !important;
+    margin-bottom: 16px !important;
     display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
-    margin-bottom: 24px !important;
-    padding-top: 8px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
-  .mobile-modal-photo {
-    width: 100% !important;
-    height: 200px !important;
-    background: radial-gradient(circle, #fffaf0 0%, var(--ck-cream-warm) 100%) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(212, 149, 43, 0.2) !important;
-  }
-  .mobile-modal-photo img {
+  .m-modal-photo img {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    padding: 24px !important;
-  }
-  .mobile-modal-name {
-    font-family: var(--ck-font-serif) !important;
-    font-size: 28px !important;
-    font-weight: 900 !important;
-    color: var(--ck-ink) !important;
-    line-height: 1.1 !important;
-  }
-  .mobile-modal-price {
-    font-family: var(--ck-font-serif) !important;
-    font-size: 20px !important;
-    font-weight: 900 !important;
-    color: var(--ck-brand-deep) !important;
-    margin-top: 4px !important;
-  }
-  .mobile-modal-desc {
-    font-size: 15px !important;
-    color: var(--ck-ink-soft) !important;
-    line-height: 1.5 !important;
-    margin-top: 8px !important;
+    /* The 3D shadow */
+    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25)) !important;
   }
 
-  /* Sections */
-  .mobile-modal-section {
-    margin-bottom: 24px !important;
-  }
-  .mobile-modal-label {
-    font-size: 12px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.1em !important;
-    text-transform: uppercase !important;
-    color: var(--ck-ink-soft) !important;
-    margin-bottom: 12px !important;
-  }
-
-  /* Ingredients */
-  .mobile-modal-ingredients {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-  .mobile-ingredient-toggle {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 10px 16px !important;
-    border-radius: 99px !important;
-    border: 1.5px solid var(--ck-border-strong) !important;
-    background: var(--ck-paper) !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: var(--ck-ink) !important;
-  }
-  .mobile-ingredient-toggle.removed {
-    border-color: var(--ck-action) !important;
-    color: var(--ck-action) !important;
-    background: var(--ck-action-soft) !important;
-    text-decoration: line-through !important;
-  }
-
-  /* Fix the Textarea Bleeding */
-  .mobile-textarea-wrapper {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  .mobile-modal-note {
-    width: 100% !important;
-    box-sizing: border-box !important; /* Forces it to stay inside */
-    padding: 16px !important;
-    font-size: 16px !important;
-    border-radius: 16px !important;
-    border: 1px solid var(--ck-border-strong) !important;
-    background: white !important;
-    resize: none !important;
-  }
-  .mobile-modal-note:focus {
-    outline: none !important;
-    border-color: var(--ck-brand) !important;
-  }
-
-  /* Sticky Footer */
-  .mobile-modal-foot {
+  /* 5. Footer (Sticky at bottom) */
+  .m-modal-foot {
     flex-shrink: 0 !important;
+    background: var(--ck-paper) !important;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid var(--ck-border) !important;
     display: flex !important;
     gap: 12px !important;
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
-    background: var(--ck-paper) !important;
-    border-top: 1px solid var(--ck-border) !important;
+    align-items: stretch !important;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.05) !important;
   }
 
-  /* Qty Selector */
-  .mobile-modal-qty {
+  /* 6. Quantity Selector */
+  .m-modal-qty {
     display: flex !important;
     align-items: center !important;
+    gap: 4px !important;
     background: var(--ck-cream-warm) !important;
     border-radius: 16px !important;
     padding: 6px !important;
     flex-shrink: 0 !important;
   }
-  .mobile-qty-btn {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 12px !important;
-    background: white !important;
-    border: none !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
-  }
-  .mobile-qty-val {
-    width: 32px !important;
-    text-align: center !important;
-    font-size: 18px !important;
-    font-weight: 800 !important;
-  }
-
-  /* Fix the Add Button Wrapping */
-  .mobile-modal-add-btn {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    background: var(--ck-action) !important;
-    border-radius: 16px !important;
-    border: none !important;
-    padding: 0 16px !important;
-    height: 56px !important;
-  }
-  .mobile-add-text {
-    font-size: 16px !important;
-    font-weight: 800 !important;
-    color: white !important;
-    white-space: nowrap !important; /* Prevents wrapping */
-  }
-  .mobile-add-price {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    padding-left: 10px !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
-    white-space: nowrap !important;
-  }
-}
-
-/* ============================================================
-   FINAL MODAL POLISH (IMAGE & HEADER FIX)
-   ============================================================ */
-@media (max-width: 767px) {
-  /* 1. Header & Drag Handle */
-  .mobile-modal-header {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 12px 20px !important;
-    background: var(--ck-bg) !important;
-    border-bottom: 1px solid var(--ck-border) !important;
-    flex-shrink: 0 !important;
-    z-index: 10 !important;
-  }
-  
-  /* The little gray bar at the top */
-  .mobile-sheet-handle {
-    width: 40px;
-    height: 5px;
-    background: rgba(0,0,0,0.15);
-    border-radius: 3px;
-  }
-
-  /* X button positioned to the right */
-  .mobile-modal-close {
-    position: absolute !important;
-    right: 16px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    background: var(--ck-cream-warm) !important;
-    color: var(--ck-ink-muted) !important;
-    border: none !important;
-  }
-
-  /* 2. Fix the Image Container */
-  .mobile-modal-body {
-    padding: 20px !important;
-    flex: 1 !important;
-    overflow-y: auto !important;
-    background: var(--ck-bg) !important;
-  }
-
-  .mobile-modal-hero {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
-    margin-bottom: 24px !important;
-  }
-
-  .mobile-modal-photo {
-    width: 100% !important;
-    height: 180px !important; /* Fixed height */
-    background: radial-gradient(circle, #fffaf0 0%, var(--ck-cream-warm) 100%) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(212, 149, 43, 0.2) !important;
-    position: relative !important;
-    overflow: hidden !important; /* Stop image from bleeding out */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  .mobile-modal-photo img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    padding: 16px !important; /* Keeps burger away from edges */
-  }
-
-  /* 3. Fix the Add Button Spacing */
-  .mobile-modal-foot {
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
-    background: var(--ck-paper) !important;
-    border-top: 1px solid var(--ck-border) !important;
-    display: flex !important;
-    gap: 12px !important;
-    align-items: center !important;
-  }
-
-  .mobile-modal-add-btn {
-    flex: 1 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important; /* Pushes text to edges */
-    padding: 0 20px !important; /* Nice padding on left and right */
-    height: 56px !important;
-    background: var(--ck-action) !important;
-    border-radius: 16px !important;
-    border: none !important;
-    box-shadow: 0 4px 12px rgba(139, 30, 18, 0.25) !important;
-  }
-
-  .mobile-add-text {
-    font-size: 16px !important;
-    font-weight: 800 !important;
-    color: white !important;
-  }
-
-  .mobile-add-price {
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    padding-left: 12px !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
-  }
-}
-
-/* ============================================================
-   BOUNDARY LOCK: STOP RIGHT-SIDE BLEEDING
-   ============================================================ */
-@media (max-width: 767px) {
-  /* 1. Force the modal sheet to strictly respect 100vw */
-  .mobile-modal-sheet {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important; /* Stop horizontal scrolling */
-    box-sizing: border-box !important;
-  }
-
-  .mobile-modal-body {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 2. Force the footer to stay within the screen */
-  .mobile-modal-foot {
-    width: 100% !important;
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom)) !important;
-    display: flex !important;
-    gap: 10px !important; /* Slightly smaller gap */
-  }
-
-  /* 3. Lock the Add Button */
-  .mobile-modal-add-btn {
-    flex: 1 !important;
-    min-width: 0 !important; /* Critical: allows flexbox to shrink properly */
-    box-sizing: border-box !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0 14px !important; /* Tighter padding */
-    height: 52px !important; /* Slightly shorter */
-    border-radius: 12px !important;
-    overflow: hidden !important; /* Hide any overflowing text */
-  }
-
-  .mobile-add-text {
-    font-size: 15px !important;
-    font-weight: 800 !important;
-    color: white !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .mobile-add-price {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    padding-left: 8px !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
-    white-space: nowrap !important;
-  }
-
-  /* 4. Ensure the textarea and inputs never bleed */
-  .mobile-modal-note, .mobile-textarea-wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-}
-
-/* ============================================================
-   FINAL BUTTON POLISH (STOP TRUNCATION)
-   ============================================================ */
-@media (max-width: 767px) {
-  /* 1. Make the quantity selector slightly more compact */
-  .mobile-modal-qty {
-    padding: 4px !important;
-    border-radius: 12px !important;
-  }
-  .mobile-qty-btn {
+  .m-qty-btn {
     width: 36px !important;
     height: 36px !important;
+    border-radius: 10px !important;
   }
-  .mobile-qty-val {
+  .m-qty-val {
     width: 24px !important;
     font-size: 16px !important;
   }
 
-  /* 2. Center the text in the button and remove the aggressive truncation */
-  .mobile-modal-add-btn {
-    justify-content: center !important; /* Centers text + price together */
-    gap: 12px !important; /* Adds space between "Add to Order" and the price */
-    padding: 0 12px !important;
+  /* 7. The Add to Order Button (Stacked to prevent wrapping) */
+  .m-modal-add-btn {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important; /* Stack text and price vertically */
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--ck-action) !important;
+    border-radius: 16px !important;
+    border: none !important;
+    height: 52px !important;
+    padding: 0 10px !important;
   }
-
-  .mobile-add-text {
+  .m-add-text {
     font-size: 15px !important;
     font-weight: 800 !important;
+    color: white !important;
     white-space: nowrap !important;
-    overflow: visible !important; /* Forces the full text to show */
-    text-overflow: clip !important; /* Removes the "..." */
   }
-
-  .mobile-add-price {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
+  .m-add-price {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-top: 2px !important;
+    border: none !important;
+    padding: 0 !important;
   }
 }
 
 /* ============================================================
-   PREMIUM MOBILE MENU (THE "HUNGER" LAYOUT)
+   PREMIUM MODAL INFO TILE
    ============================================================ */
-.mobile-menu-view {
-  padding: 16px;
-  background: #f8f9fa; /* Slight off-white background to make white cards pop */
+@media (max-width: 820px) {
+  /* 1. The Info Card Container */
+  .m-modal-meta {
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    padding: 24px !important;
+    margin-top: -30px !important; /* Pulls it up over the image shadow */
+    position: relative !important;
+    z-index: 2 !important; /* Keeps it above the image */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0,0,0,0.03) !important;
+  }
+
+  /* 2. Title & Price Row */
+  .m-modal-title-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 8px !important;
+  }
+
+  .m-modal-name {
+    font-family: var(--ck-font-serif) !important;
+    font-size: 26px !important;
+    font-weight: 900 !important;
+    color: var(--ck-ink) !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
+  }
+
+  .m-modal-price {
+    font-family: var(--ck-font-serif) !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    color: var(--ck-brand-deep) !important;
+    margin: 0 !important;
+    padding-top: 4px !important;
+  }
+
+  /* 3. Description */
+  .m-modal-desc {
+    font-size: 14px !important;
+    color: var(--ck-ink-soft) !important;
+    line-height: 1.5 !important;
+    margin: 0 0 12px 0 !important;
+  }
+
+  /* 4. Divider */
+  .m-modal-divider {
+    height: 1px !important;
+    background: var(--ck-border) !important;
+    margin: 16px 0 !important;
+  }
+
+  /* 5. Ingredients Section (Inside the tile) */
+  .m-modal-section-title {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: var(--ck-ink-muted) !important;
+    margin-bottom: 10px !important;
+  }
 }
 
-.mobile-category-header {
-  margin: 32px 0 16px;
-}
-.mobile-section-title {
-  font-family: var(--ck-font-serif);
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--ck-ink);
-  letter-spacing: -0.02em;
+/* ============================================================
+   HERO IMAGE OVERHAUL (MAKE IT MASSIVE)
+   ============================================================ */
+@media (max-width: 820px) {
+  /* 1. Remove padding from the body so the image can bleed */
+  .m-modal-body {
+    padding: 0 !important;
+  }
+
+  /* 2. The Image Container */
+  .m-modal-photo {
+    width: 100% !important;
+    height: 340px !important; /* Massive height */
+    margin: 0 !important;
+    padding: 0 !important;
+    background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important; /* Flush with top */
+  }
+
+  /* 3. The Image Itself */
+  .m-modal-photo img {
+    width: 90% !important; /* Almost full width */
+    height: 90% !important;
+    object-fit: contain !important;
+    /* Massive 3D shadow */
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.3)) !important;
+    transform: scale(1.05) !important; /* Slight zoom for drama */
+  }
+
+  /* 4. The Floating Info Tile */
+  .m-modal-meta {
+    margin: -40px 16px 20px 16px !important; /* Overlap the image and pull in from edges */
+    padding: 24px !important;
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  /* 5. The Notes Section (padding back in) */
+  .m-modal-section {
+    padding: 0 16px 20px 16px !important;
+  }
 }
 
-/* The Grid */
-.premium-food-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
-  gap: 16px;
+/* ============================================================
+   TRUE EDGE-TO-EDGE HERO IMAGE
+   ============================================================ */
+@media (max-width: 820px) {
+  /* 1. Make the modal body flush with the top */
+  .m-modal-sheet {
+    padding-top: 0 !important;
+  }
+
+  /* 2. Float the header OVER the image */
+  .m-modal-header {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 10 !important;
+    background: transparent !important;
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
+  }
+  .m-sheet-handle {
+    background: rgba(255, 255, 255, 0.5) !important; /* Make handle visible on dark images */
+    backdrop-filter: blur(4px) !important;
+  }
+  .m-modal-close {
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    color: white !important; /* Make X visible on dark images */
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  /* 3. Make the image fill the top */
+  .m-modal-photo {
+    height: 380px !important; /* Taller */
+    border-radius: 24px 24px 0 0 !important; /* Match modal curve */
+    margin-top: -60px !important; /* Pull it up behind the header */
+    padding-top: 60px !important; /* Push the food down so it's not under the X */
+    background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+  }
+  .m-modal-photo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.3)) !important;
+  }
+
+  /* 4. Give the Notes section a card look */
+  .m-modal-note-container {
+    padding: 0 16px 20px 16px !important;
+  }
+  .m-modal-note {
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,0.04) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
 }
 
-/* The Card */
-.premium-food-card {
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(0,0,0,0.02);
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
-}
-.premium-food-card:active {
-  transform: scale(0.96);
-}
-.premium-food-card.sold-out {
-  opacity: 0.6;
-  pointer-events: none;
-  filter: grayscale(1);
+/* ============================================================
+   PREMIUM UPSELL CAROUSEL
+   ============================================================ */
+.m-upsell-section {
+  padding: 0 20px;
+  margin-top: 24px;
+  margin-bottom: 8px;
 }
 
-/* The Image Hero */
-.premium-food-img {
-  width: 100%;
-  aspect-ratio: 1 / 1; /* Perfect square */
-  position: relative;
-  background: var(--ck-cream-warm);
-  overflow: hidden;
-}
-.premium-food-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Fills the square beautifully */
-}
-
-/* The Badge (e.g., "Popular") */
-.premium-food-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--ck-brand-deep);
-  color: white;
-  font-size: 10px;
+.m-upsell-title {
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 4px 10px;
-  border-radius: 99px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-/* Text Area */
-.premium-food-body {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  background: #fff;
-}
-.premium-food-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.premium-food-name {
-  font-family: var(--ck-font-body);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--ck-ink);
-  line-height: 1.2;
-}
-.premium-food-price {
-  font-family: var(--ck-font-serif);
-  font-size: 16px;
-  font-weight: 900;
   color: var(--ck-brand-deep);
-}
-.premium-food-desc {
-  font-size: 12px;
-  color: var(--ck-ink-muted);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin-bottom: 12px;
 }
 
-/* The Floating Add Button */
-.premium-add-btn {
-  position: absolute;
-  bottom: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--ck-action);
-  color: white;
-  border: 3px solid #fff; /* Creates a nice ring */
+.m-upsell-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.m-upsell-scroll::-webkit-scrollbar { display: none; }
+
+.m-upsell-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(139, 30, 18, 0.4);
-  z-index: 10;
-  transition: transform 0.1s;
-}
-.premium-add-btn:active {
-  transform: scale(0.85);
-}
-
-/* ============================================================
-   PREMIUM MOBILE MENU (LAYOUT FIXES)
-   ============================================================ */
-.mobile-menu-view {
-  padding: 16px;
-  background: #f4f5f7; /* Slightly cooler gray background for contrast */
-}
-
-.mobile-category-header {
-  margin: 24px 0 12px;
-}
-.mobile-section-title {
-  font-family: var(--ck-font-serif);
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--ck-ink);
-  letter-spacing: -0.01em;
-}
-
-.premium-food-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-
-.premium-food-card {
+  gap: 12px;
   background: #ffffff;
+  padding: 8px 12px 8px 8px;
   border-radius: 16px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(0,0,0,0.04);
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
-}
-.premium-food-card:active {
-  transform: scale(0.96);
-}
-
-.premium-food-img {
-  width: 100%;
-  aspect-ratio: 4 / 3; /* Slightly shorter than a perfect square */
-  position: relative;
-  background: #eaeaea;
-}
-.premium-food-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.premium-food-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--ck-brand-deep);
-  color: white;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 3px 8px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-/* Fix the text wrapping inside the card */
-.premium-food-body {
-  padding: 12px 12px 36px 12px; /* Added bottom padding for the button */
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  position: relative;
-}
-
-.premium-food-header {
-  display: flex;
-  flex-direction: column; /* Stack name and price */
-  gap: 2px;
-  margin-bottom: 4px;
-}
-
-.premium-food-name {
-  font-family: var(--ck-font-body);
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--ck-ink);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.premium-food-price {
-  font-family: var(--ck-font-serif);
-  font-size: 15px;
-  font-weight: 900;
-  color: var(--ck-brand-deep);
-}
-
-.premium-food-desc {
-  font-size: 11px;
-  color: var(--ck-ink-muted);
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 0;
-}
-
-/* Reposition the floating button to the bottom right of the card */
-.premium-add-btn {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--ck-action);
-  color: white;
-  border: 2px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(139, 30, 18, 0.3);
-  z-index: 10;
-}
-
-/* ============================================================
-   FINAL PREMIUM POLISH (WARMTH & SPACING)
-   ============================================================ */
-.mobile-menu-view {
-  padding: 16px;
-  background: var(--ck-bg); /* Back to your warm brand cream */
-}
-
-.mobile-section-title {
-  font-family: var(--ck-font-serif);
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--ck-ink);
-  letter-spacing: -0.01em;
-  margin-top: 16px;
-}
-
-.premium-food-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px; /* Slightly wider gap */
-}
-
-.premium-food-card {
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(139, 30, 18, 0.06); /* Warm shadow */
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(139, 30, 18, 0.04);
-}
-
-.premium-food-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  position: relative;
-  background: #eaeaea;
-}
-
-.premium-food-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: var(--ck-warm); /* Gold badge */
-  color: var(--ck-charcoal);
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 4px 8px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.premium-food-body {
-  padding: 14px 14px 40px 14px; /* More breathing room */
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  position: relative;
-}
-
-.premium-food-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.premium-food-name {
-  font-family: var(--ck-font-body);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--ck-ink);
-  line-height: 1.2;
-}
-
-.premium-food-price {
-  font-family: var(--ck-font-serif);
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--ck-brand-deep);
-}
-
-.premium-food-desc {
-  font-size: 12px;
-  color: var(--ck-ink-muted);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.premium-add-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--ck-brand-deep);
-  color: white;
-  border: 3px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(15, 46, 74, 0.3);
-  z-index: 10;
-}
-.premium-add-btn:active {
-  transform: scale(0.85);
-}
-
-/* ============================================================
-   FIX TEXT CLIPPING IN CARDS
-   ============================================================ */
-.premium-food-body {
-  padding: 12px 12px 44px 12px !important; /* Increased bottom padding */
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  position: relative;
-}
-
-.premium-food-desc {
-  font-size: 11px !important;
-  color: var(--ck-ink-muted) !important;
-  line-height: 1.35 !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 3 !important; /* Allow 3 lines of text instead of 2 */
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  margin-bottom: 0 !important;
-}
-
-/* ============================================================
-   FINAL CARD LAYOUT FIXES
-   ============================================================ */
-.premium-food-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Ensure all cards in a row are the same height */
-}
-
-.premium-food-img {
-  width: 100%;
-  aspect-ratio: 1 / 1; /* Perfect square */
-  position: relative;
-  background: #eaeaea;
-  flex-shrink: 0; /* Prevents image from shrinking */
-}
-
-.premium-food-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.premium-food-body {
-  padding: 14px 14px 48px 14px; /* Plenty of room for the + button */
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  position: relative;
-}
-
-.premium-food-header {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
-}
-
-.premium-food-name {
-  font-family: var(--ck-font-body);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--ck-ink);
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Allow up to 2 lines for long names */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.premium-food-price {
-  font-family: var(--ck-font-serif);
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--ck-brand-deep);
-}
-
-.premium-food-desc {
-  font-size: 12px;
-  color: var(--ck-ink-muted);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit description to 2 lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin: 0;
-}
-
-/* ============================================================
-   UNIFORM CARD GRID & CLIPPING FIX
-   ============================================================ */
-.mobile-menu-view {
-  padding: 16px;
-  padding-bottom: 100px !important; /* Fixes the bottom card clipping */
-}
-
-.premium-food-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  align-items: stretch; /* Forces all cards in a row to be same height */
-}
-
-.premium-food-card {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 16px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
   border: 1px solid rgba(0,0,0,0.03);
+  min-width: max-content;
+  cursor: pointer;
+  transition: transform 0.15s;
 }
+.m-upsell-card:active { transform: scale(0.96); }
 
-/* Force all images to be the exact same size */
-.premium-food-img {
-  width: 100%;
-  aspect-ratio: 1.1 / 1; /* Slightly wider than square */
-  flex-shrink: 0;
-  position: relative;
-  background: #eaeaea;
-}
-.premium-food-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.premium-food-body {
-  padding: 12px;
-  padding-bottom: 48px; /* Space for the floating + button */
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.premium-food-header {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
-  min-height: 40px; /* Prevents price from jumping up and down */
-}
-
-.premium-food-name {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--ck-ink);
-  line-height: 1.2;
-  /* Truncate long names */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.m-upsell-img {
+  width: 44px;
+  height: 44px;
+  background: var(--ck-cream-warm);
+  border-radius: 10px;
   overflow: hidden;
 }
+.m-upsell-img img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 
-.premium-food-desc {
-  font-size: 11px;
-  color: var(--ck-ink-muted);
-  line-height: 1.35;
-  margin: 0;
-  /* Truncate long descriptions */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.m-upsell-info { display: flex; flex-direction: column; }
+.m-upsell-name { font-size: 13px; font-weight: 800; color: var(--ck-ink); }
+.m-upsell-price { font-size: 12px; font-weight: 700; color: var(--ck-brand-deep); }
 
-.premium-add-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
+.m-upsell-add {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--ck-brand-deep);
-  color: white;
-  border: 2px solid #fff;
+  background: var(--ck-cream-warm);
+  color: var(--ck-brand-deep);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(15, 46, 74, 0.2);
-  z-index: 10;
-}
-
-/* ============================================================
-   FINAL SCROLL AREA PADDING
-   ============================================================ */
-.mobile-scroll-area {
-  padding-bottom: 120px !important; /* Forces extra space at the bottom */
-  background: var(--ck-bg) !important;
-}
-
-.mobile-menu-view {
-  padding-bottom: 0 !important;
+  margin-left: 8px;
 }

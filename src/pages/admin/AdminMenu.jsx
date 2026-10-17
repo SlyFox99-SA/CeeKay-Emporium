@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Plus, Save, Trash2, Eye, EyeOff, X } from 'lucide-react';
 import { getAllMenu, updateMenuItem, createMenuItem, deleteMenuItem } from '../../services/menuService';
-import ImageUploader from '../../components/ImageUploader';
+import MobileMenuModal from '../../components/mobile/MobileMenuModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const EMPTY = {
   slug: '', name: '', category: 'kota', price: 20, image: '',
@@ -10,6 +11,7 @@ const EMPTY = {
 };
 
 export default function AdminMenu() {
+  const isMobile = useIsMobile();
   const [items, setItems] = useState([]);
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -74,7 +76,7 @@ export default function AdminMenu() {
       </header>
 
       {loading ? (
-        <div className="admin-loading-inline">Loading menu…</div>
+        <div className="admin-loading-inline">Loading menuâ€¦</div>
       ) : (
         <div className="admin-table">
           <div className="admin-table-head">
@@ -107,7 +109,21 @@ export default function AdminMenu() {
         </div>
       )}
 
-      {editing && (
+      {editing && isMobile && (
+        <MobileMenuModal 
+          item={editing} 
+          onClose={cancelEdit} 
+          onSave={async (form) => {
+            const payload = { ...form, price: Number(form.price) };
+            if (editing.id) await updateMenuItem(editing.id, payload);
+            else await createMenuItem(payload);
+            await reload();
+            setEditing(null);
+          }} 
+        />
+      )}
+
+      {editing && !isMobile && (
         <div className="admin-modal-overlay" onClick={cancelEdit}>
           <div className="admin-modal admin-modal-wide" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-head">
@@ -283,7 +299,7 @@ export default function AdminMenu() {
             <div className="admin-modal-foot">
               <button className="admin-btn-ghost" onClick={cancelEdit}>Cancel</button>
               <button className="admin-btn-primary" onClick={saveEdit} disabled={saving}>
-                <Save size={15} /> {saving ? 'Saving…' : 'Save item'}
+                <Save size={15} /> {saving ? 'Savingâ€¦' : 'Save item'}
               </button>
             </div>
           </div>

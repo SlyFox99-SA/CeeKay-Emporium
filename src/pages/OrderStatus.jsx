@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ChefHat, Package, CheckCircle2, Clock, MapPin, Phone } from 'lucide-react';
 import { getHistory, updateHistoryStatus } from '../services/customerService';
@@ -19,13 +19,17 @@ export default function OrderStatus() {
 
   useEffect(() => {
     const load = async () => {
-      const live = getOrders().find(o => o.id === id);
+      // Await the promise from Supabase
+      const liveOrders = await getOrders();
+      const live = liveOrders.find(o => o.id === id);
+      
       if (live) {
         setOrder(live);
         updateHistoryStatus(id, live.status);
       } else {
-        const hist = getHistory().find(h => h.id === id);
-        if (hist) setOrder(hist);
+        const hist = await getHistory();
+        const past = hist.find(h => h.id === id);
+        if (past) setOrder(past);
       }
       setLoading(false);
     };
@@ -91,10 +95,7 @@ export default function OrderStatus() {
               const reached = i <= currentIdx;
               const active = i === currentIdx;
               return (
-                <li
-                  key={step.key}
-                  className={`status-step ${reached ? 'reached' : ''} ${active ? 'active' : ''}`}
-                >
+                <li key={step.key} className={`status-step ${reached ? 'reached' : ''} ${active ? 'active' : ''}`}>
                   <div className="status-step-dot">
                     {step.key === 'placed'    && <Package size={16} />}
                     {step.key === 'preparing' && <ChefHat size={16} />}

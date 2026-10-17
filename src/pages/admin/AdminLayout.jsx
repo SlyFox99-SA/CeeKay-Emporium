@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Utensils, Receipt, Store, Users, LogOut, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CKMark from '../../components/CKMark';
 
 const NAV = [
-  { to: '/admin',        icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/admin',        icon: LayoutDashboard, label: 'Home', end: true },
   { to: '/admin/menu',   icon: Utensils,        label: 'Menu' },
   { to: '/admin/orders', icon: Receipt,         label: 'Orders' },
   { to: '/admin/stores', icon: Store,           label: 'Stores' },
@@ -16,7 +16,6 @@ export default function AdminLayout() {
   const { user, profile, loading, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  /* Only redirect when we are 100% sure there is no user */
   useEffect(() => {
     if (!loading && !user) navigate('/admin/login', { replace: true });
   }, [loading, user, navigate]);
@@ -24,7 +23,6 @@ export default function AdminLayout() {
   if (loading) return <div className="admin-loading">Loading…</div>;
   if (!user) return null;
 
-  /* Signed in but not an admin — show a friendly screen, do NOT sign out */
   if (!isAdmin) {
     return (
       <div className="admin-login">
@@ -32,16 +30,9 @@ export default function AdminLayout() {
           <div className="admin-login-head">
             <span className="admin-login-mark"><CKMark size={44} /></span>
             <h1 className="admin-login-title">No admin access</h1>
-            <p className="admin-login-sub">
-              Signed in as <strong>{profile?.email || user?.email}</strong>. This account does not have admin access yet.
-            </p>
+            <p className="admin-login-sub">Signed in as <strong>{profile?.email || user?.email}</strong>.</p>
           </div>
-          <button className="admin-login-submit" onClick={signOut} style={{ marginTop: 24 }}>
-            Sign out
-          </button>
-          <Link to="/" className="admin-login-toggle" style={{ display: 'block', marginTop: 12 }}>
-            Back to store
-          </Link>
+          <button className="admin-login-submit" onClick={signOut} style={{ marginTop: 24 }}>Sign out</button>
         </div>
       </div>
     );
@@ -74,12 +65,9 @@ export default function AdminLayout() {
             <LogOut size={16} />
             <span>Sign out</span>
           </button>
-          <div className="admin-user">
-            <div className="admin-user-name">{profile?.full_name || 'Admin'}</div>
-            <div className="admin-user-email">{profile?.email || user?.email}</div>
-          </div>
         </div>
       </aside>
+
       <main className="admin-main">
         <Outlet />
       </main>

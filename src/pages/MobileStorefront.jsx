@@ -6,8 +6,8 @@ import { useStore } from '../context/StoreContext';
 import { useHaptics } from '../hooks/useHaptics';
 import { getMenu } from '../services/menuService';
 import ItemImage from '../components/ItemImage';
-import CartSidebar from '../components/CartSidebar';
-import ItemModal from '../components/ItemModal';
+import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
+import MobileItemModal from '../components/mobile/MobileItemModal';
 import StoreSelector from '../components/StoreSelector';
 import MobileOrders from '../components/MobileOrders';
 import MobileProfile from '../components/MobileProfile';
@@ -192,8 +192,8 @@ export default function MobileStorefront() {
       </nav>
 
       <AnimatePresence>
-        {cartOpen && <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
-        {modalItem && <ItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}
+        {cartOpen && <MobileCartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
+        {modalItem && <MobileItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}
       </AnimatePresence>
       
       <StoreSelector />
