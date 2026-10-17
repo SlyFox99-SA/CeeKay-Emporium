@@ -21,7 +21,7 @@ export default function MobileAdminShell() {
     if (!loading && !user) navigate('/admin/login', { replace: true });
   }, [loading, user, navigate]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loadingâ€¦</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading...</div>;
   if (!user) return null;
 
   return (

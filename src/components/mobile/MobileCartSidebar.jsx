@@ -1,15 +1,13 @@
-﻿import { useState, useEffect } from 'react';
-import { useNetworkStatus } from '../../hooks/useNetworkStatus';
-import { WifiOff } from 'lucide-react';
-import EmptyState from './EmptyState';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, ArrowLeft, User, Phone, Clock, Check, ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
+import { MapPin, ArrowLeft, User, Phone, Clock, Check, ShoppingBag, X, Minus, Plus, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useStore } from '../../context/StoreContext';
 import { usePrefs } from '../../context/PreferencesContext';
 import { createOrder } from '../../services/orderService';
 import { recordOrder, saveProfile } from '../../services/customerService';
+import { validatePromo } from '../../services/promoService';
 import { burstConfetti } from '../../lib/confetti';
 import { playSuccess, playError } from '../../lib/chime';
 import ItemImage from '../ItemImage';
@@ -24,11 +22,14 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
   const haptics = useHaptics();
   const navigate = useNavigate();
   
-  const isOnline = useNetworkStatus();
   const [step, setStep] = useState('cart');
   const [note, setNote] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
   const [isPlacing, setIsPlacing] = useState(false);
+  
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
   
   const [customer, setCustomer] = useState(() => {
     try {
@@ -60,6 +61,24 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
     return true;
   };
 
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setPromoError('');
+    const promo = await validatePromo(promoInput);
+    if (promo) {
+      setAppliedPromo(promo);
+      haptics.success();
+      onToast(`Promo applied: ${promo.discount_percent}% off!`);
+    } else {
+      setAppliedPromo(null);
+      setPromoError('Invalid or expired code');
+      haptics.error();
+    }
+  };
+
+  const discountAmount = appliedPromo ? (total * (appliedPromo.discount_percent / 100)) : 0;
+  const finalTotal = total - discountAmount;
+
   const handlePlaceOrder = async () => {
     if (!store || !cart.length || !validate() || isPlacing) return;
     
@@ -71,7 +90,7 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
         customer, 
         note, 
         channel: 'app', 
-        total 
+        total: finalTotal 
       });
 
       recordOrder(order); 
@@ -85,6 +104,8 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
       
       clearCart();
       setNote('');
+      setAppliedPromo(null);
+      setPromoInput('');
     } catch (err) {
       haptics.error();
       onToast('Failed to place order. Please try again.');
@@ -126,11 +147,11 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
           <>
             <div className="m-cart-items">
               {cart.length === 0 ? (
-                <EmptyState 
-                  type="cart" 
-                  title="Your cart is empty" 
-                  subtitle="Add a delicious kota to get started." 
-                />
+                <div className="m-cart-empty">
+                  <ShoppingBag size={48} strokeWidth={1.5} />
+                  <h3>Your cart is empty</h3>
+                  <p>Add a kota to get started.</p>
+                </div>
               ) : cart.map(item => {
                 const key = lineKey(item);
                 return (
@@ -168,17 +189,9 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
         {step === 'details' && (
           <>
             <div className="m-cart-items">
-              <motion.button 
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
-                className="m-cart-back" onClick={() => setStep('cart')}
-              >
-                <ArrowLeft size={16} /> Back to cart
-              </motion.button>
+              <button className="m-cart-back" onClick={() => setStep('cart')}><ArrowLeft size={16} /> Back to cart</button>
               
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="m-checkout-summary"
-              >
+              <div className="m-checkout-summary">
                 <h4>Order Summary</h4>
                 {cart.map(item => (
                   <div key={lineKey(item)} className="m-summary-row">
@@ -186,12 +199,9 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
                     <span>R {(item.price * item.qty).toFixed(2)}</span>
                   </div>
                 ))}
-              </motion.div>
+              </div>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="m-form-group"
-              >
+              <div className="m-form-group">
                 <label className="m-field">
                   <span className="m-label"><User size={12} /> Name</span>
                   <input type="text" placeholder="Bongani" value={customer.name} onChange={e => updateCustomer('name', e.target.value)} />
@@ -206,18 +216,59 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
                     {PICKUP_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </label>
+
+                {/* Promo Code UI */}
+                <div className="m-form-group" style={{ marginTop: '8px' }}>
+                  <label className="m-field">
+                    <span className="m-label">Promo Code</span>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. KOTA10" 
+                        value={promoInput} 
+                        onChange={e => setPromoInput(e.target.value.toUpperCase())}
+                        style={{ textTransform: 'uppercase' }}
+                      />
+                      <button 
+                        type="button"
+                        onClick={handleApplyPromo}
+                        style={{ background: 'var(--ck-charcoal)', color: 'white', border: 'none', borderRadius: '16px', padding: '0 20px', fontWeight: 800 }}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {promoError && <span style={{ color: 'var(--ck-action)', fontSize: '12px', marginTop: '4px', fontWeight: 600 }}>{promoError}</span>}
+                    {appliedPromo && <span style={{ color: 'var(--ck-green)', fontSize: '12px', marginTop: '4px', fontWeight: 600 }}>{appliedPromo.discount_percent}% Discount Applied!</span>}
+                  </label>
+                </div>
+
                 <label className="m-field">
                   <span className="m-label">Notes</span>
                   <textarea placeholder="Extra achaar..." value={note} onChange={e => setNote(e.target.value)} />
                 </label>
-              </motion.div>
+              </div>
             </div>
             <div className="m-cart-footer">
-              <div className="m-cart-totals">
-                <span>Total to pay</span>
-                <strong>R {total.toFixed(2)}</strong>
+              
+              {/* Updated Footer Totals with Discount */}
+              <div className="m-cart-totals" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span>Subtotal</span>
+                  <span>R {total.toFixed(2)}</span>
+                </div>
+                {appliedPromo && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--ck-green)', fontWeight: 700 }}>
+                    <span>Discount ({appliedPromo.discount_percent}%)</span>
+                    <span>-R {discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ck-border)', paddingTop: '8px', marginTop: '4px' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--ck-ink-soft)' }}>Total to pay</span>
+                  <strong style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '24px', color: 'var(--ck-ink)' }}>R {finalTotal.toFixed(2)}</strong>
+                </div>
               </div>
-              <button className="m-cart-primary-btn" onClick={handlePlaceOrder} disabled={isPlacing}>
+
+              <button className="m-cart-primary-btn" onClick={handlePlaceOrder} disabled={isPlacing} style={{ marginTop: '16px' }}>
                 {isPlacing ? <Loader2 size={24} className="spin" /> : 'Place Order'}
               </button>
             </div>
@@ -226,7 +277,7 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
 
         {step === 'success' && lastOrder && (
           <div className="m-cart-items m-cart-success">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }} className="m-success-icon"><Check size={48} strokeWidth={3} /></motion.div>
+            <div className="m-success-icon"><Check size={48} strokeWidth={3} /></div>
             <h2>Order received!</h2>
             <p>We're preparing it now. You can track the status live.</p>
             

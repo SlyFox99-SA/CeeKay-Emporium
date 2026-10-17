@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
 
@@ -7,15 +8,12 @@ export default function PwaInstallBanner() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) return;
 
-    // Check for iOS
     const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(isIosDevice);
 
     if (isIosDevice) {
-      // iOS doesn't support beforeinstallprompt, so we just show custom instructions
       setTimeout(() => setShow(true), 3000);
       return;
     }

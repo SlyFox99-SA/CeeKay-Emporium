@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CKMark from '../../components/CKMark';
@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (loading) return <div className="admin-login-loading">Loading…</div>;
+  if (loading) return <div className="admin-login-loading">Loading...</div>;
   if (user) return <Navigate to="/admin" replace />;
 
   const submit = async (e) => {
@@ -62,11 +62,11 @@ export default function AdminLogin() {
           </label>
           <label className="field">
             <span className="field-label">Password</span>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required />
           </label>
           {error && <div className="admin-login-error">{error}</div>}
           <button type="submit" className="admin-login-submit" disabled={busy}>
-            {busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+            {busy ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create account'}
           </button>
         </form>
         <button className="admin-login-toggle" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}>

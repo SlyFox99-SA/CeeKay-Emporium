@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, ShoppingBag, Home, ReceiptText, User, Plus } from 'lucide-react';
+import { MapPin, ShoppingBag, Home, ReceiptText, User, Plus, Share2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { useHaptics } from '../hooks/useHaptics';
@@ -15,23 +16,18 @@ import MobileSkeleton from '../components/MobileSkeleton';
 import MobileWelcomeBack from '../components/MobileWelcomeBack';
 import CKMark from '../components/CKMark';
 import PwaInstallBanner from '../components/mobile/PwaInstallBanner';
-import ActiveOrderBar from '../components/mobile/ActiveOrderBar';
 import NetworkStatus from '../components/NetworkStatus';
-
-// We are hardcoding these to guarantee the visual layout works perfectly
-const PERFECT_IMAGES = {
-  'mezozo': "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop",
-  'emporium-bliss': "https://images.unsplash.com/photo-1553979459-d2229ba7433b?q=80&w=600&auto=format&fit=crop",
-  'emporium-chaw': "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=600&auto=format&fit=crop",
-  'orange-soda': "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?q=80&w=600&auto=format&fit=crop", 
-  'coca-cola': "https://images.unsplash.com/photo-1554866585-cd94860890b7?q=80&w=600&auto=format&fit=crop" 
-};
+import ActiveOrderBar from '../components/mobile/ActiveOrderBar';
+import ErrorState from '../components/mobile/ErrorState';
+import PullToRefresh from '../components/mobile/PullToRefresh';
 
 export default function MobileStorefront() {
   const [activeTab, setActiveTab] = useState('menu');
   const [cartOpen, setCartOpen] = useState(false);
   const [modalItem, setModalItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState('');
+  const [error, setError] = useState(null);
   
   const [menu, setMenu] = useState({ kotas: [], drinks: [] });
 
@@ -39,13 +35,22 @@ export default function MobileStorefront() {
   const { store, clearStore } = useStore();
   const haptics = useHaptics();
 
-  useEffect(() => {
-    async function loadMenu() {
+  const reloadData = async () => {
+    setError(null);
+    setLoading(true);
+    try {
       const data = await getMenu();
       setMenu(data);
+    } catch (err) {
+      console.error("Failed to load menu:", err);
+      setError(err);
+    } finally {
       setLoading(false);
     }
-    loadMenu();
+  };
+
+  useEffect(() => {
+    reloadData();
   }, []);
 
   const handleModalConfirm = (item, options) => {
@@ -53,11 +58,28 @@ export default function MobileStorefront() {
     setModalItem(null);
   };
 
+  const handleShare = async () => {
+    haptics.light();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'CeeKay Emporium',
+          text: 'Order the best kotas in Benoni directly from the app!',
+          url: window.location.origin,
+        });
+      } catch (err) {
+        console.log('Share canceled');
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.origin);
+      setToast('Link copied to clipboard!');
+      setTimeout(() => setToast(''), 3000);
+    }
+  };
+
   const renderFoodItem = (item) => {
     const isSoldOut = item.available === false;
-    
-    // Use the hardcoded map, fallback to a burger if slug is missing
-    const imageUrl = PERFECT_IMAGES[item.slug] || PERFECT_IMAGES['mezozo'];
+    const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
 
     return (
       <motion.div 
@@ -102,19 +124,24 @@ export default function MobileStorefront() {
 
   return (
     <div className="mobile-app-shell">
+      <NetworkStatus />
+      
       <header className="mobile-topbar">
         <div className="mobile-brand">
           <CKMark size={26} />
           <span>CeeKay</span>
         </div>
-        {store && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="mobile-store-pill" onClick={clearStore}>
-            <MapPin size={12} /> {store.branch}
+            <MapPin size={12} /> {store?.branch || 'Benoni'}
           </button>
-        )}
+          <button onClick={handleShare} style={{ background: 'transparent', border: 'none', color: 'var(--ck-brand-deep)', padding: 8 }}>
+            <Share2 size={20} />
+          </button>
+        </div>
       </header>
 
-      <main className="mobile-scroll-area">
+      <PullToRefresh onRefresh={reloadData}>
         <AnimatePresence mode="wait">
           {activeTab === 'menu' && (
             <motion.div 
@@ -124,7 +151,11 @@ export default function MobileStorefront() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {loading ? <MobileSkeleton /> : (
+              {loading ? (
+                <MobileSkeleton />
+              ) : error ? (
+                <ErrorState onRetry={reloadData} />
+              ) : (
                 <div className="mobile-menu-view">
                   <MobileWelcomeBack />
                   
@@ -141,8 +172,7 @@ export default function MobileStorefront() {
                   <div className="premium-food-grid">
                     {menu.drinks.map(renderFoodItem)}
                   </div>
-                  {/* Safe area spacer so the bottom nav doesn't cover the last row */}
-                  <div style={{ height: 100 }} />
+                  
                 </div>
               )}
             </motion.div>
@@ -160,9 +190,12 @@ export default function MobileStorefront() {
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
+      </PullToRefresh>
 
-      <ActiveOrderBar />`r`n`r`n      <nav className="mobile-bottom-nav">
+      <ActiveOrderBar />
+      <PwaInstallBanner />
+
+      <nav className="mobile-bottom-nav">
         <button className={`mobile-nav-item ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} />
           <span>Menu</span>
@@ -194,14 +227,16 @@ export default function MobileStorefront() {
         </button>
       </nav>
 
-      <NetworkStatus />
-      <PwaInstallBanner />
       <AnimatePresence>
         {cartOpen && <MobileCartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
         {modalItem && <MobileItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}
       </AnimatePresence>
       
       <StoreSelector />
+      
+      {toast && (
+        <div className="toast show" style={{ zIndex: 9999 }}>{toast}</div>
+      )}
     </div>
   );
 }

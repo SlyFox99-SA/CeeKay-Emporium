@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import { getLastOrder } from '../services/customerService';
@@ -36,15 +37,19 @@ export default function MobileWelcomeBack() {
           <Sparkles size={12} /> Welcome back
         </div>
         <div className="mwb-title">Your usual?</div>
-        <div className="mwb-thumbs">
-          {last.items.slice(0, 3).map((it, i) => (
-            <div key={i} className="mwb-thumb">
-              <ItemImage src={it.image} alt={it.name} />
-            </div>
-          ))}
+        
+        <div className="mwb-thumbs-row">
+          <div className="mwb-thumbs">
+            {last.items.slice(0, 3).map((it, i) => (
+              <div key={i} className="mwb-thumb">
+                <ItemImage src={it.image} alt={it.name} />
+              </div>
+            ))}
+          </div>
           <div className="mwb-count">{itemCount} items</div>
         </div>
       </div>
+      
       <button className="mwb-btn" onClick={handleReorder}>
         <RotateCcw size={14} /> Reorder
       </button>

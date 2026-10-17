@@ -1,0 +1,31 @@
+
+.ck-splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #1e5f9c 0%, #0f2e4a 100%);
+}
+
+.ck-splash-content {
+  display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; width: 100%; max-width: 400px;
+}
+
+.ck-splash-logo-wrap { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+
+.ck-splash-ring {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 2px solid var(--ck-warm); box-shadow: 0 0 30px var(--ck-warm);
+}
+
+.ck-splash-text-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 48px; }
+
+.ck-splash-title { font-family: var(--ck-font-display); font-size: 42px; font-weight: 900; color: #ffffff; margin: 0; line-height: 1; }
+
+.ck-splash-tagline { font-family: var(--ck-font-body); font-size: 12px; font-weight: 800; color: var(--ck-warm); text-transform: uppercase; margin: 8px 0 0 0; }
+
+.ck-splash-loader-track { width: 160px; height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 99px; overflow: hidden; }
+
+.ck-splash-loader-fill { height: 100%; background: var(--ck-warm); border-radius: 99px; box-shadow: 0 0 15px var(--ck-warm); }

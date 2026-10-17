@@ -1,29 +1,56 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChefHat, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { getOrders, subscribeToOrders } from '../../services/orderService';
 
 export default function ActiveOrderBar() {
   const [activeOrder, setActiveOrder] = useState(null);
+  const [dismissed, setDismissed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const x = useMotionValue(0);
+  const barRef = useRef(null);
 
   useEffect(() => {
     const checkActive = async () => {
-      // Fetch all orders, find the most recent one that isn't completed/cancelled
       const orders = await getOrders();
       const active = orders.find(o => ['placed', 'preparing', 'ready'].includes(o.status));
+      
+      if (active?.id !== activeOrder?.id) {
+        setDismissed(false); // Reset dismiss state if a NEW order comes in
+      }
+      
       setActiveOrder(active || null);
     };
 
     checkActive();
     const unsub = subscribeToOrders(checkActive);
     return unsub;
-  }, []);
+  }, [activeOrder?.id]);
 
-  // Hide the bar if we are already on the tracking page or checkout
-  if (!activeOrder || location.pathname.startsWith('/order') || location.pathname === '/admin') {
+  // Auto-dismiss after 6 seconds
+  useEffect(() => {
+    if (!activeOrder || dismissed) return;
+    const timer = setTimeout(() => {
+      setDismissed(true);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [activeOrder, dismissed]);
+
+  // Dismiss when clicking outside
+  useEffect(() => {
+    if (!activeOrder || dismissed) return;
+    const handleOutsideClick = (e) => {
+      if (barRef.current && !barRef.current.contains(e.target)) {
+        setDismissed(true);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [activeOrder, dismissed]);
+
+  if (!activeOrder || dismissed || location.pathname.startsWith('/order') || location.pathname === '/admin') {
     return null;
   }
 
@@ -37,9 +64,19 @@ export default function ActiveOrderBar() {
   return (
     <AnimatePresence>
       <motion.div 
+        ref={barRef}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.4}
+        style={{ x }}
+        onDragEnd={(e, info) => {
+          if (info.offset.x > 80) {
+            setDismissed(true);
+          }
+        }}
         className={`active-order-bar status-${activeOrder.status}`}
         onClick={() => navigate(`/order/${activeOrder.id}`)}
       >

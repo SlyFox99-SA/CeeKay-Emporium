@@ -1,14 +1,19 @@
+
 export function useHaptics() {
   const vibrate = (pattern) => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(pattern);
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    } catch (e) {
+      // Silently ignore browser intervention errors
     }
   };
 
   return {
-    light: () => vibrate(10),          // Small tick (e.g., adding to cart)
-    medium: () => vibrate(30),         // A bit stronger (e.g., opening modal)
-    success: () => vibrate([20, 50, 20]), // Double pulse (e.g., order placed)
-    error: () => vibrate([50, 50, 50, 50, 50]), // Buzz (e.g., invalid input)
+    light: () => vibrate(10),
+    medium: () => vibrate(30),
+    success: () => vibrate([20, 50, 20]),
+    error: () => vibrate([50, 50, 50, 50, 50]),
   };
 }

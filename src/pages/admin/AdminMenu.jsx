@@ -76,7 +76,7 @@ export default function AdminMenu() {
       </header>
 
       {loading ? (
-        <div className="admin-loading-inline">Loading menuâ€¦</div>
+        <div className="admin-loading-inline">Loading menu...</div>
       ) : (
         <div className="admin-table">
           <div className="admin-table-head">
@@ -299,7 +299,7 @@ export default function AdminMenu() {
             <div className="admin-modal-foot">
               <button className="admin-btn-ghost" onClick={cancelEdit}>Cancel</button>
               <button className="admin-btn-primary" onClick={saveEdit} disabled={saving}>
-                <Save size={15} /> {saving ? 'Savingâ€¦' : 'Save item'}
+                <Save size={15} /> {saving ? 'Saving...' : 'Save item'}
               </button>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus, X, Check } from 'lucide-react';
@@ -37,8 +38,7 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
 
   const handleAddUpsell = (drink) => {
     haptics.light();
-    onConfirm(drink, { qty: 1 }); // Adds drink to cart
-    // Note: This doesn't close the modal, it just adds the drink to the cart behind it.
+    onConfirm(drink, { qty: 1 }); 
   };
 
   return (
@@ -49,18 +49,18 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
+        {/* Header area with drag handle */}
         <div className="m-modal-header" {...swipeProps} style={{ touchAction: 'none' }}>
           <div className="m-sheet-handle" />
           <button className="m-modal-close" onClick={onClose}><X size={18} /></button>
         </div>
 
+        {/* Scrollable Body */}
         <div className="m-modal-body">
-          {/* The Image */}
           <div className="m-modal-photo">
             <ItemImage src={item.image} alt={item.name} />
           </div>
 
-          {/* The Info Tile */}
           <div className="m-modal-meta">
             <div className="m-modal-title-row">
               <h2 className="m-modal-name">{item.name}</h2>
@@ -87,7 +87,6 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
             )}
           </div>
 
-          {/* The Upsell Section */}
           {isKota && (
             <div className="m-upsell-section">
               <div className="m-upsell-title">Perfect with a cold drink</div>
@@ -108,13 +107,13 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
             </div>
           )}
 
-          {/* Notes Card */}
           <div className="m-modal-note-container">
-            <div className="m-modal-section-title" style={{ marginLeft: '4px', marginTop: '20px' }}>Add a note (optional)</div>
-            <textarea className="m-modal-note" placeholder="e.g. extra crispy..." value={note} onChange={e => setNote(e.target.value)} rows={3} />
+            <div className="m-modal-section-title">Add a note (optional)</div>
+            <textarea className="m-modal-note" placeholder="e.g. extra crispy..." value={note} onChange={e => setNote(e.target.value)} rows={2} />
           </div>
         </div>
 
+        {/* Sticky Footer */}
         <div className="m-modal-foot">
           <div className="m-modal-qty">
             <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }} disabled={qty <= 1}><Minus size={16} /></button>

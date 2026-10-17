@@ -5708,3 +5708,96 @@ body:has(.mobile-app-shell) {
     width: 100% !important;
   }
 }
+
+/* =========================================
+   MY ORDERS LIST
+   ========================================= */
+.m-orders-list { padding: 16px 20px 100px 20px; display: flex; flex-direction: column; gap: 16px; }
+.m-order-card { display: flex; flex-direction: column; background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.04); border: 1px solid var(--ck-border); text-decoration: none; color: var(--ck-ink); transition: transform 0.15s ease; }
+.m-order-card:active { transform: scale(0.97); }
+.m-order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.m-order-id { font-family: 'SF Mono', monospace; font-weight: 800; font-size: 16px; color: var(--ck-brand-deep); }
+.m-order-status { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 99px; }
+.m-order-status.status-placed { background: #fff4e0; color: #b26a00; }
+.m-order-status.status-preparing { background: #e0f2fe; color: #0369a1; }
+.m-order-status.status-ready { background: #e8f5e9; color: #2e7d32; }
+.m-order-status.status-completed { background: #f1f5f9; color: #64748b; }
+.m-order-status.status-cancelled { background: var(--ck-action-soft); color: var(--ck-action); }
+.m-order-date { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ck-ink-muted); font-weight: 600; margin-bottom: 16px; }
+.m-order-items { display: flex; margin-bottom: 16px; }
+.m-order-item-thumb { width: 44px; height: 44px; border-radius: 50%; background: var(--ck-cream-warm); border: 2px solid #fff; margin-left: -12px; overflow: hidden; position: relative; flex-shrink: 0; }
+.m-order-item-thumb:first-child { margin-left: 0; }
+.m-order-item-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.m-order-item-qty { position: absolute; inset: 0; background: rgba(15,46,74,0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+.m-order-item-more { width: 44px; height: 44px; border-radius: 50%; background: var(--ck-cream-warm); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--ck-ink-soft); margin-left: -12px; }
+.m-order-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px dashed var(--ck-border); }
+.m-order-total { font-family: var(--ck-font-serif); font-size: 20px; font-weight: 900; color: var(--ck-brand-deep); }
+.m-order-track { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--ck-brand); }
+
+/* =========================================
+   ORDER STATUS TIMELINE
+   ========================================= */
+.mobile-track-header { padding: 24px 20px; text-align: center; }
+.mobile-track-title { font-family: var(--ck-font-serif); font-size: 32px; font-weight: 900; margin-bottom: 4px; }
+.mobile-track-sub { color: var(--ck-ink-muted); font-size: 14px; }
+.mobile-track-timeline { padding: 0 24px; margin-bottom: 32px; }
+.mobile-track-step { display: flex; gap: 16px; min-height: 80px; }
+.mobile-track-icon-wrap { display: flex; flex-direction: column; align-items: center; }
+.mobile-track-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--ck-cream-warm); color: var(--ck-ink-muted); display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.3s ease; }
+.mobile-track-step.reached .mobile-track-icon { background: var(--ck-brand-deep); color: white; box-shadow: 0 4px 12px rgba(15, 46, 74, 0.2); }
+.mobile-track-step.active .mobile-track-icon { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(30, 95, 156, 0.15); }
+.mobile-track-line { width: 2px; flex: 1; background: var(--ck-border-strong); margin: 4px 0; }
+.mobile-track-step.reached .mobile-track-line { background: var(--ck-brand-deep); }
+.mobile-track-text { padding-top: 10px; padding-bottom: 24px; }
+.mobile-track-label { font-family: var(--ck-font-serif); font-size: 18px; font-weight: 900; color: var(--ck-ink-muted); }
+.mobile-track-step.reached .mobile-track-label { color: var(--ck-ink); }
+.mobile-track-sub-label { font-size: 13px; color: var(--ck-ink-muted); margin-top: 2px; }
+.mobile-track-step.active .mobile-track-sub-label { color: var(--ck-brand); font-weight: 700; }
+.mobile-track-card { margin: 0 20px 24px; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
+.mobile-track-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--ck-border); font-size: 14px; font-weight: 600; }
+.mobile-track-row:last-child { border-bottom: none; padding-bottom: 0; }
+.mobile-track-row svg { color: var(--ck-brand-deep); }
+.mobile-track-items { margin: 0 20px; background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
+.mobile-track-items h3 { font-family: var(--ck-font-serif); font-size: 18px; margin-bottom: 16px; }
+.mobile-track-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.mobile-track-item-img { width: 40px; height: 40px; background: var(--ck-cream-warm); border-radius: 8px; padding: 4px; }
+.mobile-track-item-name { flex: 1; font-weight: 700; font-size: 14px; }
+.mobile-track-item-qty { font-weight: 800; color: var(--ck-brand-deep); }
+
+/* =========================================
+   MOBILE PROFILE & LOYALTY
+   ========================================= */
+.mobile-profile-view { padding: 24px 20px 100px 20px; background: var(--ck-bg); }
+.m-profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+.m-profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--ck-cream-warm); display: flex; align-items: center; justify-content: center; border: 2px solid var(--ck-border); }
+.m-profile-info h2 { font-family: var(--ck-font-serif); font-size: 24px; font-weight: 900; color: var(--ck-ink); margin: 0 0 4px; }
+.m-profile-info p { font-size: 14px; color: var(--ck-ink-muted); margin: 0; }
+.m-profile-section-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ck-ink-soft); margin-bottom: 12px; margin-top: 32px; }
+.m-profile-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.pref-row { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--ck-border); }
+.pref-row:last-child { border-bottom: none; }
+.pref-row-icon { width: 32px; height: 32px; border-radius: var(--ck-r-sm); background: var(--ck-cream-warm); color: var(--ck-brand-deep); display: flex; align-items: center; justify-content: center; }
+.pref-row-text { flex: 1; }
+.pref-row-label { font-weight: 800; font-size: 14px; }
+.pref-row-sub { font-size: 12px; color: var(--ck-ink-muted); margin-top: 2px; }
+.pref-toggle { width: 44px; height: 26px; border-radius: 999px; background: rgba(0,0,0,0.1); border: none; position: relative; transition: 0.2s; }
+.pref-toggle.on { background: var(--ck-brand-deep); }
+.pref-toggle-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; transition: 0.2s; }
+.pref-toggle.on .pref-toggle-knob { transform: translateX(18px); }
+
+.m-loyalty-card { position: relative; background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%); border-radius: 24px; padding: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1); margin-bottom: 24px; }
+.m-loyalty-card.unlocked { background: linear-gradient(145deg, var(--ck-warm) 0%, #b87c10 100%); box-shadow: 0 20px 40px rgba(212, 149, 43, 0.3), inset 0 1px 0 rgba(255,255,255,0.3); }
+.m-loyalty-content { position: relative; z-index: 2; color: white; }
+.m-loyalty-card.unlocked .m-loyalty-content { color: var(--ck-charcoal); }
+.m-loyalty-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.m-loyalty-title { font-family: var(--ck-font-serif); font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+.m-loyalty-sub { font-size: 13px; opacity: 0.7; }
+.m-loyalty-bar-wrap { height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; margin-bottom: 20px; overflow: hidden; }
+.m-loyalty-bar { height: 100%; background: var(--ck-warm); border-radius: 99px; }
+.m-loyalty-card.unlocked .m-loyalty-bar { background: #fff; }
+.m-loyalty-stamps { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.m-stamp { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.2); }
+.m-stamp.filled { background: var(--ck-warm); border: 2px solid var(--ck-warm); color: var(--ck-charcoal); box-shadow: 0 0 15px rgba(212, 149, 43, 0.4); }
+.m-loyalty-card.unlocked .m-stamp.filled { background: var(--ck-charcoal); border-color: var(--ck-charcoal); color: var(--ck-warm); }
+.m-loyalty-btn { width: 100%; background: #fff; color: var(--ck-charcoal); border: none; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.m-loyalty-card.unlocked .m-loyalty-btn { background: var(--ck-charcoal); color: white; }

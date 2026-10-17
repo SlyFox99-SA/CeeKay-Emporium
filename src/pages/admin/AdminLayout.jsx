@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Utensils, Receipt, Store, Users, LogOut, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -20,7 +20,7 @@ export default function AdminLayout() {
     if (!loading && !user) navigate('/admin/login', { replace: true });
   }, [loading, user, navigate]);
 
-  if (loading) return <div className="admin-loading">Loading…</div>;
+  if (loading) return <div className="admin-loading">Loading...</div>;
   if (!user) return null;
 
   if (!isAdmin) {

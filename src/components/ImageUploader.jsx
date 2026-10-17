@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { UploadCloud, Image as ImageIcon, X, RefreshCw, Loader2 } from 'lucide-react';
 import { uploadImage, deleteImageByUrl, validateImage } from '../lib/storage';
 
@@ -96,13 +96,13 @@ export default function ImageUploader({ value, onChange, folder = 'menu' }) {
           {busy ? (
             <>
               <Loader2 size={28} className="image-uploader-spin" />
-              <div className="image-uploader-title">Uploading…</div>
+              <div className="image-uploader-title">UpLoading...</div>
             </>
           ) : (
             <>
               <UploadCloud size={28} />
               <div className="image-uploader-title">Drop an image here</div>
-              <div className="image-uploader-sub">or <span className="image-uploader-link">browse</span> · JPG, PNG, WEBP, SVG · max 3 MB</div>
+              <div className="image-uploader-sub">or <span className="image-uploader-link">browse</span> Â· JPG, PNG, WEBP, SVG Â· max 3 MB</div>
             </>
           )}
         </div>

@@ -1,5 +1,7 @@
-﻿import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { CartProvider } from './context/CartContext';
@@ -21,11 +23,12 @@ import AdminMenu from './pages/admin/AdminMenu';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
+import SplashScreen from './components/SplashScreen';
 
 function AppRoutes() {
   const isMobile = useIsMobile();
+  useDynamicManifest();
 
-  // Unlock audio on the very first tap anywhere in the app
   useEffect(() => {
     const unlock = () => {
       primeAudio();
@@ -52,7 +55,6 @@ function AppRoutes() {
       </Route>
 
       <Route path="/kitchen" element={<Kitchen />} />
-      
       <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
       
       <Route
@@ -71,10 +73,22 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <AuthProvider>
       <PreferencesProvider>
         <AppRoutes />
+        <AnimatePresence>
+          {showSplash && <SplashScreen key="splash" />}
+        </AnimatePresence>
       </PreferencesProvider>
     </AuthProvider>
   );

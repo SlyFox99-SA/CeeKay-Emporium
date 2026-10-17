@@ -26,18 +26,20 @@ export function useDynamicManifest() {
       description = 'Live kitchen order dashboard.';
     }
 
+    // Ensure the URLs are absolute to stop browser warnings
+    const base = window.location.origin;
     const manifest = {
       name: appName,
       short_name: shortName,
       description: description,
-      start_url: startUrl,
+      start_url: base + startUrl,
       display: 'standalone',
       orientation: 'portrait',
       background_color: '#f5ecd9',
       theme_color: themeColor,
       icons: [
         {
-          src: '/icon.svg', // Make sure you have a generic icon for all
+          src: base + '/icon.svg',
           sizes: 'any',
           type: 'image/svg+xml',
           purpose: 'any maskable'
@@ -56,12 +58,9 @@ export function useDynamicManifest() {
       document.head.appendChild(link);
     }
     
-    // Save the old URL to revoke it later
     const oldHref = link.href;
-    
     link.href = manifestURL;
     
-    // Update theme color meta tag
     let metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) metaTheme.setAttribute('content', themeColor);
 
