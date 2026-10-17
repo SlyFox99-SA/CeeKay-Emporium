@@ -4882,3 +4882,675 @@ body:has(.mobile-app-shell) {
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+
+/* ============================================================
+   NATIVE MOBILE CHECKOUT & EDIT MODALS
+   ============================================================ */
+@media (max-width: 767px) {
+  /* 1. Make the item modal take up the whole screen */
+  .item-modal {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    background: var(--ck-bg) !important;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .item-modal-hero {
+    margin-top: 20px;
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .item-modal-photo {
+    width: 100%;
+    height: 160px;
+    border-radius: 20px;
+  }
+  .item-modal-photo img {
+    padding: 20px;
+  }
+  .item-modal-name { font-size: 28px; }
+  
+  /* Native Inputs for Item Note */
+  .item-modal-section { padding: 0 20px; }
+  .item-modal-note {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 16px !important;
+    border-radius: 16px !important;
+    min-height: 80px !important;
+  }
+
+  /* Sticky Native Footer */
+  .item-modal-foot {
+    margin-top: auto;
+    background: var(--ck-paper);
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) 20px;
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 12px;
+  }
+  .item-modal-qty {
+    background: var(--ck-cream-warm);
+    border-radius: 16px;
+    padding: 6px;
+  }
+  .qty-btn-lg { width: 40px; height: 40px; border-radius: 12px; }
+  .qty-val-lg { font-size: 18px; }
+  
+  .item-modal-add {
+    height: 56px;
+    border-radius: 16px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 2. Cart Checkout Full Screen Form */
+  .cart-side {
+    width: 100vw !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+  
+  .cart-items {
+    padding: 20px !important;
+  }
+  
+  /* Native Inputs for Customer Details */
+  .field { margin-bottom: 20px; }
+  .field-label {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 16px 18px !important;
+    border-radius: 14px !important;
+    min-height: 56px !important;
+    background: var(--ck-paper) !important;
+  }
+
+  /* Sticky Cart Footer */
+  .cart-foot {
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom)) 20px !important;
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    background: var(--ck-bg) !important;
+  }
+  
+  /* Huge Native CTA Buttons */
+  .order-btn {
+    height: 56px;
+    border-radius: 16px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .order-btn.whatsapp {
+    background: #25D366; /* Official WhatsApp Green */
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+  }
+  .order-btn.primary {
+    background: var(--ck-brand-deep);
+  }
+
+  /* Price Breakdown */
+  .price-breakdown {
+    padding: 16px !important;
+    border-radius: 16px !important;
+    background: var(--ck-paper) !important;
+  }
+  
+  /* 3. Native Success Screen */
+  .order-success {
+    padding: 40px 20px calc(40px + env(safe-area-inset-bottom)) 20px;
+  }
+  .success-ticket {
+    max-width: 100%;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .success-btn-primary {
+    height: 56px;
+    border-radius: 16px;
+    font-size: 16px;
+  }
+}
+
+/* ============================================================
+   NATIVE MOBILE MODALS & CHECKOUT FIX
+   ============================================================ */
+@media (max-width: 767px) {
+  /* --- FIX ITEM MODAL --- */
+  .item-modal {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    background: var(--ck-bg) !important;
+  }
+  
+  .item-modal-header {
+    position: sticky;
+    top: 0;
+    padding: 16px 20px calc(16px + env(safe-area-inset-top)) 20px;
+    background: var(--ck-bg);
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end; /* Pushes X to the right */
+  }
+  .item-modal-close {
+    position: relative;
+    top: auto; right: auto; /* Override desktop absolute */
+    width: 40px;
+    height: 40px;
+    background: var(--ck-cream-warm);
+    color: var(--ck-ink);
+  }
+
+  .item-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+  }
+  
+  /* Make image massive at the top */
+  .item-modal-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .item-modal-photo {
+    width: 100%;
+    height: 200px;
+    border-radius: 20px;
+  }
+  .item-modal-photo img { padding: 24px; }
+  .item-modal-name { font-size: 26px; }
+  
+  /* Fix the bottom sticky footer */
+  .item-modal-foot {
+    background: var(--ck-paper);
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) 20px;
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .item-modal-add {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--ck-action);
+    padding: 0;
+  }
+  .item-modal-add span:first-child {
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .item-modal-add-price {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+
+  /* --- FIX CHECKOUT CART --- */
+  .cart-side {
+    height: 100dvh !important;
+    background: var(--ck-bg) !important;
+  }
+  
+  .cart-head {
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
+    padding-bottom: 16px !important;
+    background: var(--ck-brand-deep) !important;
+    flex-shrink: 0;
+  }
+  
+  .cart-store-banner {
+    flex-shrink: 0;
+    padding: 12px 20px;
+    background: var(--ck-cream-warm);
+    font-size: 13px;
+    border-bottom: 1px solid var(--ck-border);
+  }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px !important;
+  }
+
+  .details-intro { margin-top: 10px; margin-bottom: 24px; }
+  
+  /* Make Input Fields look Native */
+  .field {
+    margin-bottom: 20px;
+  }
+  .field-label {
+    font-size: 11px;
+    margin-bottom: 8px;
+    color: var(--ck-ink-muted);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px !important;
+    padding: 16px 18px !important;
+    border-radius: 14px !important;
+    min-height: 56px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--ck-border-strong) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02) !important;
+  }
+
+  /* Sticky Checkout Footer */
+  .cart-foot {
+    flex-shrink: 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom)) 20px !important;
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    background: var(--ck-bg) !important;
+  }
+  
+  .price-breakdown {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .order-btn {
+    height: 56px;
+    border-radius: 16px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .order-btn.whatsapp {
+    background: #25D366 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+  }
+  .order-btn.primary {
+    background: var(--ck-brand-deep);
+    color: white;
+  }
+}
+
+/* ============================================================
+   NATIVE SPA FEEL & ENCODING FIXES
+   ============================================================ */
+@media (max-width: 767px) {
+  /* 1. Fix the text encoding bugs by forcing font rendering */
+  .cart-close, .qty-btn, .qty-btn-lg, .c-remove {
+    font-family: system-ui, -apple-system, sans-serif; 
+  }
+
+  /* 2. SPA Layout Engine (Grid Stacking) */
+  .cart-side {
+    display: grid !important;
+    grid-template-rows: auto auto 1fr auto; /* Head, Banner, Content, Footer */
+    height: 100dvh !important;
+    overflow: hidden;
+    background: var(--ck-bg) !important;
+  }
+
+  /* Force the head and banner to stay in their rows */
+  .cart-head {
+    grid-row: 1;
+    padding-top: calc(16px + env(safe-area-inset-top)) !important;
+    padding-bottom: 16px !important;
+  }
+  .cart-store-banner {
+    grid-row: 2;
+    margin: 0;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--ck-border);
+    background: var(--ck-cream-warm);
+    z-index: 10;
+  }
+
+  /* The middle section scrolls independently */
+  .cart-items {
+    grid-row: 3;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 20px 0 20px !important;
+    position: relative;
+  }
+
+  /* The footer stays pinned to the bottom */
+  .cart-foot {
+    grid-row: 4;
+    position: relative;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) 20px !important;
+    background: var(--ck-bg) !important;
+    border-top: 1px solid var(--ck-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    z-index: 20;
+  }
+
+  /* 3. Fix the checkout overlap and inputs */
+  .cart-back {
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ck-brand);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .details-intro { margin-bottom: 20px; }
+
+  /* Native Form Groupings */
+  .mobile-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .field {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .field-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--ck-ink-soft);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px !important;
+    padding: 16px 18px !important;
+    border-radius: 16px !important;
+    min-height: 56px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--ck-border-strong) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    transition: all 0.2s ease;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: var(--ck-brand) !important;
+    box-shadow: 0 0 0 4px rgba(30, 95, 156, 0.12) !important;
+  }
+
+  /* Native Price Breakdown */
+  .price-breakdown {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    margin-bottom: 16px !important;
+  }
+  .price-row {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .price-row-total {
+    border-top: 1px dashed var(--ck-border-strong);
+    padding-top: 12px;
+    margin-top: 12px;
+    font-size: 16px;
+  }
+
+  /* Massive Native Buttons */
+  .order-btn {
+    height: 56px;
+    border-radius: 16px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .order-btn.whatsapp {
+    background: #25D366 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+    border: none;
+  }
+  .order-btn.email {
+    background: transparent;
+    color: var(--ck-brand-deep);
+    border: 2px solid var(--ck-border-strong);
+  }
+  .order-btn.primary {
+    background: var(--ck-brand-deep);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 14px rgba(15, 46, 74, 0.2);
+  }
+}
+
+/* ============================================================
+   ABSOLUTE NATIVE MOBILE OVERRIDE (FIXES ALL LAYOUT BUGS)
+   ============================================================ */
+@media (max-width: 767px) {
+  /* 1. Force the Cart to be a True Full-Screen Flex App */
+  .cart-side {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    background: var(--ck-bg) !important;
+    overflow: hidden !important;
+  }
+
+  /* Header stays at the top */
+  .cart-head {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: calc(16px + env(safe-area-inset-top)) 20px 16px !important;
+    background: var(--ck-brand-deep) !important;
+    z-index: 100 !important;
+  }
+  .cart-head h3 {
+    margin: 0 !important;
+    font-size: 20px !important;
+    color: #fff !important;
+  }
+  .cart-close {
+    background: rgba(255,255,255,0.15) !important;
+    color: #fff !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+  }
+
+  /* Store banner */
+  .cart-store-banner {
+    flex-shrink: 0 !important;
+    padding: 12px 20px !important;
+    background: var(--ck-cream-warm) !important;
+    border-bottom: 1px solid var(--ck-border) !important;
+    font-size: 13px !important;
+  }
+
+  /* Middle content scrolls */
+  .cart-items {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 20px !important;
+  }
+
+  /* Bottom footer stays locked */
+  .cart-foot {
+    flex-shrink: 0 !important;
+    background: var(--ck-paper) !important;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid var(--ck-border) !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05) !important;
+    z-index: 100 !important;
+  }
+
+  /* 2. Fix the Checkout Form */
+  .mobile-form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+  .field {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .field-label {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: var(--ck-ink-soft) !important;
+    margin-bottom: 6px !important;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    box-sizing: border-box !important; /* Stops it from bleeding off the screen */
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px !important;
+    font-size: 16px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--ck-border-strong) !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
+  }
+  .field textarea {
+    min-height: 80px !important;
+    resize: none !important;
+  }
+
+  /* 3. Fix the Item Modal to be a True Flex App */
+  .item-modal {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    background: var(--ck-bg) !important;
+    overflow: hidden !important;
+  }
+
+  /* Modal Header */
+  .item-modal-header {
+    flex-shrink: 0 !important;
+    padding: calc(16px + env(safe-area-inset-top)) 20px 16px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+  }
+  .item-modal-close {
+    background: var(--ck-cream-warm) !important;
+    color: var(--ck-ink) !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+  }
+
+  /* Modal Scroll Area */
+  .item-modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 0 20px 20px !important;
+  }
+
+  /* Modal Footer */
+  .item-modal-foot {
+    flex-shrink: 0 !important;
+    background: var(--ck-paper) !important;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid var(--ck-border) !important;
+    display: flex !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05) !important;
+    z-index: 100 !important;
+  }
+
+  /* Fix the Add to Order Button Wrapping */
+  .item-modal-add {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--ck-action) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    height: 56px !important;
+    padding: 0 !important;
+    box-shadow: 0 4px 12px rgba(139, 30, 18, 0.25) !important;
+  }
+  .item-modal-add span:first-child {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    margin-bottom: 2px !important;
+  }
+  .item-modal-add-price {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    opacity: 0.9 !important;
+    line-height: 1 !important;
+  }
+
+  /* Fix Qty Stepper */
+  .item-modal-qty {
+    flex-shrink: 0 !important;
+    background: var(--ck-cream-warm) !important;
+    border-radius: 12px !important;
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .qty-btn-lg {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+  }
+  .qty-val-lg {
+    width: 32px !important;
+    text-align: center !important;
+    font-size: 18px !important;
+  }
+}
