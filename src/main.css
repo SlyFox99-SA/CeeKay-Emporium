@@ -4759,3 +4759,126 @@ body:has(.mobile-app-shell) {
   margin: 0 20px 16px;
   border-radius: 12px;
 }
+
+/* ============================================================
+   ADMIN ORDER DETAILS & POLISH
+   ============================================================ */
+.admin-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s var(--ck-ease);
+}
+.admin-row-clickable:hover {
+  background: var(--ck-cream-warm) !important;
+}
+
+.admin-order-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: var(--ck-cream-warm);
+  padding: 16px;
+  border-radius: var(--ck-r-md);
+}
+.admin-order-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ck-brand-deep);
+}
+.admin-order-info-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ck-ink-muted);
+  margin-bottom: 2px;
+}
+.admin-order-info-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ck-ink);
+}
+
+.admin-order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.admin-order-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: var(--ck-bg-raised);
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-r-sm);
+}
+.admin-order-item-img {
+  width: 48px;
+  height: 48px;
+  background: var(--ck-cream-warm);
+  border-radius: var(--ck-r-sm);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.admin-order-item-img img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.admin-order-item-details { flex: 1; }
+.admin-order-item-name {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ck-ink);
+}
+.admin-order-item-mod {
+  font-size: 12px;
+  color: var(--ck-action);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.admin-order-item-price {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ck-brand-deep);
+}
+
+.admin-order-note-box {
+  padding: 14px 16px;
+  background: rgba(212, 149, 43, 0.1);
+  border-left: 3px solid var(--ck-warm);
+  border-radius: var(--ck-r-sm);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ck-ink);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   KITCHEN EMPTY STATE
+   ============================================================ */
+.kitchen-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  opacity: 0.4;
+}
+.kitchen-empty-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ck-kitchen-ink);
+  margin-bottom: 12px;
+}
+.kitchen-empty-text {
+  font-family: var(--ck-font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ck-kitchen-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}

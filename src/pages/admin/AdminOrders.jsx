@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Receipt, Search, CheckCircle2, Play, XCircle, Clock } from 'lucide-react';
 import { getOrders, updateOrderStatus, subscribeToOrders, STATUS_LABELS } from '../../services/orderService';
+import AdminOrderModal from './AdminOrderModal';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const load = async () => {
     const data = await getOrders();
@@ -20,7 +22,8 @@ export default function AdminOrders() {
     return unsub;
   }, []);
 
-  const advance = async (order, nextStatus) => {
+  const advance = async (e, order, nextStatus) => {
+    e.stopPropagation();
     await updateOrderStatus(order.id, nextStatus);
   };
 
@@ -85,7 +88,11 @@ export default function AdminOrders() {
             <div>Actions</div>
           </div>
           {filtered.map((order) => (
-            <div key={order.id} className="admin-table-row">
+            <div 
+              key={order.id} 
+              className="admin-table-row admin-row-clickable"
+              onClick={() => setSelectedOrder(order)}
+            >
               <div>
                 <div className="admin-order-id">#{order.id}</div>
                 <div className="admin-order-time">
@@ -104,22 +111,22 @@ export default function AdminOrders() {
               </div>
               <div className="admin-table-actions">
                 {order.status === 'placed' && (
-                  <button className="admin-btn-advance" onClick={() => advance(order, 'preparing')}>
+                  <button className="admin-btn-advance" onClick={(e) => advance(e, order, 'preparing')}>
                     <Play size={13} /> Start
                   </button>
                 )}
                 {order.status === 'preparing' && (
-                  <button className="admin-btn-advance" onClick={() => advance(order, 'ready')}>
+                  <button className="admin-btn-advance" onClick={(e) => advance(e, order, 'ready')}>
                     <CheckCircle2 size={13} /> Ready
                   </button>
                 )}
                 {order.status === 'ready' && (
-                  <button className="admin-btn-advance success" onClick={() => advance(order, 'completed')}>
+                  <button className="admin-btn-advance success" onClick={(e) => advance(e, order, 'completed')}>
                     <CheckCircle2 size={13} /> Collect
                   </button>
                 )}
                 {(order.status === 'placed' || order.status === 'preparing') && (
-                  <button className="admin-btn-cancel" onClick={() => advance(order, 'cancelled')} title="Cancel">
+                  <button className="admin-btn-cancel" onClick={(e) => advance(e, order, 'cancelled')} title="Cancel">
                     <XCircle size={14} />
                   </button>
                 )}
@@ -128,6 +135,8 @@ export default function AdminOrders() {
           ))}
         </div>
       )}
+
+      <AdminOrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
     </div>
   );
 }

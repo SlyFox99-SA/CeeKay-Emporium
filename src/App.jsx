@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+﻿import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { CartProvider } from './context/CartContext';
@@ -17,6 +17,7 @@ import AdminMenu from './pages/admin/AdminMenu';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
   const isMobile = useIsMobile();
@@ -32,7 +33,7 @@ function AppRoutes() {
         <Route path="staff" element={<AdminStaff />} />
       </Route>
 
-      <Route path="/kitchen" element={<Kitchen />} />
+      <Route path="/kitchen" element={<ProtectedRoute requireAdmin={false}><Kitchen /></ProtectedRoute>} />
       
       {/* Route to the correct Order Status based on device */}
       <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />

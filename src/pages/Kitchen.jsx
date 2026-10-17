@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ChefHat, ArrowLeft, RefreshCw, Clock, CheckCircle2, Play, X, Phone, Bell, BellOff, Volume2 } from 'lucide-react';
 import {
@@ -124,7 +124,7 @@ export default function Kitchen() {
 
       {enabled && permission === 'denied' && (
         <div className="kitchen-alert-banner">
-          Browser notifications are blocked. The chime still works — enable notifications in your browser settings for pop-ups.
+          Browser notifications are blocked. The chime still works â€” enable notifications in your browser settings for pop-ups.
         </div>
       )}
 
@@ -138,7 +138,10 @@ export default function Kitchen() {
 
             <div className="kitchen-column-body">
               {grouped[col].length === 0 ? (
-                <div className="kitchen-empty">No orders</div>
+                <div className="kitchen-empty-state">
+                   <div className="kitchen-empty-icon"><ChefHat size={32} /></div>
+                   <div className="kitchen-empty-text">Waiting for orders</div>
+                 </div>
               ) : grouped[col].map(order => (
                 <article key={order.id} className="kitchen-card">
                   <div className="kitchen-card-head">
@@ -165,7 +168,7 @@ export default function Kitchen() {
                           </a>
                         )}
                         {order.customer.pickupTime && (
-                          <span className="kitchen-customer-time">· {order.customer.pickupTime}</span>
+                          <span className="kitchen-customer-time">Â· {order.customer.pickupTime}</span>
                         )}
                       </div>
                     </div>
@@ -177,7 +180,7 @@ export default function Kitchen() {
                         <span className="kitchen-item-thumb">
                           <ItemImage src={it.image} alt={it.name} />
                         </span>
-                        <span className="kitchen-item-qty">{it.qty}×</span>
+                        <span className="kitchen-item-qty">{it.qty}Ã—</span>
                         <span className="kitchen-item-name">{it.name}</span>
                       </li>
                     ))}
