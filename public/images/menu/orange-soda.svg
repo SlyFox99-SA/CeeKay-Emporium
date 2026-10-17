@@ -1,0 +1,14 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <ellipse cx="200" cy="360" rx="90" ry="10" fill="#2b1810" opacity="0.1"/>
+  <path d="M170 80 L170 130 Q140 145 140 180 L140 330 Q140 355 165 355 L235 355 Q260 355 260 330 L260 180 Q260 145 230 130 L230 80 Z" fill="#e67e22" stroke="#a85d12" stroke-width="3"/>
+  <rect x="168" y="60" width="64" height="26" rx="6" fill="#8b3a1e" stroke="#5c2412" stroke-width="2"/>
+  <rect x="140" y="180" width="120" height="90" fill="#f5a623"/>
+  <text x="200" y="225" font-family="Playfair Display, serif" font-size="22" font-weight="900" fill="#fff" text-anchor="middle">SODA</text>
+  <text x="200" y="248" font-family="Inter, sans-serif" font-size="11" font-weight="700" letter-spacing="2" fill="#fff" text-anchor="middle" opacity="0.9">ORANGE</text>
+  <circle cx="200" cy="290" r="22" fill="#fff" opacity="0.35"/>
+  <g transform="translate(200 290)">
+    <circle r="14" fill="#f5a623"/>
+    <path d="M0 -14 L0 14 M-14 0 L14 0 M-10 -10 L10 10 M-10 10 L10 -10" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <path d="M175 90 L175 130" stroke="#fff" stroke-width="2" opacity="0.3"/>
+</svg>

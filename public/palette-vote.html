@@ -1,0 +1,475 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CeeKay Emporium — Palette Vote</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f5f2ed;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;line-height:1.5;padding:60px 24px 120px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  .kicker{font-size:11px;font-weight:800;letter-spacing:0.28em;text-transform:uppercase;color:#999;margin-bottom:14px}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:56px;letter-spacing:-0.02em;line-height:1.02;margin-bottom:14px}
+  .lede{font-family:'Fraunces',serif;font-style:italic;font-size:19px;color:#5a4a3f;max-width:720px;margin-bottom:56px}
+
+  .votes-bar{position:sticky;top:0;z-index:100;background:rgba(245,242,237,0.94);backdrop-filter:blur(8px);padding:16px 0;margin-bottom:40px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .votes-bar .label{font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#999}
+  .votes-bar .count{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:20px;color:#1a1a1a}
+  .votes-bar .clear{margin-left:auto;font-size:12px;background:transparent;border:1.5px solid rgba(0,0,0,0.15);padding:8px 14px;border-radius:999px;font-weight:700;cursor:pointer;font-family:inherit}
+
+  .palette{margin-bottom:72px;background:#fff;border-radius:24px;padding:0;overflow:hidden;box-shadow:0 4px 24px rgba(26,26,26,0.06);transition:transform 0.25s ease, box-shadow 0.25s ease}
+  .palette:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(26,26,26,0.10)}
+  .palette.voted{outline:3px solid currentColor;outline-offset:0}
+
+  .palette-head{padding:32px 40px 24px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .palette-num{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:44px;line-height:1;color:#ddd}
+  .palette-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:28px;letter-spacing:-0.01em;line-height:1.1}
+  .palette-sub{font-size:14px;color:#5a4a3f;margin-top:6px;max-width:560px}
+
+  .vote-btn{margin-left:auto;background:#1a1a1a;color:#fff;border:none;padding:12px 22px;border-radius:999px;font-family:inherit;font-weight:800;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:transform 0.15s ease}
+  .vote-btn:hover{transform:scale(1.03)}
+  .vote-btn.voted{background:#2f6f4e}
+
+  .palette-body{padding:36px 40px 40px;display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:start}
+
+  /* Swatches */
+  .swatch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .swatch{border-radius:14px;padding:20px 16px 14px;height:118px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+  .swatch .name{font-size:12px;font-weight:700;letter-spacing:0.02em}
+  .swatch .hex{font-family:'SF Mono',Menlo,monospace;font-size:10px;opacity:0.85;margin-top:2px}
+  .swatch .role{font-size:9px;text-transform:uppercase;letter-spacing:0.14em;opacity:0.75;margin-top:6px}
+  .swatch.light{color:#1a1a1a}
+  .swatch.light .hex{opacity:0.6}
+  .swatch.wide{grid-column:span 2;height:70px;flex-direction:row;align-items:center;justify-content:space-between;padding:16px 20px}
+
+  /* Mockup */
+  .mockup{border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(26,26,26,0.10);font-family:'Inter',sans-serif}
+  .mockup-sign{padding:44px 24px;text-align:center;position:relative}
+  .mockup-sign .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:32px;letter-spacing:-0.02em;line-height:1}
+  .mockup-sign .sub{font-size:10px;font-weight:800;letter-spacing:0.35em;margin-top:10px;text-transform:uppercase}
+  .mockup-sign .tag{font-family:'Fraunces',serif;font-style:italic;font-size:16px;margin-top:14px}
+
+  .mockup-body{padding:20px 20px 24px;display:flex;flex-direction:column;gap:14px}
+  .mockup-card{border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .mockup-card .info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+  .mockup-card .title{font-weight:800;font-size:14px}
+  .mockup-card .desc{font-size:11px;opacity:0.7}
+  .mockup-card .price{font-family:'Bricolage Grotesque',sans-serif;font-weight:900;font-size:20px}
+  .mockup-btn{border:none;padding:10px 16px;border-radius:999px;font-family:inherit;font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer}
+
+  .mockup-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:16px;border-top:1px solid rgba(0,0,0,0.06)}
+
+  /* Verdict */
+  .verdict{margin-top:20px;padding:14px 18px;border-radius:10px;font-size:13px;line-height:1.6;color:#4a3a2a;background:#fff8e6;border-left:3px solid #d4952b}
+  .verdict strong{display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8b1e12;margin-bottom:4px}
+
+  .proscons{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .pc{background:#fafaf7;border-radius:10px;padding:14px 16px}
+  .pc h4{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#999;margin-bottom:8px}
+  .pc ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .pc li{font-size:13px;color:#3a2a1f;display:flex;gap:8px;align-items:flex-start;line-height:1.45}
+  .pc li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px}
+  .pc.pros li::before{background:#2f6f4e}
+  .pc.cons li::before{background:#b8544a}
+
+  @media (max-width:860px){
+    .palette-body{grid-template-columns:1fr;gap:32px;padding:28px 24px 32px}
+    .palette-head{padding:24px 24px 18px}
+    h1{font-size:38px}
+    .proscons{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">CeeKay Emporium · Palette Vote</div>
+  <h1>Four directions.<br>Pick the family favourite.</h1>
+  <p class="lede">Look at each palette in context — the sign, the menu card, the button. Then tap <em>Vote for this one</em>. The one with the most votes becomes the CeeKay brand.</p>
+
+  <div class="votes-bar">
+    <span class="label">Your vote:</span>
+    <span class="count" id="vote-count">— not voted yet —</span>
+    <button class="clear" id="clear-vote">Clear vote</button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PALETTE A — SIGNATURE BLUE (recommended)                      -->
+  <!-- ============================================================ -->
+  <div class="palette" data-palette="A" style="color:#1e5f9c">
+    <div class="palette-head">
+      <div class="palette-num">A</div>
+      <div>
+        <div class="palette-name">Signature Blue</div>
+        <div class="palette-sub">Deep blue anchor with toasted gold warmth and an achaar red trigger. Premium, chain-ready, distinctive from KFC, Steers, and Nando's.</div>
+      </div>
+      <button class="vote-btn" data-vote="A">Vote for this one</button>
+    </div>
+
+    <div class="palette-body">
+      <div>
+        <div class="swatch-grid">
+          <div class="swatch" style="background:#0f2e4a;"><div><div class="name">Blue Deep</div><div class="hex">#0f2e4a</div></div><div class="role">Anchor · Signage</div></div>
+          <div class="swatch" style="background:#1e5f9c;"><div><div class="name">Blue Mid</div><div class="hex">#1e5f9c</div></div><div class="role">Brand · Links</div></div>
+          <div class="swatch" style="background:#2ba8d4;"><div><div class="name">Blue Bright</div><div class="hex">#2ba8d4</div></div><div class="role">Signature · Accent</div></div>
+          <div class="swatch" style="background:#d4952b;"><div><div class="name">Toasted Gold</div><div class="hex">#d4952b</div></div><div class="role">Warmth · Prices</div></div>
+          <div class="swatch" style="background:#8b1e12;"><div><div class="name">Achaar Red</div><div class="hex">#8b1e12</div></div><div class="role">CTA · Heat</div></div>
+          <div class="swatch" style="background:#1a1a1a;"><div><div class="name">Charcoal</div><div class="hex">#1a1a1a</div></div><div class="role">Type · Kitchen</div></div>
+          <div class="swatch light wide" style="background:#f5ecd9;"><div><div class="name">Cream</div><div class="hex">#f5ecd9</div></div><div class="role">Background · Paper</div></div>
+        </div>
+
+        <div class="verdict">
+          <strong>Feels like</strong> A proper food chain that could open in a mall tomorrow. Blue does the trust and premium work; gold and red make people hungry and click "Add to Order".
+        </div>
+
+        <div class="proscons">
+          <div class="pc pros">
+            <h4>Strengths</h4>
+            <ul>
+              <li>Nobody in SA fast food owns blue — instantly different on any high street</li>
+              <li>Blue gradient carries the existing logo colours you already love</li>
+              <li>Works on signage, app icon, packaging, staff uniform</li>
+              <li>Red still drives the buying (Add to Order button)</li>
+            </ul>
+          </div>
+          <div class="pc cons">
+            <h4>Tradeoffs</h4>
+            <ul>
+              <li>Blue suppresses appetite <em>slightly</em> — but only as plate/food colour, not brand</li>
+              <li>Needs the gold + red to feel warm enough — cannot go blue-only</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mockup">
+          <div class="mockup-sign" style="background:linear-gradient(135deg,#0f2e4a,#1e5f9c);color:#fff;">
+            <div class="brand" style="color:#fff;">CeeKay Emporium</div>
+            <div class="sub" style="color:#d4952b;">K O T A &nbsp; · &nbsp; M A D E &nbsp; P R O P E R L Y</div>
+            <div class="tag" style="color:#d4952b;">No shortcuts. No pre-cooking.</div>
+          </div>
+
+          <div class="mockup-body" style="background:#f5ecd9;">
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Bliss</div>
+                <div class="desc" style="color:#5a4a3f;">Chips · Cheese · Achaar · Polony · Vienna</div>
+              </div>
+              <div class="price" style="color:#0f2e4a;">R35</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Chaw</div>
+                <div class="desc" style="color:#5a4a3f;">Fully loaded · The Beast</div>
+              </div>
+              <div class="price" style="color:#0f2e4a;">R40</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+          </div>
+
+          <div class="mockup-actions" style="background:#f5ecd9;">
+            <button class="mockup-btn" style="background:#8b1e12;color:#fff;">+ Add to Order</button>
+            <button class="mockup-btn" style="background:#0f2e4a;color:#fff;">See the Menu</button>
+            <button class="mockup-btn" style="background:#d4952b;color:#1a1a1a;">Order on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PALETTE B — WARM KOTA (classic SA food brand)                 -->
+  <!-- ============================================================ -->
+  <div class="palette" data-palette="B" style="color:#8b1e12">
+    <div class="palette-head">
+      <div class="palette-num">B</div>
+      <div>
+        <div class="palette-name">Warm Kota</div>
+        <div class="palette-sub">Achaar red primary with toasted gold. The classic SA food look — appetising, warm, familiar. Blue becomes a small accent for trust.</div>
+      </div>
+      <button class="vote-btn" data-vote="B">Vote for this one</button>
+    </div>
+
+    <div class="palette-body">
+      <div>
+        <div class="swatch-grid">
+          <div class="swatch" style="background:#8b1e12;"><div><div class="name">Achaar Red</div><div class="hex">#8b1e12</div></div><div class="role">Primary · Appetite</div></div>
+          <div class="swatch" style="background:#c0392b;"><div><div class="name">Red Bright</div><div class="hex">#c0392b</div></div><div class="role">CTA · Heat</div></div>
+          <div class="swatch" style="background:#d4952b;"><div><div class="name">Toasted Gold</div><div class="hex">#d4952b</div></div><div class="role">Prices · Ribbons</div></div>
+          <div class="swatch" style="background:#e8b355;"><div><div class="name">Gold Soft</div><div class="hex">#e8b355</div></div><div class="role">Highlight · Warmth</div></div>
+          <div class="swatch" style="background:#1a1a1a;"><div><div class="name">Charcoal</div><div class="hex">#1a1a1a</div></div><div class="role">Type · Kitchen</div></div>
+          <div class="swatch" style="background:#0f2e4a;"><div><div class="name">Blue Deep</div><div class="hex">#0f2e4a</div></div><div class="role">Accent · Trust</div></div>
+          <div class="swatch light wide" style="background:#f5ecd9;"><div><div class="name">Cream</div><div class="hex">#f5ecd9</div></div><div class="role">Background · Paper</div></div>
+        </div>
+
+        <div class="verdict">
+          <strong>Feels like</strong> The most appetising of the four. Red and gold are the universal food-signal colours — the "eat here" switch in every customer's brain flips instantly.
+        </div>
+
+        <div class="proscons">
+          <div class="pc pros">
+            <h4>Strengths</h4>
+            <ul>
+              <li>Maximum appetite appeal — proven category leader colour</li>
+              <li>Instantly warm, generous, "come in and eat"</li>
+              <li>Feels authentically SA — matches the food's cultural roots</li>
+            </ul>
+          </div>
+          <div class="pc cons">
+            <h4>Tradeoffs</h4>
+            <ul>
+              <li>Looks similar to KFC / Steers / Nando's in a mall lineup</li>
+              <li>Blue becomes decorative — less brand distinction</li>
+              <li>Risk of reading as "another fast food place" instead of premium</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mockup">
+          <div class="mockup-sign" style="background:linear-gradient(135deg,#8b1e12,#c0392b);color:#fff;">
+            <div class="brand" style="color:#fff;">CeeKay Emporium</div>
+            <div class="sub" style="color:#e8b355;">K O T A &nbsp; · &nbsp; M A D E &nbsp; P R O P E R L Y</div>
+            <div class="tag" style="color:#e8b355;">No shortcuts. No pre-cooking.</div>
+          </div>
+
+          <div class="mockup-body" style="background:#f5ecd9;">
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Bliss</div>
+                <div class="desc" style="color:#5a4a3f;">Chips · Cheese · Achaar · Polony · Vienna</div>
+              </div>
+              <div class="price" style="color:#8b1e12;">R35</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Chaw</div>
+                <div class="desc" style="color:#5a4a3f;">Fully loaded · The Beast</div>
+              </div>
+              <div class="price" style="color:#8b1e12;">R40</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+          </div>
+
+          <div class="mockup-actions" style="background:#f5ecd9;">
+            <button class="mockup-btn" style="background:#8b1e12;color:#fff;">+ Add to Order</button>
+            <button class="mockup-btn" style="background:#1a1a1a;color:#fff;">See the Menu</button>
+            <button class="mockup-btn" style="background:#d4952b;color:#1a1a1a;">Order on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PALETTE C — MIDNIGHT EMPORIUM (premium dark)                  -->
+  <!-- ============================================================ -->
+  <div class="palette" data-palette="C" style="color:#d4952b">
+    <div class="palette-head">
+      <div class="palette-num">C</div>
+      <div>
+        <div class="palette-name">Midnight Emporium</div>
+        <div class="palette-sub">Charcoal-dominant with gold trim and blue accents. The most premium of the four. Feels like a high-end food hall or a whisky bar.</div>
+      </div>
+      <button class="vote-btn" data-vote="C">Vote for this one</button>
+    </div>
+
+    <div class="palette-body">
+      <div>
+        <div class="swatch-grid">
+          <div class="swatch" style="background:#1a1a1a;"><div><div class="name">Charcoal</div><div class="hex">#1a1a1a</div></div><div class="role">Primary · Base</div></div>
+          <div class="swatch" style="background:#2a2622;"><div><div class="name">Charcoal Soft</div><div class="hex">#2a2622</div></div><div class="role">Surfaces</div></div>
+          <div class="swatch" style="background:#d4952b;"><div><div class="name">Toasted Gold</div><div class="hex">#d4952b</div></div><div class="role">Accent · Warmth</div></div>
+          <div class="swatch" style="background:#e8b355;"><div><div class="name">Gold Soft</div><div class="hex">#e8b355</div></div><div class="role">Highlight</div></div>
+          <div class="swatch" style="background:#0f2e4a;"><div><div class="name">Blue Deep</div><div class="hex">#0f2e4a</div></div><div class="role">Accent · Secondary</div></div>
+          <div class="swatch" style="background:#8b1e12;"><div><div class="name">Achaar Red</div><div class="hex">#8b1e12</div></div><div class="role">CTA · Heat</div></div>
+          <div class="swatch light wide" style="background:#f5ecd9;"><div><div class="name">Cream</div><div class="hex">#f5ecd9</div></div><div class="role">Paper · Type on dark</div></div>
+        </div>
+
+        <div class="verdict">
+          <strong>Feels like</strong> A premium urban food hall. Confident, mature, expensive. The kind of place where you'd pay R80 for a kota without blinking.
+        </div>
+
+        <div class="proscons">
+          <div class="pc pros">
+            <h4>Strengths</h4>
+            <ul>
+              <li>Most premium of the four — feels like a R80 kota, not a R20 one</li>
+              <li>Signage on a dark background stands out in a bright mall</li>
+              <li>Photography looks dramatically better on charcoal backgrounds</li>
+            </ul>
+          </div>
+          <div class="pc cons">
+            <h4>Tradeoffs</h4>
+            <ul>
+              <li>Too dark for a township store or side-of-road setup — needs premium real estate</li>
+              <li>Less welcoming for walk-in customers looking for a quick snack</li>
+              <li>Charcoal can feel cold without careful photography</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mockup">
+          <div class="mockup-sign" style="background:linear-gradient(135deg,#0f0f0f,#1a1a1a);color:#fff;border-bottom:3px solid #d4952b;">
+            <div class="brand" style="color:#f5ecd9;">CeeKay Emporium</div>
+            <div class="sub" style="color:#d4952b;">K O T A &nbsp; · &nbsp; M A D E &nbsp; P R O P E R L Y</div>
+            <div class="tag" style="color:#d4952b;">No shortcuts. No pre-cooking.</div>
+          </div>
+
+          <div class="mockup-body" style="background:#0f0f0f;">
+            <div class="mockup-card" style="background:#1a1a1a;border:1px solid rgba(212,149,43,0.2);">
+              <div class="info">
+                <div class="title" style="color:#f5ecd9;">Emporium Bliss</div>
+                <div class="desc" style="color:#a8998a;">Chips · Cheese · Achaar · Polony · Vienna</div>
+              </div>
+              <div class="price" style="color:#d4952b;">R35</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+            <div class="mockup-card" style="background:#1a1a1a;border:1px solid rgba(212,149,43,0.2);">
+              <div class="info">
+                <div class="title" style="color:#f5ecd9;">Emporium Chaw</div>
+                <div class="desc" style="color:#a8998a;">Fully loaded · The Beast</div>
+              </div>
+              <div class="price" style="color:#d4952b;">R40</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+          </div>
+
+          <div class="mockup-actions" style="background:#0f0f0f;">
+            <button class="mockup-btn" style="background:#8b1e12;color:#fff;">+ Add to Order</button>
+            <button class="mockup-btn" style="background:#d4952b;color:#1a1a1a;">See the Menu</button>
+            <button class="mockup-btn" style="background:transparent;color:#f5ecd9;border:1.5px solid rgba(245,236,217,0.3);">Order on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PALETTE D — HERITAGE STREET (traditional SA food)              -->
+  <!-- ============================================================ -->
+  <div class="palette" data-palette="D" style="color:#2f6f4e">
+    <div class="palette-head">
+      <div class="palette-num">D</div>
+      <div>
+        <div class="palette-name">Heritage Street</div>
+        <div class="palette-sub">Cream and forest green with achaar red accents. Honest, local, handmade. Feels like a farmers' market or a heritage brand.</div>
+      </div>
+      <button class="vote-btn" data-vote="D">Vote for this one</button>
+    </div>
+
+    <div class="palette-body">
+      <div>
+        <div class="swatch-grid">
+          <div class="swatch" style="background:#2f6f4e;"><div><div class="name">Forest Green</div><div class="hex">#2f6f4e</div></div><div class="role">Primary · Heritage</div></div>
+          <div class="swatch" style="background:#1e4a34;"><div><div class="name">Deep Pine</div><div class="hex">#1e4a34</div></div><div class="role">Signage · Anchor</div></div>
+          <div class="swatch" style="background:#8b1e12;"><div><div class="name">Achaar Red</div><div class="hex">#8b1e12</div></div><div class="role">CTA · Heat</div></div>
+          <div class="swatch" style="background:#d4952b;"><div><div class="name">Toasted Gold</div><div class="hex">#d4952b</div></div><div class="role">Prices · Warmth</div></div>
+          <div class="swatch" style="background:#1a1a1a;"><div><div class="name">Charcoal</div><div class="hex">#1a1a1a</div></div><div class="role">Type · Kitchen</div></div>
+          <div class="swatch" style="background:#0f2e4a;"><div><div class="name">Blue Deep</div><div class="hex">#0f2e4a</div></div><div class="role">Trust · Accent</div></div>
+          <div class="swatch light wide" style="background:#f5ecd9;"><div><div class="name">Cream</div><div class="hex">#f5ecd9</div></div><div class="role">Background · Paper</div></div>
+        </div>
+
+        <div class="verdict">
+          <strong>Feels like</strong> A heritage food brand with roots. Honest, handmade, proudly local. The opposite of "corporate franchise" — which could be your weapon or your limitation.
+        </div>
+
+        <div class="proscons">
+          <div class="pc pros">
+            <h4>Strengths</h4>
+            <ul>
+              <li>Distinctive — no SA fast food brand owns green</li>
+              <li>Feels premium and honest at the same time</li>
+              <li>Strong for a "founded 2021, made properly" story</li>
+            </ul>
+          </div>
+          <div class="pc cons">
+            <h4>Tradeoffs</h4>
+            <ul>
+              <li>Green is not an appetite colour — food feels less urgent</li>
+              <li>Reads more "artisan café" than "kota spot"</li>
+              <li>Harder to make signage feel energetic at a busy mall</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mockup">
+          <div class="mockup-sign" style="background:linear-gradient(135deg,#1e4a34,#2f6f4e);color:#fff;">
+            <div class="brand" style="color:#f5ecd9;">CeeKay Emporium</div>
+            <div class="sub" style="color:#d4952b;">K O T A &nbsp; · &nbsp; M A D E &nbsp; P R O P E R L Y</div>
+            <div class="tag" style="color:#d4952b;">No shortcuts. No pre-cooking.</div>
+          </div>
+
+          <div class="mockup-body" style="background:#f5ecd9;">
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Bliss</div>
+                <div class="desc" style="color:#5a4a3f;">Chips · Cheese · Achaar · Polony · Vienna</div>
+              </div>
+              <div class="price" style="color:#2f6f4e;">R35</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+            <div class="mockup-card" style="background:#fff;">
+              <div class="info">
+                <div class="title" style="color:#1a1a1a;">Emporium Chaw</div>
+                <div class="desc" style="color:#5a4a3f;">Fully loaded · The Beast</div>
+              </div>
+              <div class="price" style="color:#2f6f4e;">R40</div>
+              <button class="mockup-btn" style="background:#8b1e12;color:#fff;">Add</button>
+            </div>
+          </div>
+
+          <div class="mockup-actions" style="background:#f5ecd9;">
+            <button class="mockup-btn" style="background:#8b1e12;color:#fff;">+ Add to Order</button>
+            <button class="mockup-btn" style="background:#2f6f4e;color:#fff;">See the Menu</button>
+            <button class="mockup-btn" style="background:#d4952b;color:#1a1a1a;">Order on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const voteNames = { A: "Signature Blue", B: "Warm Kota", C: "Midnight Emporium", D: "Heritage Street" };
+  const countEl = document.getElementById('vote-count');
+  const clearBtn = document.getElementById('clear-vote');
+
+  function applyVote(id) {
+    document.querySelectorAll('.palette').forEach(p => p.classList.toggle('voted', p.dataset.palette === id));
+    document.querySelectorAll('.vote-btn').forEach(b => {
+      b.classList.toggle('voted', b.dataset.vote === id);
+      if (b.dataset.vote === id) b.textContent = '✓ Voted';
+      else b.textContent = 'Vote for this one';
+    });
+    countEl.textContent = id ? voteNames[id] : "— not voted yet —";
+  }
+
+  document.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.vote;
+      localStorage.setItem('ck-vote', id);
+      applyVote(id);
+    });
+  });
+
+  clearBtn.addEventListener('click', () => {
+    localStorage.removeItem('ck-vote');
+    applyVote(null);
+  });
+
+  const saved = localStorage.getItem('ck-vote');
+  if (saved) applyVote(saved);
+</script>
+</body>
+</html>

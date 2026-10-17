@@ -1,0 +1,20 @@
+﻿{
+  "name": "CeeKay Emporium",
+  "short_name": "CeeKay",
+  "description": "Kota, done properly. Order from Benoni's kota spot.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5ecd9",
+  "theme_color": "#0f2e4a",
+  "categories": ["food", "shopping"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

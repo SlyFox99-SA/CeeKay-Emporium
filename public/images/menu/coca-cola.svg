@@ -1,0 +1,11 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <ellipse cx="200" cy="360" rx="90" ry="10" fill="#2b1810" opacity="0.1"/>
+  <path d="M140 70 Q140 60 150 60 L250 60 Q260 60 260 70 L260 340 Q260 355 245 355 L155 355 Q140 355 140 340 Z" fill="#b81414" stroke="#6b0a0a" stroke-width="3"/>
+  <ellipse cx="200" cy="70" rx="60" ry="12" fill="#d4d4d4" stroke="#8a8a8a" stroke-width="2"/>
+  <ellipse cx="200" cy="70" rx="52" ry="8" fill="#a8a8a8"/>
+  <ellipse cx="200" cy="355" rx="60" ry="10" fill="#8a0f0f"/>
+  <path d="M140 150 Q200 130 260 150 L260 265 Q200 285 140 265 Z" fill="#fff"/>
+  <text x="200" y="205" font-family="Playfair Display, serif" font-size="34" font-weight="900" font-style="italic" fill="#b81414" text-anchor="middle">Cola</text>
+  <text x="200" y="232" font-family="Inter, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#b81414" text-anchor="middle">CLASSIC</text>
+  <path d="M150 90 L150 340" stroke="#fff" stroke-width="3" opacity="0.15"/>
+</svg>

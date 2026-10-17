@@ -1,0 +1,212 @@
+﻿/* ============================================================
+   CeeKay Emporium — Motion System
+   src/animations.css
+   ------------------------------------------------------------
+   Every animation in the app reads from the --ck-dur / --ck-ease
+   tokens in brand.css. Change the timing there, everything follows.
+   ============================================================ */
+
+/* ── HERO ENTRANCE CHOREOGRAPHY ── */
+@keyframes ck-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-stamp,
+.hero-title,
+.hero-tagline,
+.hero-actions {
+  opacity: 0;
+  animation: ck-fade-up 700ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+.hero-stamp  { animation-delay: 60ms; }
+.hero-title  { animation-delay: 180ms; }
+.hero-tagline{ animation-delay: 340ms; }
+.hero-actions{ animation-delay: 480ms; }
+
+/* Ticker keeps sliding in from the top */
+@keyframes ticker-in {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+.ticker {
+  animation: ticker-in 600ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+/* ── SCROLL REVEALS ── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    transform 700ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  transition-delay: var(--delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Section heading underline sweep */
+.menu-heading h2 {
+  position: relative;
+  display: inline-block;
+}
+.menu-heading h2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--ck-brand-gradient);
+  transition: width 900ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  transition-delay: 250ms;
+}
+.menu-heading.is-visible h2::after {
+  width: 70px;
+}
+
+/* ── BUTTON TACTILITY ── */
+.add-btn,
+.drink-add,
+.order-btn,
+.hero-cta,
+.cart-btn,
+.qty-btn,
+.store-pill,
+.cart-close,
+.c-remove,
+.kitchen-btn,
+.kitchen-icon-btn {
+  transition:
+    transform 120ms cubic-bezier(0.3, 1.4, 0.5, 1),
+    background 180ms var(--ck-ease),
+    color 180ms var(--ck-ease),
+    border-color 180ms var(--ck-ease),
+    box-shadow 180ms var(--ck-ease);
+}
+.add-btn:active,
+.drink-add:active,
+.order-btn:active,
+.hero-cta:active,
+.cart-btn:active,
+.qty-btn:active,
+.store-pill:active,
+.kitchen-btn:active,
+.kitchen-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* ── CART FLY-IN ── */
+.fly-item {
+  position: fixed;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ck-paper);
+  border: 2px solid var(--ck-brand);
+  box-shadow: var(--ck-shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+.fly-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+/* Cart button bounce when item lands */
+@keyframes ck-cart-bounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.18); }
+  65%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.cart-btn.cart-bounce {
+  animation: ck-cart-bounce 550ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* Cart count badge pop */
+@keyframes ck-badge-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.cart-count.badge-pop {
+  animation: ck-badge-pop 500ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* ── CART SIDEBAR ITEM STAGGER ── */
+@keyframes ck-item-slide {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.cart-side.open .cart-item {
+  animation: ck-item-slide 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.cart-side.open .cart-item:nth-child(1) { animation-delay: 60ms; }
+.cart-side.open .cart-item:nth-child(2) { animation-delay: 110ms; }
+.cart-side.open .cart-item:nth-child(3) { animation-delay: 160ms; }
+.cart-side.open .cart-item:nth-child(4) { animation-delay: 210ms; }
+.cart-side.open .cart-item:nth-child(5) { animation-delay: 260ms; }
+.cart-side.open .cart-item:nth-child(n+6) { animation-delay: 300ms; }
+
+/* Store banner fades in */
+@keyframes ck-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cart-store-banner {
+  animation: ck-slide-down 320ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: 40ms;
+}
+
+/* ── TOAST OVERSHOOT ── */
+.toast {
+  transition:
+    opacity 300ms var(--ck-ease),
+    transform 450ms cubic-bezier(0.3, 1.55, 0.5, 1) !important;
+}
+
+/* ── ADD-TO-CART CONFIRMATION FLASH ── */
+@keyframes ck-card-flash {
+  0%   { box-shadow: var(--ck-shadow-sm), 0 0 0 0 rgba(139, 30, 18, 0.4); }
+  50%  { box-shadow: var(--ck-shadow-md), 0 0 0 8px rgba(139, 30, 18, 0); }
+  100% { box-shadow: var(--ck-shadow-sm), 0 0 0 0 rgba(139, 30, 18, 0); }
+}
+.dish-card.flash,
+.drink-card.flash {
+  animation: ck-card-flash 550ms cubic-bezier(0.3, 1.2, 0.5, 1);
+}
+
+/* ── KITCHEN CARD ENTRANCE ── */
+@keyframes kitchen-card-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.kitchen-column.col-placed .kitchen-card {
+  animation:
+    kitchen-card-in 500ms cubic-bezier(0.2, 0.8, 0.3, 1) both,
+    kitchen-pulse 2s ease-in-out infinite;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,163 @@
+﻿/* ============================================================
+   CeeKay Emporium — Brand Tokens
+   src/brand.css
+   ------------------------------------------------------------
+   THE ONLY file in the app that holds raw color values.
+   Every other file reads from these tokens.
+   Change a token here → the whole app updates.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* ── PRIMITIVE COLORS ── */
+  --ck-blue-deep: #0f2e4a;
+  --ck-blue-mid: #1e5f9c;
+  --ck-blue-bright: #2ba8d4;
+  --ck-blue-gradient: linear-gradient(135deg, #2ba8d4 0%, #1e5f9c 55%, #0f2e4a 100%);
+  --ck-blue-gradient-vertical: linear-gradient(180deg, #1e5f9c 0%, #0f2e4a 100%);
+
+  --ck-gold: #d4952b;
+  --ck-gold-soft: #e8b355;
+  --ck-gold-dark: #a06e1c;
+
+  --ck-red: #8b1e12;
+  --ck-red-bright: #c0392b;
+  --ck-red-soft: #f5e5e2;
+
+  --ck-charcoal: #1a1a1a;
+  --ck-charcoal-soft: #2a2622;
+  --ck-charcoal-ink: #0f0f0f;
+
+  --ck-cream: #f5ecd9;
+  --ck-cream-warm: #fbf3e3;
+  --ck-paper: #fffdf8;
+  --ck-white: #ffffff;
+
+  --ck-green: #2f6f4e;
+
+  /* ── SEMANTIC TOKENS ── */
+  /* Surfaces */
+  --ck-bg: var(--ck-cream);
+  --ck-bg-raised: var(--ck-paper);
+  --ck-bg-elevated: var(--ck-white);
+
+  /* Text */
+  --ck-ink: var(--ck-charcoal);
+  --ck-ink-soft: #5a4a3f;
+  --ck-ink-muted: #8a7a6c;
+  --ck-ink-inverse: var(--ck-cream);
+  --ck-ink-on-brand: var(--ck-white);
+
+  /* Brand */
+  --ck-brand: var(--ck-blue-mid);
+  --ck-brand-deep: var(--ck-blue-deep);
+  --ck-brand-bright: var(--ck-blue-bright);
+  --ck-brand-gradient: var(--ck-blue-gradient);
+
+  /* Warm accent — used for prices, ribbons, badges */
+  --ck-warm: var(--ck-gold);
+  --ck-warm-soft: var(--ck-gold-soft);
+  --ck-warm-dark: var(--ck-gold-dark);
+
+  /* Action — used for CTAs that must drive a click */
+  --ck-action: var(--ck-red);
+  --ck-action-hover: var(--ck-red-bright);
+  --ck-action-soft: var(--ck-red-soft);
+
+  /* Borders & dividers */
+  --ck-border: rgba(26, 26, 26, 0.08);
+  --ck-border-strong: rgba(26, 26, 26, 0.18);
+  --ck-border-brand: rgba(30, 95, 156, 0.22);
+  --ck-border-warm: rgba(212, 149, 43, 0.35);
+
+  /* Kitchen (dark surface) tokens */
+  --ck-kitchen-bg: #1a1a1a;
+  --ck-kitchen-surface: #221e1a;
+  --ck-kitchen-surface-2: #2b2622;
+  --ck-kitchen-border: rgba(245, 236, 217, 0.08);
+  --ck-kitchen-ink: #f5e9df;
+  --ck-kitchen-ink-muted: rgba(245, 233, 223, 0.55);
+
+  /* ── TYPOGRAPHY ── */
+  --ck-font-display: 'Bricolage Grotesque', 'Playfair Display', serif;
+  --ck-font-serif: 'Fraunces', 'Playfair Display', Georgia, serif;
+  --ck-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ── SPACING ── */
+  --ck-s-1: 4px;
+  --ck-s-2: 8px;
+  --ck-s-3: 12px;
+  --ck-s-4: 16px;
+  --ck-s-5: 24px;
+  --ck-s-6: 32px;
+  --ck-s-7: 48px;
+  --ck-s-8: 64px;
+
+  /* ── RADIUS ── */
+  --ck-r-sm: 8px;
+  --ck-r-md: 12px;
+  --ck-r-lg: 18px;
+  --ck-r-xl: 24px;
+  --ck-r-pill: 999px;
+
+  /* ── SHADOWS ── */
+  --ck-shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.06);
+  --ck-shadow-md: 0 8px 24px rgba(26, 26, 26, 0.10);
+  --ck-shadow-lg: 0 20px 50px rgba(26, 26, 26, 0.15);
+  --ck-shadow-brand: 0 8px 24px rgba(30, 95, 156, 0.18);
+  --ck-shadow-action: 0 8px 24px rgba(139, 30, 18, 0.22);
+
+  /* ── MOTION ── */
+  --ck-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ck-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ck-dur-fast: 150ms;
+  --ck-dur: 250ms;
+  --ck-dur-slow: 400ms;
+}
+
+/* ── BASE ── */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ck-bg);
+  color: var(--ck-ink);
+  font-family: var(--ck-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 { font-family: var(--ck-font-serif); margin: 0; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ── UTILITY CLASSES ── */
+.ck-display {
+  font-family: var(--ck-font-display);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ck-ink);
+}
+
+.ck-serif {
+  font-family: var(--ck-font-serif);
+  font-style: italic;
+  font-weight: 900;
+  color: var(--ck-brand-deep);
+}
+
+.ck-eyebrow {
+  font-family: var(--ck-font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ck-brand);
+}
+
+.ck-text-gradient {
+  background: var(--ck-brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
