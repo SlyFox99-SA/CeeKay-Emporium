@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
@@ -6,6 +6,7 @@ import { CartProvider } from './context/CartContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { useIsMobile } from './hooks/useIsMobile';
 import { primeAudio } from './lib/chime';
+import { useDynamicManifest } from './hooks/useDynamicManifest';
 
 import Storefront from './pages/Storefront';
 import MobileStorefront from './pages/MobileStorefront';

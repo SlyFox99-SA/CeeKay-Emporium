@@ -14,6 +14,9 @@ import MobileProfile from '../components/MobileProfile';
 import MobileSkeleton from '../components/MobileSkeleton';
 import MobileWelcomeBack from '../components/MobileWelcomeBack';
 import CKMark from '../components/CKMark';
+import PwaInstallBanner from '../components/mobile/PwaInstallBanner';
+import ActiveOrderBar from '../components/mobile/ActiveOrderBar';
+import NetworkStatus from '../components/NetworkStatus';
 
 // We are hardcoding these to guarantee the visual layout works perfectly
 const PERFECT_IMAGES = {
@@ -159,7 +162,7 @@ export default function MobileStorefront() {
         </AnimatePresence>
       </main>
 
-      <nav className="mobile-bottom-nav">
+      <ActiveOrderBar />`r`n`r`n      <nav className="mobile-bottom-nav">
         <button className={`mobile-nav-item ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} />
           <span>Menu</span>
@@ -191,6 +194,8 @@ export default function MobileStorefront() {
         </button>
       </nav>
 
+      <NetworkStatus />
+      <PwaInstallBanner />
       <AnimatePresence>
         {cartOpen && <MobileCartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
         {modalItem && <MobileItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}

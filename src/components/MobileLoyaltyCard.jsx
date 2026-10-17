@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Sandwich, Gift, CheckCircle2, X } from 'lucide-react';
+import { Sandwich, Gift, X, Sparkles } from 'lucide-react';
 import { getLoyaltyProgress, redeemLoyalty } from '../services/customerService';
 import { usePrefs } from '../context/PreferencesContext';
 import { burstConfetti } from '../lib/confetti';
 import { playSuccess } from '../lib/chime';
+import { useHaptics } from '../hooks/useHaptics';
 
 export default function MobileLoyaltyCard() {
   const [progress, setProgress] = useState(null);
@@ -12,6 +13,7 @@ export default function MobileLoyaltyCard() {
   const [showReward, setShowReward] = useState(false);
   
   const { prefs } = usePrefs();
+  const haptics = useHaptics();
 
   const load = async () => {
     const p = await getLoyaltyProgress();
@@ -25,10 +27,11 @@ export default function MobileLoyaltyCard() {
     setRedeeming(true);
     try {
       await redeemLoyalty();
-      await load(); // refresh count
+      await load();
       setShowReward(false);
       if (prefs.sound) playSuccess();
       if (prefs.confetti) burstConfetti();
+      haptics.success();
     } catch (e) {
       alert("Error redeeming reward");
     } finally {
@@ -39,58 +42,64 @@ export default function MobileLoyaltyCard() {
   if (loading || !progress) return null;
 
   const { slotsFilled, threshold, rewardReady } = progress;
-  const slots = Array.from({ length: threshold });
+  const percent = Math.min(100, (slotsFilled / threshold) * 100);
 
   return (
     <>
-      <div className={`loyalty-card ${rewardReady ? 'unlocked' : ''}`}>
-        <div className="loyalty-head">
-          <div className="loyalty-title">
-            {rewardReady ? 'Reward Unlocked!' : 'Kota Rewards'}
-          </div>
-          <div className="loyalty-sub">
-            {rewardReady 
-              ? 'You have a free kota waiting.' 
-              : `Buy ${threshold - slotsFilled} more kotas for a free one.`}
-          </div>
-        </div>
-
-        <div className="loyalty-slots">
-          {slots.map((_, i) => (
-            <div key={i} className={`loyalty-slot ${i < slotsFilled ? 'filled' : ''}`}>
-              <Sandwich size={20} />
+      <div className={`m-loyalty-card ${rewardReady ? 'unlocked' : ''}`}>
+        {/* Glow Effect */}
+        <div className="m-loyalty-glow" />
+        
+        <div className="m-loyalty-content">
+          <div className="m-loyalty-header">
+            <div>
+              <div className="m-loyalty-title">Kota Rewards</div>
+              <div className="m-loyalty-sub">
+                {rewardReady ? 'You have a free kota!' : `Buy ${threshold - slotsFilled} more for a free one`}
+              </div>
             </div>
-          ))}
-        </div>
+            <Sparkles size={24} className={rewardReady ? 'text-warm' : 'text-muted'} />
+          </div>
 
-        {rewardReady && (
-          <button className="loyalty-redeem-btn" onClick={() => setShowReward(true)}>
-            <Gift size={16} /> Claim Free Kota
-          </button>
-        )}
+          {/* Progress Bar */}
+          <div className="m-loyalty-bar-wrap">
+            <div className="m-loyalty-bar" style={{ width: `${percent}%` }} />
+          </div>
+
+          {/* Stamps */}
+          <div className="m-loyalty-stamps">
+            {Array.from({ length: threshold }).map((_, i) => (
+              <div key={i} className={`m-stamp ${i < slotsFilled ? 'filled' : ''}`}>
+                <Sandwich size={18} />
+              </div>
+            ))}
+          </div>
+
+          {rewardReady && (
+            <button className="m-loyalty-btn" onClick={() => setShowReward(true)}>
+              <Gift size={18} /> Claim Free Kota
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Reward Modal */}
+      {/* Redeem Modal */}
       {showReward && (
-        <div className="loyalty-modal-overlay" onClick={() => setShowReward(false)}>
-          <div className="loyalty-modal" onClick={e => e.stopPropagation()}>
-            <button className="loyalty-modal-close" onClick={() => setShowReward(false)}>
-              <X size={18} />
-            </button>
-            <div className="loyalty-modal-icon">
-              <Gift size={40} />
+        <div className="m-modal-overlay" onClick={() => setShowReward(false)} style={{ zIndex: 9999 }}>
+          <div className="m-modal-sheet" onClick={e => e.stopPropagation()} style={{ height: 'auto', borderRadius: '24px 24px 0 0', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            <div className="m-loyalty-success">
+              <button className="m-modal-close" style={{ position: 'absolute', top: 16, right: 16 }} onClick={() => setShowReward(false)}>
+                <X size={18} />
+              </button>
+              <div className="m-success-icon" style={{ background: 'var(--ck-warm)', color: 'var(--ck-charcoal)' }}>
+                <Gift size={40} />
+              </div>
+              <h2>Free Kota!</h2>
+              <p>Show this screen to the cashier to claim your reward.</p>
+              <button className="m-cart-primary-btn" onClick={handleRedeem} disabled={redeeming} style={{ marginTop: 24 }}>
+                {redeeming ? 'Redeeming...' : 'Mark as Redeemed'}
+              </button>
             </div>
-            <h2 className="loyalty-modal-title">Free Kota!</h2>
-            <p className="loyalty-modal-sub">
-              Show this screen to the cashier to claim your free kota.
-            </p>
-            <button 
-              className="loyalty-modal-btn" 
-              onClick={handleRedeem}
-              disabled={redeeming}
-            >
-              {redeeming ? 'Redeeming...' : 'Mark as Redeemed'}
-            </button>
           </div>
         </div>
       )}

@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import { WifiOff } from 'lucide-react';
+import EmptyState from './EmptyState';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowLeft, User, Phone, Clock, Check, ShoppingBag, X, Minus, Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +24,7 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
   const haptics = useHaptics();
   const navigate = useNavigate();
   
+  const isOnline = useNetworkStatus();
   const [step, setStep] = useState('cart');
   const [note, setNote] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
@@ -122,11 +126,11 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
           <>
             <div className="m-cart-items">
               {cart.length === 0 ? (
-                <div className="m-cart-empty">
-                  <ShoppingBag size={48} strokeWidth={1.5} />
-                  <h3>Your cart is empty</h3>
-                  <p>Add a kota to get started.</p>
-                </div>
+                <EmptyState 
+                  type="cart" 
+                  title="Your cart is empty" 
+                  subtitle="Add a delicious kota to get started." 
+                />
               ) : cart.map(item => {
                 const key = lineKey(item);
                 return (
@@ -164,9 +168,17 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
         {step === 'details' && (
           <>
             <div className="m-cart-items">
-              <button className="m-cart-back" onClick={() => setStep('cart')}><ArrowLeft size={16} /> Back to cart</button>
+              <motion.button 
+                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
+                className="m-cart-back" onClick={() => setStep('cart')}
+              >
+                <ArrowLeft size={16} /> Back to cart
+              </motion.button>
               
-              <div className="m-checkout-summary">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="m-checkout-summary"
+              >
                 <h4>Order Summary</h4>
                 {cart.map(item => (
                   <div key={lineKey(item)} className="m-summary-row">
@@ -174,9 +186,12 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
                     <span>R {(item.price * item.qty).toFixed(2)}</span>
                   </div>
                 ))}
-              </div>
+              </motion.div>
 
-              <div className="m-form-group">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                className="m-form-group"
+              >
                 <label className="m-field">
                   <span className="m-label"><User size={12} /> Name</span>
                   <input type="text" placeholder="Bongani" value={customer.name} onChange={e => updateCustomer('name', e.target.value)} />
@@ -195,7 +210,7 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
                   <span className="m-label">Notes</span>
                   <textarea placeholder="Extra achaar..." value={note} onChange={e => setNote(e.target.value)} />
                 </label>
-              </div>
+              </motion.div>
             </div>
             <div className="m-cart-footer">
               <div className="m-cart-totals">
@@ -211,7 +226,7 @@ export default function MobileCartSidebar({ open, onClose, onToast }) {
 
         {step === 'success' && lastOrder && (
           <div className="m-cart-items m-cart-success">
-            <div className="m-success-icon"><Check size={48} strokeWidth={3} /></div>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }} className="m-success-icon"><Check size={48} strokeWidth={3} /></motion.div>
             <h2>Order received!</h2>
             <p>We're preparing it now. You can track the status live.</p>
             

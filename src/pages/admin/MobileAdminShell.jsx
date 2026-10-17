@@ -1,7 +1,9 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+﻿import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Utensils, Receipt, Store, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect } from 'react';
+import PwaInstallBanner from '../../components/mobile/PwaInstallBanner';
+import NetworkStatus from '../../components/NetworkStatus';
 
 const NAV = [
   { to: '/admin',        icon: LayoutDashboard, label: 'Home', end: true },
@@ -19,7 +21,7 @@ export default function MobileAdminShell() {
     if (!loading && !user) navigate('/admin/login', { replace: true });
   }, [loading, user, navigate]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading…</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loadingâ€¦</div>;
   if (!user) return null;
 
   return (
@@ -33,6 +35,8 @@ export default function MobileAdminShell() {
         <Outlet />
       </main>
 
+      <NetworkStatus />
+      <PwaInstallBanner />
       <nav className="m-admin-nav">
         {NAV.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end} className={({ isActive }) => `m-admin-nav-item ${isActive ? 'active' : ''}`}>

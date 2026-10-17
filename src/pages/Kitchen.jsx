@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+﻿import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChefHat, ArrowLeft, RefreshCw, Clock, CheckCircle2, Play, X, Phone, Bell, BellOff, Volume2 } from 'lucide-react';
 import {
@@ -12,6 +12,9 @@ import { STORES } from '../data/stores';
 import ItemImage from '../components/ItemImage';
 import { useNewOrderAlerts } from '../hooks/useNewOrderAlerts';
 import { playChime, primeAudio } from '../lib/chime';
+import PwaInstallBanner from '../components/mobile/PwaInstallBanner';
+import NetworkStatus from '../components/NetworkStatus';
+import EmptyState from '../components/mobile/EmptyState';
 
 const COLUMNS = ['placed', 'preparing', 'ready', 'completed'];
 
@@ -171,6 +174,8 @@ export default function Kitchen() {
         ))}
       </div>
 
+      <NetworkStatus />
+      <PwaInstallBanner />
       <div className="kitchen-board" ref={boardRef} onScroll={handleScroll}>
         {COLUMNS.map(col => (
           <section 
@@ -185,10 +190,13 @@ export default function Kitchen() {
 
             <div className="kitchen-column-body">
               {grouped[col].length === 0 ? (
-                <div className="kitchen-empty-state">
-                   <div className="kitchen-empty-icon"><ChefHat size={32} /></div>
-                   <div className="kitchen-empty-text">Waiting for orders</div>
-                 </div>
+                <div style={{ padding: '40px 10px' }}>
+                  <EmptyState 
+                    type="kitchen" 
+                    title="All caught up" 
+                    subtitle="No orders in this stage." 
+                  />
+                </div>
               ) : grouped[col].map(order => (
                 <article key={order.id} className="kitchen-card">
                   
@@ -217,7 +225,7 @@ export default function Kitchen() {
                             <Phone size={11} /> {order.customer.phone}
                           </a>
                         )}
-                        {order.customer.pickupTime && <span className="kitchen-customer-time">· {order.customer.pickupTime}</span>}
+                        {order.customer.pickupTime && <span className="kitchen-customer-time">Â· {order.customer.pickupTime}</span>}
                       </div>
                     </div>
                   )}

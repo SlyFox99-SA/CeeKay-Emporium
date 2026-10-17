@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Clock, ReceiptText } from 'lucide-react';
 import { getHistory } from '../services/customerService';
 import ItemImage from './ItemImage';
+import EmptyState from './mobile/EmptyState';
 
 export default function MobileOrders() {
   const [orders, setOrders] = useState([]);
@@ -17,17 +18,17 @@ export default function MobileOrders() {
   }, []);
 
   if (loading) {
-    return <div className="mobile-orders-loading">Loading your orders…</div>;
+    return <div className="mobile-orders-loading">Loading your ordersâ€¦</div>;
   }
 
   if (orders.length === 0) {
     return (
-      <div className="mobile-orders-empty">
-        <div className="mobile-orders-empty-icon">
-          <ReceiptText size={48} strokeWidth={1.5} color="var(--ck-brand)" />
-        </div>
-        <h2>No orders yet</h2>
-        <p>Your past kotas will show up here.</p>
+      <div style={{ paddingTop: 60 }}>
+        <EmptyState 
+          type="orders" 
+          title="No orders yet" 
+          subtitle="When you place an order, you can track it here." 
+        />
       </div>
     );
   }
