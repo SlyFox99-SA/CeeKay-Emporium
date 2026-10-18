@@ -1,72 +1,57 @@
-import { useRef, useState } from 'react';
-import { Camera, Image as ImageIcon, X, Loader2 } from 'lucide-react';
-import { uploadImage, deleteImageByUrl, validateImage } from '../../lib/storage';
 
-export default function MobileImageUploader({ value, onChange, folder = 'menu' }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const inputRef = useRef(null);
+import { useState, useRef } from 'react';
+import { Camera, X, Loader2, UploadCloud } from 'lucide-react';
+import { uploadImage } from '../../lib/storage';
 
-  const handleFile = async (e) => {
+export default function MobileImageUploader({ value, onChange }) {
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validationError = validateImage(file);
-    if (validationError) { setError(validationError); return; }
-
-    setError('');
-    setBusy(true);
+    setLoading(true);
     try {
-      const url = await uploadImage(file, folder);
+      const url = await uploadImage(file);
       onChange(url);
     } catch (err) {
-      setError(err.message || 'Upload failed');
+      console.error('Upload failed', err);
+      alert('Failed to upload image. Make sure you are an admin.');
     } finally {
-      setBusy(false);
-      e.target.value = '';
-    }
-  };
-
-  const remove = async () => {
-    if (!value) return;
-    if (!confirm('Remove this image?')) return;
-    setBusy(true);
-    try {
-      await deleteImageByUrl(value);
-      onChange('');
-    } catch (err) {
-      setError(err.message || 'Remove failed');
-    } finally {
-      setBusy(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className="m-image-uploader">
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment" /* Opens camera directly on mobile */
-        onChange={handleFile}
-        hidden
+      <input 
+        type="file" 
+        accept="image/*" 
+        capture="environment" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
       />
-
+      
       {value ? (
-        <div className="m-image-preview-box">
+        <div className="m-image-preview">
           <img src={value} alt="Preview" />
-          <button className="m-image-remove-btn" onClick={remove} disabled={busy}>
+          <button className="m-image-remove" onClick={() => onChange('')} type="button">
             <X size={16} />
           </button>
         </div>
       ) : (
-        <button className="m-image-upload-btn" onClick={() => inputRef.current?.click()} disabled={busy}>
-          {busy ? <Loader2 size={24} className="spin" /> : <Camera size={24} />}
-          <span>{busy ? 'Uploading...' : 'Tap to take photo or upload'}</span>
+        <button 
+          className="m-image-upload-btn" 
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loading}
+          type="button"
+        >
+          {loading ? <Loader2 size={24} className="spin" /> : <Camera size={24} />}
+          <span>{loading ? 'Uploading...' : 'Take Photo or Upload'}</span>
         </button>
       )}
-
-      {error && <div className="m-image-error">{error}</div>}
     </div>
   );
 }

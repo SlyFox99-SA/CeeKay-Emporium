@@ -1,60 +1,39 @@
-﻿/* Flies a small image from a source point to the cart button.
-   Uses Web Animations API — no dependencies. */
-export function flyToCart(sourceEl, imageSrc) {
-  if (!sourceEl) return;
 
-  const target = document.querySelector('[data-cart-target]');
-  if (!target) return;
+export function flyToCart(e, imageUrl) {
+  if (!e || !imageUrl) return;
+  const cartBtn = document.querySelector('[data-cart-target]');
+  if (!cartBtn) return;
 
-  const srcRect = sourceEl.getBoundingClientRect();
-  const tgtRect = target.getBoundingClientRect();
+  const startRect = e.currentTarget.getBoundingClientRect();
+  const endRect = cartBtn.getBoundingClientRect();
 
-  const startX = srcRect.left + srcRect.width / 2;
-  const startY = srcRect.top + srcRect.height / 2;
-  const endX = tgtRect.left + tgtRect.width / 2;
-  const endY = tgtRect.top + tgtRect.height / 2;
+  const clone = document.createElement('img');
+  clone.src = imageUrl;
+  clone.style.position = 'fixed';
+  clone.style.top = startRect.top + 'px';
+  clone.style.left = startRect.left + 'px';
+  clone.style.width = startRect.width + 'px';
+  clone.style.height = startRect.height + 'px';
+  clone.style.borderRadius = '50%';
+  clone.style.objectFit = 'contain';
+  clone.style.background = '#fff';
+  clone.style.zIndex = '99999';
+  clone.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.3, 1)';
+  clone.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)';
 
-  const floater = document.createElement('div');
-  floater.className = 'fly-item';
-  floater.style.left = `${startX - 26}px`;
-  floater.style.top = `${startY - 26}px`;
+  document.body.appendChild(clone);
 
-  if (imageSrc) {
-    const img = document.createElement('img');
-    img.src = imageSrc;
-    img.alt = '';
-    floater.appendChild(img);
-  }
+  requestAnimationFrame(() => {
+    clone.style.top = endRect.top + (endRect.height / 2) - 15 + 'px';
+    clone.style.left = endRect.left + (endRect.width / 2) - 15 + 'px';
+    clone.style.width = '30px';
+    clone.style.height = '30px';
+    clone.style.opacity = '0.5';
+  });
 
-  document.body.appendChild(floater);
-
-  const dx = endX - startX;
-  const dy = endY - startY;
-
-  const animation = floater.animate(
-    [
-      { transform: 'translate(0, 0) scale(1)', opacity: 1, offset: 0 },
-      { transform: `translate(${dx * 0.55}px, ${dy * 0.55 - 130}px) scale(0.75)`, opacity: 1, offset: 0.55 },
-      { transform: `translate(${dx}px, ${dy}px) scale(0.15)`, opacity: 0.4, offset: 1 },
-    ],
-    {
-      duration: 750,
-      easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)',
-      fill: 'forwards',
-    }
-  );
-
-  animation.onfinish = () => {
-    floater.remove();
-    target.classList.add('cart-bounce');
-    setTimeout(() => target.classList.remove('cart-bounce'), 600);
-
-    const badge = target.querySelector('.cart-count');
-    if (badge) {
-      badge.classList.remove('badge-pop');
-      void badge.offsetWidth;
-      badge.classList.add('badge-pop');
-      setTimeout(() => badge.classList.remove('badge-pop'), 600);
-    }
-  };
+  setTimeout(() => {
+    clone.remove();
+    cartBtn.classList.add('cart-bounce');
+    setTimeout(() => cartBtn.classList.remove('cart-bounce'), 600);
+  }, 600);
 }

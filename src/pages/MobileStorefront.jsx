@@ -5,6 +5,7 @@ import { MapPin, ShoppingBag, Home, ReceiptText, User, Plus, Share2 } from 'luci
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { useHaptics } from '../hooks/useHaptics';
+import { flyToCart } from '../lib/flyToCart';
 import { getMenu } from '../services/menuService';
 import ItemImage from '../components/ItemImage';
 import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
@@ -208,7 +209,7 @@ export default function MobileStorefront() {
           <User size={22} strokeWidth={activeTab === 'profile' ? 2.5 : 2} />
           <span>Profile</span>
         </button>
-        <button className="mobile-nav-item cart-tab" onClick={() => { setCartOpen(true); haptics.light(); }}>
+        <button className="mobile-nav-item cart-tab" data-cart-target onClick={() => { setCartOpen(true); haptics.light(); }}>
           <div className="mobile-cart-icon-wrap">
             <ShoppingBag size={22} strokeWidth={2} />
             {count > 0 && (
