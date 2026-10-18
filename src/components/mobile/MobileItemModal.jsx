@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Minus, Plus, Check, AlertCircle, ShoppingBag } from 'lucide-react';
-import ItemImage from '../ItemImage';
+import { Minus, Plus, Check, AlertCircle } from 'lucide-react';
 import SoldOutBadge from './SoldOutBadge';
 import { useSwipeToDismiss } from '../../hooks/useSwipeToDismiss';
 import { useHaptics } from '../../hooks/useHaptics';
+import ModifierSelector from './item-modal/ModifierSelector';
+import PreferenceSelector from './item-modal/PreferenceSelector';
 
 export default function MobileItemModal({ item, onClose, onConfirm }) {
   const swipeProps = useSwipeToDismiss(onClose);
@@ -16,26 +17,56 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
   const [isAdded, setIsAdded] = useState(false);
 
   useEffect(() => {
-    if (item) document.body.classList.add('modal-open');
-    return () => document.body.classList.remove('modal-open');
-  }, [item]);
-
-  useEffect(() => {
     if (!item) return;
     setQty(1); setNote(''); setSelectedMods([]); setIsAdded(false);
   }, [item?.id]);
 
   if (!item) return null;
   const isSoldOut = item.available === false;
+  const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
 
-  const toggleMod = (mod) => {
+  const extras = item.available_modifiers?.filter(m => m.category === 'extra') || [];
+  const prefs = item.available_modifiers?.filter(m => m.category === 'preference') || [];
+
+  const updateMod = (mod, action) => {
     haptics.light();
-    setSelectedMods(prev => prev.find(m => m.id === mod.id) ? prev.filter(m => m.id !== mod.id) : [...prev, mod]);
+    setSelectedMods(prev => {
+      const existing = prev.find(m => m.id === mod.id);
+      if (action === 'add') {
+        if (existing) {
+          if ((existing.qty || 1) >= 2) return prev;
+          return prev.map(m => m.id === mod.id ? { ...m, qty: (m.qty || 1) + 1 } : m);
+        }
+        return [...prev, { ...mod, qty: 1 }];
+      } else {
+        if (!existing) return prev;
+        if ((existing.qty || 1) === 1) return prev.filter(m => m.id !== mod.id);
+        return prev.map(m => m.id === mod.id ? { ...m, qty: (m.qty || 1) - 1 } : m);
+      }
+    });
   };
 
-  const basePrice = Number(item.price);
-  const modsTotal = selectedMods.reduce((sum, mod) => sum + Number(mod.sell_price), 0);
-  const subtotal = (basePrice + modsTotal) * qty;
+  const togglePref = (pref) => {
+    haptics.light();
+    setSelectedMods(prev => {
+      if (pref.group_name === 'Sauces') {
+        const filtered = prev.filter(m => {
+           const existingMod = item.available_modifiers.find(x => x.id === m.id);
+           return !existingMod || existingMod.group_name !== 'Sauces';
+        });
+        const isAlreadySelected = prev.some(m => m.id === pref.id);
+        if (isAlreadySelected) return filtered;
+        return [...filtered, { ...pref, qty: 1 }];
+      }
+      const existing = prev.find(m => m.id === pref.id);
+      if (existing) return prev.filter(m => m.id !== pref.id);
+      return [...prev, { ...pref, qty: 1 }];
+    });
+  };
+
+  const basePrice = Number(item.price) || 0;
+  const modsTotal = selectedMods.reduce((sum, mod) => sum + (Number(mod.sell_price || 0) * (mod.qty || 1)), 0);
+  const subtotal = (basePrice + modsTotal) * (qty || 1);
 
   const handleConfirm = () => {
     if (isSoldOut || isAdded) return;
@@ -48,64 +79,51 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
   return (
     <div className="m-modal-overlay" onClick={onClose}>
       <motion.div className="m-modal-sheet" onClick={e => e.stopPropagation()} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 350 }}>
-        <div className="m-modal-header" {...swipeProps} style={{ touchAction: 'none', justifyContent: 'center' }}>
+        
+        <div className="m-modal-header" {...swipeProps} style={{ touchAction: 'none' }}>
           <div className="m-sheet-handle" />
         </div>
 
         <div className="m-modal-body">
-          <div className="m-modal-photo-wrapper" style={{ opacity: isSoldOut ? 0.5 : 1 }}>
-            <ItemImage src={item.image} alt={item.name} />
-            {isSoldOut && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><SoldOutBadge /></div>}
+          <div style={{ width: '100%', height: '260px', background: 'var(--ck-cream)', position: 'relative' }}>
+             <img src={imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+             {isSoldOut && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><SoldOutBadge /></div>}
           </div>
 
-          <div className="m-modal-meta">
-            <div className="m-modal-title-row">
-              <h2 className="m-modal-name">{item.name}</h2>
-              <div className="m-modal-price">R {basePrice.toFixed(2)}</div>
+          <div style={{ padding: '24px 20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <h2 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '24px', margin: 0, color: 'var(--ck-ink)' }}>{item.name}</h2>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--ck-brand-deep)' }}>R {basePrice.toFixed(2)}</div>
             </div>
-            {item.desc && <p className="m-modal-desc">{item.desc}</p>}
+            
+            {item.desc && <p style={{ margin: '0 0 24px', fontSize: '14px', color: 'var(--ck-ink-soft)', lineHeight: 1.5 }}>{item.desc}</p>}
 
-            {item.available_modifiers && item.available_modifiers.length > 0 && !isSoldOut && (
+            {!isSoldOut && (
               <>
-                <div className="m-modal-divider" />
-                <div className="m-modal-section-title">Make it a Beast</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-                  {item.available_modifiers.map(mod => {
-                    const isSelected = selectedMods.find(m => m.id === mod.id);
-                    return (
-                      <button key={mod.id} onClick={() => toggleMod(mod)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: '12px', border: `1px solid ${isSelected ? 'var(--ck-brand-deep)' : 'var(--ck-border)'}`, background: isSelected ? 'var(--ck-cream)' : 'white', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--ck-ink)', fontSize: '14px' }}>{mod.name}</span>
-                        <span style={{ fontWeight: 700, color: 'var(--ck-brand-deep)', fontSize: '14px' }}>+ R{mod.sell_price}</span>
-                      </button>
-                    );
-                  })}
+                <ModifierSelector extras={extras} selectedMods={selectedMods} onUpdate={updateMod} />
+                <PreferenceSelector prefs={prefs} selectedMods={selectedMods} onToggle={togglePref} />
+                <div style={{ marginTop: '24px' }}>
+                  <textarea style={{ width: '100%', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '12px', padding: '16px', fontSize: '14px', minHeight: '80px', resize: 'none', outline: 'none' }} placeholder="Add a note (e.g. extra crispy)..." value={note} onChange={e => setNote(e.target.value)} />
                 </div>
               </>
             )}
           </div>
-
-          {!isSoldOut && (
-            <div className="m-modal-note-container">
-              <div className="m-modal-section-title">Add a note (optional)</div>
-              <textarea className="m-modal-note" placeholder="e.g. extra crispy..." value={note} onChange={e => setNote(e.target.value)} rows={3} />
-            </div>
-          )}
         </div>
 
         <div className="m-modal-foot">
           {isSoldOut ? (
             <div style={{ width: '100%', textAlign: 'center', padding: '12px', color: 'var(--ck-achaar-red)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <AlertCircle size={20} /> Sorry, this item is currently sold out.
+              <AlertCircle size={20} /> Sold Out
             </div>
           ) : (
             <>
-              <div className="m-modal-qty">
-                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }} disabled={qty <= 1 || isAdded}><Minus size={16} /></button>
+              <div className="m-qty-selector">
+                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }}><Minus size={16} /></button>
                 <span className="m-qty-val">{qty}</span>
-                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }} disabled={isAdded}><Plus size={16} /></button>
+                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }}><Plus size={16} /></button>
               </div>
-              <button className="m-modal-add-btn" onClick={handleConfirm} style={{ background: isAdded ? 'var(--ck-green)' : 'var(--ck-brand-deep)', transition: 'background 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                {isAdded ? (<><Check size={20} /> Added!</>) : (<><ShoppingBag size={18} /><span className="m-add-text">Add</span><span className="m-add-price">R {subtotal.toFixed(2)}</span></>)}
+              <button className={`m-add-btn ${isAdded ? 'added' : ''}`} onClick={handleConfirm}>
+                {isAdded ? (<><Check size={20} /> Added!</>) : (`Add • R ${subtotal.toFixed(2)}`)}
               </button>
             </>
           )}
