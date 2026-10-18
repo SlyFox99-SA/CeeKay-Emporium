@@ -1,0 +1,80 @@
+CeeKay Emporium - Codebase Audit Report
+Generated: 10/18/2026 03:15:37
+
+======================================================================
+  1. Leftover Backup (.bak) Files
+======================================================================
+  [OK] No .bak files found in src/.
+
+======================================================================
+  2. CSS !important Violations
+======================================================================
+  [WARN] components.css contains 32 '!important' tags.
+         Line 243: background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+         Line 244: padding: 12px !important;
+         Line 245: display: flex !important;
+         Line 246: align-items: center !important;
+         Line 247: justify-content: center !important;
+         Line 248: aspect-ratio: 1 / 1 !important;
+         Line 251: width: 100% !important;
+         Line 252: height: 100% !important;
+         Line 253: object-fit: contain !important;
+         Line 254: filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2)) !important;
+         Line 270: color: white !important;
+         Line 271: width: 18px !important;
+         Line 272: height: 18px !important;
+         Line 273: display: block !important;
+         Line 278: background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+         Line 279: display: flex !important;
+         Line 280: align-items: center !important;
+         Line 281: justify-content: center !important;
+         Line 282: padding: 24px !important;
+         Line 285: width: 100% !important;
+         Line 286: height: 100% !important;
+         Line 287: object-fit: contain !important;
+         Line 288: filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25)) !important;
+         Line 293: width: 48px !important;
+         Line 294: height: 6px !important;
+         Line 295: background: rgba(0, 0, 0, 0.25) !important;
+         Line 296: border-radius: 4px !important;
+         Line 297: margin: 0 auto !important;
+         Line 298: display: block !important;
+         Line 301: justify-content: center !important; /* Center the handle */
+         Line 408: transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1) !important;
+         Line 411: transform: scale(0.94) !important;
+
+======================================================================
+  3. Debug Statements (console.log / debugger)
+======================================================================
+  [WARN] .\src\pages\MobileStorefront.jsx
+         Line 73: console.log('Share canceled');
+
+======================================================================
+  4. Native Browser Popups (alert / confirm)
+======================================================================
+  [WARN] .\src\components\mobile\MobileImageUploader.jsx
+         Line 20: alert('Failed to upload image. Make sure you are an admin.');
+  [WARN] .\src\components\mobile\MobileItemModal.jsx
+         Line 41: onConfirm(item, { qty, removedIngredients: removed, itemNote: note });
+         Line 105: <div key={drink.id} className="m-upsell-card" onClick={() => { haptics.light(); onConfirm(drink, { qty: 1 }); }}>
+  [WARN] .\src\components\ImageUploader.jsx
+         Line 52: if (!confirm('Remove this image?')) return;
+  [WARN] .\src\components\ItemModal.jsx
+         Line 43: onConfirm(item, { qty, removedIngredients: removed, itemNote: note });
+  [WARN] .\src\components\MobileLoyaltyCard.jsx
+         Line 36: alert("Error redeeming reward");
+  [WARN] .\src\pages\admin\AdminMenu.jsx
+         Line 61: if (!confirm(`Delete "${item.name}"?`)) return;
+  [WARN] .\src\pages\Kitchen.jsx
+         Line 99: if (confirm(`Cancel order ${order.id}? This cannot be undone.`)) {
+
+======================================================================
+  5. Missing "key" Props in .map() (Heuristic)
+======================================================================
+  [OK] No obvious missing key props found (or codebase uses keys correctly).
+
+======================================================================
+  6. Hardcoded Localhost URLs
+======================================================================
+  [WARN] .\src\lib\supabase.js
+         Line 12: export const supabase = createClient(url || 'http://localhost', key || 'noop', {

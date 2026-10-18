@@ -1,5 +1,62 @@
-
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--ck-bg); color: var(--ck-ink); font-family: var(--ck-font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 button { font-family: inherit; cursor: pointer; }
 h1, h2, h3 { font-family: var(--ck-font-serif); margin: 0; }
+/* STRICT MOBILE LAYOUT LOCK */
+html, body, #root {
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents the whole page from scrolling */
+}
+
+/* Ensure the main app wrapper is a flex column */
+.app-container, .mobile-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Ensure the header stays at the top and doesn't shrink */
+header, .m-header {
+  flex-shrink: 0;
+  z-index: 50;
+  background: var(--ck-surface, white);
+}
+
+/* Ensure the main content area scrolls independently */
+main, .m-main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom)); /* Account for bottom nav */
+}
+/* --- PREMIUM APP FEEL LOCK --- */
+/* 1. Kill the 300ms tap delay and blue highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 2. Prevent accidental text selection (feels like a native app) */
+body, div, span, h1, h2, h3, h4, p, img {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 3. Allow text selection ONLY in inputs and textareas */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* 4. Prevent bounce-scrolling / pull-to-refresh on iOS unless intended */
+html, body {
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
+}
+
+/* 5. Smooth momentum scrolling for all overflow areas */
+.overflow-scroll, [data-scroll="true"], .m-main-content {
+  -webkit-overflow-scrolling: touch;
+}

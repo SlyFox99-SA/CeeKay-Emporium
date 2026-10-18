@@ -17,7 +17,7 @@ export default function MobileImageUploader({ value, onChange }) {
       onChange(url);
     } catch (err) {
       console.error('Upload failed', err);
-      alert('Failed to upload image. Make sure you are an admin.');
+      console.error('Failed to upload image. Make sure you are an admin.');
     } finally {
       setLoading(false);
     }

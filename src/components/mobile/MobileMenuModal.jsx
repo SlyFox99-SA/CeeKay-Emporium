@@ -6,13 +6,22 @@ import { useHaptics } from '../../hooks/useHaptics';
 
 export default function MobileMenuModal({ item, onClose, onSave }) {
   const haptics = useHaptics();
-  const [form, setForm] = useState({ ...item });
+  const [form, setForm] = useState({ 
+    ...item,
+    stock_quantity: item.stock_quantity ?? '',
+    manually_sold_out: item.manually_sold_out ?? false
+  });
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     haptics.success();
     setSaving(true);
-    await onSave(form);
+    // Ensure stock quantity is sent as a number or null
+    const payload = {
+      ...form,
+      stock_quantity: form.stock_quantity === '' ? null : Number(form.stock_quantity)
+    };
+    await onSave(payload);
     setSaving(false);
   };
 
@@ -64,10 +73,23 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
           </div>
 
           <div className="m-form-section">
-            <div className="m-section-label">Options</div>
+            <div className="m-section-label">Inventory & Status</div>
+            <label className="m-field">
+              <span className="m-label">Stock Quantity (leave blank for unlimited)</span>
+              <input 
+                type="number" 
+                value={form.stock_quantity} 
+                onChange={e => setForm({ ...form, stock_quantity: e.target.value })} 
+                placeholder="e.g. 50"
+              />
+            </label>
             <label className="m-checkbox-row">
-              <input type="checkbox" checked={form.available} onChange={e => setForm({ ...form, available: e.target.checked })} />
-              <span>Available for ordering</span>
+              <input 
+                type="checkbox" 
+                checked={form.manually_sold_out} 
+                onChange={e => setForm({ ...form, manually_sold_out: e.target.checked })} 
+              />
+              <span>Manually mark as Sold Out</span>
             </label>
             <label className="m-checkbox-row">
               <input type="checkbox" checked={form.popular} onChange={e => setForm({ ...form, popular: e.target.checked })} />

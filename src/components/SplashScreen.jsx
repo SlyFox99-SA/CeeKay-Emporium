@@ -1,41 +1,18 @@
+
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
-import { useHaptics } from '../hooks/useHaptics';
 import CKMark from './CKMark';
 
 export default function SplashScreen() {
-  const haptics = useHaptics();
-
-  useEffect(() => {
-    // Give a satisfying haptic thud when the app is ready
-    const timer = setTimeout(() => {
-      haptics.medium();
-    }, 1800);
-    return () => clearTimeout(timer);
-  }, [haptics]);
-
   return (
     <motion.div 
       className="ck-splash-screen"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ y: "-100%", opacity: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Dynamic Background */}
-      <motion.div 
-        className="ck-splash-bg"
-        animate={{ 
-          background: [
-            "radial-gradient(circle at 50% 50%, #1e5f9c 0%, #0f2e4a 100%)",
-            "radial-gradient(circle at 50% 50%, #2ba8d4 0%, #0f2e4a 100%)",
-            "radial-gradient(circle at 50% 50%, #1e5f9c 0%, #0f2e4a 100%)"
-          ]
-        }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      />
-
+      <div className="ck-splash-bg" />
+      
       <div className="ck-splash-content">
-        
         {/* Pulsing Ring + Logo */}
         <div className="ck-splash-logo-wrap">
           <motion.div 
@@ -87,7 +64,6 @@ export default function SplashScreen() {
             transition={{ delay: 1.1, duration: 1.2, ease: "easeInOut" }}
           />
         </motion.div>
-
       </div>
     </motion.div>
   );

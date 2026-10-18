@@ -1,82 +1,52 @@
+let audioCtx = null;
 
-let ctx = null;
-
-function getCtx() {
-  if (!ctx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    ctx = new AC();
-  }
-  return ctx;
-}
-
-// Call this on the VERY FIRST user touch/click
 export function primeAudio() {
-  const audio = getCtx();
-  if (!audio) return;
-
-  if (audio.state === 'suspended') {
-    audio.resume().catch(() => {});
+  if (typeof window === 'undefined') return;
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) audioCtx = new AudioContext();
   }
-
-  // iOS requires a silent sound to actually play to unlock the context
-  const osc = audio.createOscillator();
-  const gain = audio.createGain();
-  gain.gain.value = 0.001; // Almost silent, but not 0
-  osc.connect(gain).connect(audio.destination);
-  osc.start(0);
-  osc.stop(0.1);
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
 }
 
-async function prepare() {
-  const audio = getCtx();
-  if (!audio) return null;
-  if (audio.state === 'suspended') {
-    try { await audio.resume(); } catch { return null; }
-  }
-  return audio;
-}
+function playTone({ type = 'sine', freq, duration, volume = 0.05, delay = 0 }) {
+  // Strict Gate: Do not play if context isn't ready/unlocked
+  if (!audioCtx || audioCtx.state === 'suspended') return;
 
-function playNote(audio, freq, start, dur, gainPeak = 0.3, type = 'sine') {
-  const now = audio.currentTime;
-  const osc = audio.createOscillator();
-  const gain = audio.createGain();
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  const now = audioCtx.currentTime + delay;
+
   osc.type = type;
-  osc.frequency.value = freq;
-  
-  gain.gain.setValueAtTime(0.0001, now + start);
-  gain.gain.exponentialRampToValueAtTime(gainPeak, now + start + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
-  
-  osc.connect(gain).connect(audio.destination);
-  osc.start(now + start);
-  osc.stop(now + start + dur + 0.05);
+  osc.frequency.setValueAtTime(freq, now);
+
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(volume, now + 0.02);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
 }
 
-export async function playChime() {
-  const audio = await prepare();
-  if (!audio) return;
-  playNote(audio, 659.25, 0.00, 0.20);
-  playNote(audio, 880.00, 0.15, 0.42);
+export function playPop() {
+  playTone({ type: 'triangle', freq: 300, duration: 0.08, volume: 0.03 });
 }
 
-export async function playPop() {
-  const audio = await prepare();
-  if (!audio) return;
-  playNote(audio, 880, 0, 0.06, 0.15, 'triangle');
-  playNote(audio, 1320, 0.03, 0.09, 0.1, 'sine');
+export function playSuccess() {
+  playTone({ type: 'sine', freq: 440, duration: 0.15, volume: 0.04 });
+  playTone({ type: 'sine', freq: 554.37, duration: 0.3, volume: 0.04, delay: 0.08 });
 }
 
-export async function playSuccess() {
-  const audio = await prepare();
-  if (!audio) return;
-  playNote(audio, 523.25, 0.00, 0.14);
-  playNote(audio, 659.25, 0.11, 0.14);
-  playNote(audio, 783.99, 0.22, 0.30);
+export function playError() {
+  playTone({ type: 'sawtooth', freq: 150, duration: 0.15, volume: 0.03 });
 }
 
-export async function playError() {
-  const audio = await prepare();
-  if (!audio) return;
-  playNote(audio, 220, 0, 0.20, 0.2, 'sawtooth');
+export function playChime() {
+  playTone({ type: 'sine', freq: 880, duration: 0.4, volume: 0.05 });
+  playTone({ type: 'sine', freq: 1108.73, duration: 0.4, volume: 0.05, delay: 0.15 });
 }

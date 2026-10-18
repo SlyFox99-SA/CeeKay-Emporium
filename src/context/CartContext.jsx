@@ -1,4 +1,6 @@
-﻿import { createContext, useContext, useEffect, useState } from 'react';
+const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useStore } from './StoreContext';
 
 const CartContext = createContext(null);
@@ -17,9 +19,14 @@ export function CartProvider({ children }) {
   const { store } = useStore();
 
   const [cart, setCart] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
-  });
+  try {
+    const saved = JSON.parse(localStorage.getItem('ceekay-cart') || '[]');
+    // Strict filter: Drop any items that don't have a valid Supabase UUID
+    return saved.filter(item => isUUID(item.id));
+  } catch {
+    return [];
+  }
+});
 
   const [cartStoreId, setCartStoreId] = useState(() => {
     try { return localStorage.getItem(STORE_KEY) || null; }

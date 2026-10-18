@@ -221,40 +221,24 @@
 .m-pwa-close { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 4px; }
 
 /* =========================================
-   FOOD APP VISUAL RESTORATION
+/* =========================================
+   FOOD APP VISUAL RESTORATION (Clean)
    ========================================= */
 
-/* Fix the Welcome Back Card (Restore Gradient) */
-
-.mobile-welcome-back {
-  display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(135deg, var(--ck-brand-deep), var(--ck-brand));
-  border-radius: 20px; padding: 16px; margin-bottom: 20px; color: white;
-  box-shadow: 0 10px 25px rgba(15, 46, 74, 0.2);
-}
-
-
-
-
-
-
-/* Restore the 3D Food Tiles */
 .premium-food-img {
-  background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
-  padding: 12px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  aspect-ratio: 1 / 1 !important;
+  background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
 }
 .premium-food-img img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2)) !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2));
 }
-
-/* Restore the + Button */
 
 .premium-add-btn {
   position: absolute; bottom: 12px; right: 12px;
@@ -264,63 +248,40 @@
   box-shadow: 0 4px 12px rgba(15, 46, 74, 0.25);
   z-index: 10; padding: 0; cursor: pointer;
 }
-.premium-add-btn svg { stroke: white; }
-
 .premium-add-btn svg {
-  color: white !important;
-  width: 18px !important;
-  height: 18px !important;
-  display: block !important;
+  color: white;
+  width: 18px;
+  height: 18px;
+  display: block;
+  stroke: white;
 }
 
-/* Fix the Modal Image Container (3D) */
 .m-modal-photo-wrapper {
-  background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 24px !important;
+  background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 .m-modal-photo-wrapper img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25)) !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25));
 }
 
-/* Make the drag handle prominent */
 .m-sheet-handle {
-  width: 48px !important;
-  height: 6px !important;
-  background: rgba(0, 0, 0, 0.25) !important;
-  border-radius: 4px !important;
-  margin: 0 auto !important;
-  display: block !important;
+  width: 48px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  margin: 0 auto;
+  display: block;
 }
 .m-modal-header, .m-cart-header {
-  justify-content: center !important; /* Center the handle */
+  justify-content: center;
 }
 
-/* =========================================
-   PREMIUM BOTTOM NAVIGATION
-   ========================================= */
-
-
-
-
-
-
-
-
-/* The Cart Icon Wrapper */
-
-
-/* The Red Cart Badge */
-
-
-/* =========================================
-   PREMIUM BOTTOM NAVIGATION
-   ========================================= */
 .mobile-bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   height: calc(64px + env(safe-area-inset-bottom));
@@ -332,31 +293,25 @@
   padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
 }
-
 .mobile-nav-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; color: #999; font-size: 10px; font-weight: 700; flex: 1; height: 100%;
   background: transparent; border: none; transition: color 0.2s ease;
 }
-
 .mobile-nav-item.active {
   color: var(--ck-brand-deep);
 }
-
 .mobile-nav-item.active svg {
   transform: translateY(-2px);
   transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 
-/* The Cart Icon Wrapper */
 .mobile-cart-icon-wrap {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-
-/* The Red Cart Badge */
 .mobile-cart-badge {
   position: absolute;
   top: -6px;
@@ -375,9 +330,6 @@
   box-shadow: 0 2px 4px rgba(139, 30, 18, 0.2);
 }
 
-/* =========================================
-   MOBILE IMAGE UPLOADER
-   ========================================= */
 .m-image-uploader { width: 100%; margin-top: 8px; }
 .m-image-upload-btn {
   width: 100%; height: 120px;
@@ -401,12 +353,108 @@
   backdrop-filter: blur(4px);
 }
 
-/* =========================================
-   GLOBAL BUTTON TACTILITY
-   ========================================= */
 button, .premium-add-btn, .mobile-nav-item {
-  transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1) !important;
+  transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 button:active, .premium-add-btn:active, .mobile-nav-item:active {
-  transform: scale(0.94) !important;
+  transform: scale(0.94);
+}
+
+/* =========================================
+   CINEMATIC SPLASH SCREEN
+   ========================================= */
+.ck-splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #1e5f9c 0%, #0f2e4a 100%);
+}
+
+.ck-splash-content {
+  display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; width: 100%; max-width: 400px;
+}
+
+.ck-splash-logo-wrap { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+
+.ck-splash-ring {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 2px solid var(--ck-warm); box-shadow: 0 0 30px var(--ck-warm);
+}
+
+.ck-splash-text-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 48px; }
+
+.ck-splash-title { font-family: var(--ck-font-display); font-size: 42px; font-weight: 900; color: #ffffff; margin: 0; line-height: 1; }
+
+.ck-splash-tagline { font-family: var(--ck-font-body); font-size: 12px; font-weight: 800; color: var(--ck-warm); text-transform: uppercase; margin: 8px 0 0 0; }
+
+.ck-splash-loader-track { width: 160px; height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 99px; overflow: hidden; }
+
+.ck-splash-loader-fill { height: 100%; background: var(--ck-warm); border-radius: 99px; box-shadow: 0 0 15px var(--ck-warm); }
+
+/* =========================================
+   CINEMATIC BRAND LOADER
+   ========================================= */
+.brand-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  width: 100%;
+  padding: 24px;
+}
+
+.brand-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-loader-icon {
+  background: var(--ck-cream-warm);
+  padding: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(15, 46, 74, 0.1);
+}
+
+.brand-loader-text {
+  font-family: var(--ck-font-serif);
+  font-size: 18px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--ck-brand-deep);
+}
+
+.brand-loader-bar-track {
+  width: 120px;
+  height: 4px;
+  background: var(--ck-border-strong);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.brand-loader-bar-fill {
+  height: 100%;
+  background: var(--ck-warm);
+  border-radius: 99px;
+}
+
+/* --- Sold out badge (inventory tracking) --- */
+.ck-soldout-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ck-achaar-red) 12%, transparent);
+  color: var(--ck-achaar-red);
+  font: 600 0.7rem/1 Inter, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }

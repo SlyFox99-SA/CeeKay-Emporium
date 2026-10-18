@@ -2,22 +2,34 @@ import { useEffect, useState } from 'react';
 import { Receipt, DollarSign, TrendingUp, Utensils, Trophy } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../../lib/supabase';
+import StoreSelector from '../../components/admin/StoreSelector';
 
 export default function AdminDashboard() {
+  const [selectedStore, setSelectedStore] = useState('all');
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, menuCount: 0, activeOrders: 0 });
   const [chartData, setChartData] = useState([]);
   const [topItems, setTopItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     (async () => {
+      setLoading(true);
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
-      const [ordersRes, menuRes] = await Promise.all([
-        supabase.from('orders').select('*').gte('created_at', sevenDaysAgo.toISOString()),
-        supabase.from('menu_items').select('id', { count: 'exact', head: true }),
-      ]);
+      let ordersQuery = supabase.from('orders').select('*').gte('created_at', sevenDaysAgo.toISOString());
+      if (selectedStore !== 'all') {
+        ordersQuery = ordersQuery.eq('store_id', selectedStore);
+      }
+
+      let menuQuery = supabase.from('menu_items').select('id', { count: 'exact', head: true });
+      // Note: If your menu_items table has a store_id in the future, filter it here too.
+
+      const [ordersRes, menuRes] = await Promise.all([ordersQuery, menuQuery]);
+
+      if (!isMounted) return;
 
       const orders = ordersRes.data || [];
       
@@ -53,7 +65,8 @@ export default function AdminDashboard() {
       // 3. Top Selling Items Logic
       const itemCounts = {};
       orders.filter(o => o.status !== 'cancelled').forEach(order => {
-        order.items.forEach(item => {
+        const items = order.items || [];
+        items.forEach(item => {
           if (!itemCounts[item.name]) {
             itemCounts[item.name] = { name: item.name, qty: 0, image: item.image };
           }
@@ -66,15 +79,18 @@ export default function AdminDashboard() {
 
       setLoading(false);
     })();
-  }, []);
+
+    return () => { isMounted = false; };
+  }, [selectedStore]);
 
   return (
     <div className="admin-page">
-      <header className="admin-page-head">
+      <header className="admin-page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div className="admin-page-eyebrow">Overview</div>
           <h1 className="admin-page-title">Dashboard</h1>
         </div>
+        <StoreSelector selectedStore={selectedStore} onChange={setSelectedStore} />
       </header>
 
       {/* KPI Cards */}
@@ -105,14 +121,14 @@ export default function AdminDashboard() {
           </div>
           <div style={{ width: '100%', height: 240 }}>
             <ResponsiveContainer>
-              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0,bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--ck-brand)" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="var(--ck-brand)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 12 }} dy={10} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12 }} dy={10} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   formatter={(value) => [`R ${value.toFixed(2)}`, 'Revenue']}

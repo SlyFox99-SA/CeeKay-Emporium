@@ -1,0 +1,21 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { HashRouter } from 'react-router-dom';
+import App from './App.jsx';
+import AudioWrapper from './components/AudioWrapper.jsx';
+import './main.css';
+
+// Purge legacy static store IDs
+if (localStorage.getItem('ceekay-store') === 'benoni') {
+  localStorage.removeItem('ceekay-store');
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <HashRouter>
+      <AudioWrapper>
+        <App />
+      </AudioWrapper>
+    </HashRouter>
+  </React.StrictMode>
+);

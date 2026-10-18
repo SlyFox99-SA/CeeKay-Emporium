@@ -1,12 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ShoppingBag, Home, ReceiptText, User, Plus, Share2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { useHaptics } from '../hooks/useHaptics';
-import { flyToCart } from '../lib/flyToCart';
 import { getMenu } from '../services/menuService';
+import { flyToCart } from '../lib/flyToCart';
+import { playPop } from '../lib/chime'; 
+import { usePrefs } from '../context/PreferencesContext';
+
 import ItemImage from '../components/ItemImage';
 import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
 import MobileItemModal from '../components/mobile/MobileItemModal';
@@ -21,6 +23,7 @@ import NetworkStatus from '../components/NetworkStatus';
 import ActiveOrderBar from '../components/mobile/ActiveOrderBar';
 import ErrorState from '../components/mobile/ErrorState';
 import PullToRefresh from '../components/mobile/PullToRefresh';
+import Toast from '../components/mobile/Toast';
 
 export default function MobileStorefront() {
   const [activeTab, setActiveTab] = useState('menu');
@@ -33,8 +36,18 @@ export default function MobileStorefront() {
   const [menu, setMenu] = useState({ kotas: [], drinks: [] });
 
   const { addToCart, count } = useCart();
-  const { store, clearStore } = useStore();
+  const { store } = useStore();
+  const { prefs } = usePrefs();
   const haptics = useHaptics();
+
+  useEffect(() => {
+    if (cartOpen || modalItem) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [cartOpen, modalItem]);
 
   const reloadData = async () => {
     setError(null);
@@ -59,6 +72,12 @@ export default function MobileStorefront() {
     setModalItem(null);
   };
 
+  const handleTabChange = (tab) => {
+    if (activeTab === tab) return;
+    haptics.light();
+    setActiveTab(tab);
+  };
+
   const handleShare = async () => {
     haptics.light();
     if (navigator.share) {
@@ -68,9 +87,7 @@ export default function MobileStorefront() {
           text: 'Order the best kotas in Benoni directly from the app!',
           url: window.location.origin,
         });
-      } catch (err) {
-        console.log('Share canceled');
-      }
+      } catch (err) {}
     } else {
       navigator.clipboard.writeText(window.location.origin);
       setToast('Link copied to clipboard!');
@@ -78,16 +95,17 @@ export default function MobileStorefront() {
     }
   };
 
-  const renderFoodItem = (item) => {
+  const renderFoodItem = (item, index) => {
     const isSoldOut = item.available === false;
     const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
 
     return (
       <motion.div 
         key={item.id} 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: index * 0.05 }}
+        whileTap={!isSoldOut ? { scale: 0.97 } : {}}
         className={`premium-food-card ${isSoldOut ? 'sold-out' : ''}`} 
         onClick={() => {
           if (!isSoldOut) {
@@ -111,13 +129,19 @@ export default function MobileStorefront() {
         </div>
 
         {!isSoldOut && (
-          <button className="premium-add-btn" onClick={(e) => {
-            e.stopPropagation();
-            addToCart(item, { qty: 1 });
-            haptics.light();
-          }}>
+          <motion.button 
+            whileTap={{ scale: 0.8 }}
+            className="premium-add-btn" 
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(item, { qty: 1 });
+              haptics.light();
+              if (prefs.sound) playPop();
+              flyToCart(e, item.image);
+            }}
+          >
             <Plus size={20} strokeWidth={3} />
-          </button>
+          </motion.button>
         )}
       </motion.div>
     );
@@ -127,15 +151,14 @@ export default function MobileStorefront() {
     <div className="mobile-app-shell">
       <NetworkStatus />
       
+      {/* HEADER RESTORED */}
       <header className="mobile-topbar">
         <div className="mobile-brand">
           <CKMark size={26} />
           <span>CeeKay</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="mobile-store-pill" onClick={clearStore}>
-            <MapPin size={12} /> {store?.branch || 'Benoni'}
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StoreSelector /> {/* <--- Trigger is here */}
           <button onClick={handleShare} style={{ background: 'transparent', border: 'none', color: 'var(--ck-brand-deep)', padding: 8 }}>
             <Share2 size={20} />
           </button>
@@ -147,10 +170,10 @@ export default function MobileStorefront() {
           {activeTab === 'menu' && (
             <motion.div 
               key="menu"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
               {loading ? (
                 <MobileSkeleton />
@@ -164,29 +187,28 @@ export default function MobileStorefront() {
                     <h2 className="mobile-section-title">Signature Kotas</h2>
                   </div>
                   <div className="premium-food-grid">
-                    {menu.kotas.map(renderFoodItem)}
+                    {menu.kotas.map((item, i) => renderFoodItem(item, i))}
                   </div>
 
                   <div className="mobile-category-header">
                     <h2 className="mobile-section-title">Cold Drinks</h2>
                   </div>
                   <div className="premium-food-grid">
-                    {menu.drinks.map(renderFoodItem)}
+                    {menu.drinks.map((item, i) => renderFoodItem(item, i + menu.kotas.length))}
                   </div>
-                  
                 </div>
               )}
             </motion.div>
           )}
 
           {activeTab === 'orders' && (
-            <motion.div key="orders" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+            <motion.div key="orders" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
               <MobileOrders />
             </motion.div>
           )}
 
           {activeTab === 'profile' && (
-            <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+            <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
               <MobileProfile />
             </motion.div>
           )}
@@ -197,47 +219,37 @@ export default function MobileStorefront() {
       <PwaInstallBanner />
 
       <nav className="mobile-bottom-nav">
-        <button className={`mobile-nav-item ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
+        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'menu' ? 'active' :''}`} onClick={() => handleTabChange('menu')}>
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} />
           <span>Menu</span>
-        </button>
-        <button className={`mobile-nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
-          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2} />
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'orders' ? 'active': ''}`} onClick={() => handleTabChange('orders')}>
+          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2}/>
           <span>Orders</span>
-        </button>
-        <button className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabChange('profile')}>
           <User size={22} strokeWidth={activeTab === 'profile' ? 2.5 : 2} />
           <span>Profile</span>
-        </button>
-        <button className="mobile-nav-item cart-tab" data-cart-target onClick={() => { setCartOpen(true); haptics.light(); }}>
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.9 }} className="mobile-nav-item cart-tab" data-cart-target onClick={() => { setCartOpen(true); haptics.light(); }}>
           <div className="mobile-cart-icon-wrap">
             <ShoppingBag size={22} strokeWidth={2} />
             {count > 0 && (
-              <motion.span 
-                key={count}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                className="mobile-cart-badge"
-              >
+              <motion.span key={count} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} className="mobile-cart-badge">
                 {count}
               </motion.span>
             )}
           </div>
           <span>Cart</span>
-        </button>
+        </motion.button>
       </nav>
 
       <AnimatePresence>
-        {cartOpen && <MobileCartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
-        {modalItem && <MobileItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}
+        {cartOpen && <MobileCartSidebar open={cartOpen} onClose={() => setCartOpen(false)} onToast={setToast} />}
+        {modalItem && <MobileItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} drinks={menu.drinks} />}
       </AnimatePresence>
       
-      <StoreSelector />
-      
-      {toast && (
-        <div className="toast show" style={{ zIndex: 9999 }}>{toast}</div>
-      )}
+      <Toast message={toast} onClose={() => setToast('')} />
     </div>
   );
 }

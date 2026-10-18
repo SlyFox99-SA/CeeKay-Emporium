@@ -1,13 +1,11 @@
-﻿
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { CartProvider } from './context/CartContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { useIsMobile } from './hooks/useIsMobile';
-import { primeAudio } from './lib/chime';
 import { useDynamicManifest } from './hooks/useDynamicManifest';
 
 import Storefront from './pages/Storefront';
@@ -27,59 +25,47 @@ import SplashScreen from './components/SplashScreen';
 
 function AppRoutes() {
   const isMobile = useIsMobile();
+  const location = useLocation();
   useDynamicManifest();
 
-  useEffect(() => {
-    const unlock = () => {
-      primeAudio();
-      // Once unlocked, remove the listeners so we don't spam it
-      window.removeEventListener('touchstart', unlock);
-      window.removeEventListener('click', unlock);
-    };
-    window.addEventListener('touchstart', unlock, { once: true });
-    window.addEventListener('click', unlock, { once: true });
-    return () => {
-      window.removeEventListener('touchstart', unlock);
-      window.removeEventListener('click', unlock);
-    };
-  }, []);
+  // Audio unlocking is strictly handled by AudioWrapper in main.jsx
 
   return (
-    <Routes>
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="menu" element={<AdminMenu />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="stores" element={<AdminStores />} />
-        <Route path="staff" element={<AdminStaff />} />
-      </Route>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="menu" element={<AdminMenu />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="stores" element={<AdminStores />} />
+          <Route path="staff" element={<AdminStaff />} />
+        </Route>
 
-      <Route path="/kitchen" element={<Kitchen />} />
-      <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
-      
-      <Route
-        path="/*"
-        element={
-          <StoreProvider>
-            <CartProvider>
-              {isMobile ? <MobileStorefront /> : <Storefront />}
-            </CartProvider>
-          </StoreProvider>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="/kitchen" element={<Kitchen />} />
+        <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
+        
+        <Route
+          path="/*"
+          element={
+            <StoreProvider>
+              <CartProvider>
+                {isMobile ? <MobileStorefront /> : <Storefront />}
+              </CartProvider>
+            </StoreProvider>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
+    const timer = setTimeout(() => setIsBooting(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -88,7 +74,7 @@ export default function App() {
       <PreferencesProvider>
         <AppRoutes />
         <AnimatePresence>
-          {showSplash && <SplashScreen key="splash" />}
+          {isBooting && <SplashScreen key="splash" />}
         </AnimatePresence>
       </PreferencesProvider>
     </AuthProvider>

@@ -33,7 +33,7 @@ export default function MobileLoyaltyCard() {
       if (prefs.confetti) burstConfetti();
       haptics.success();
     } catch (e) {
-      alert("Error redeeming reward");
+      console.error("Error redeeming reward");
     } finally {
       setRedeeming(false);
     }

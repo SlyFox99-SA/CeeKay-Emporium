@@ -6,3 +6,6 @@ dist
 *.local
 .dev.vars
 .env
+
+# Codebase Backups.backups/
+*.bak-*

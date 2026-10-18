@@ -4,7 +4,6 @@ function fromDb(row) {
   return {
     id: row.id,
     storeId: row.store_id,
-    storeBranch: row.store_branch,
     channel: row.channel,
     customer: row.customer || {},
     items: row.items || [],
@@ -20,7 +19,6 @@ function toDb(order) {
   return {
     id: order.id,
     store_id: order.storeId,
-    store_branch: order.storeBranch,
     channel: order.channel,
     customer: order.customer,
     items: order.items,
@@ -32,53 +30,30 @@ function toDb(order) {
   };
 }
 
-function generateOrderId() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const pick = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `CK-${pick(4)}-${pick(2)}`;
+function toOrderError(error) {
+  const msg = error?.message ?? '';
+  if (msg.includes('ITEMS_UNAVAILABLE')) {
+    const items = msg.split('ITEMS_UNAVAILABLE:')[1]?.trim() ?? 'some items';
+    return new Error(`Sorry, ${items} just sold out. Please update your cart.`);
+  }
+  if (msg.includes('MENU_ITEM_NOT_FOUND')) {
+    return new Error('One of your items is no longer on the menu. Please refresh.');
+  }
+  if (msg.includes('EMPTY_CART')) {
+    return new Error('Your cart is empty.');
+  }
+  // Show the actual database error for debugging
+  return new Error(msg || 'We could not place your order. Please try again.');
 }
 
-export async function createOrder({ store, cart, customer, note, channel, total }) {
-  const now = new Date().toISOString();
-  
-  const order = {
-    id: generateOrderId(),
-    storeId: store.id,
-    storeBranch: store.branch,
-    channel: channel || 'app',
-    customer: {
-      name: (customer?.name || '').trim(),
-      phone: (customer?.phone || '').trim(),
-      pickupTime: customer?.pickupTime || 'As soon as possible',
-    },
-    items: cart.map((i) => ({
-      id: i.id,
-      name: i.name,
-      image: i.image,
-      price: i.price,
-      qty: i.qty,
-      removedIngredients: i.removedIngredients || [],
-      itemNote: i.itemNote || '',
-    })),
-    note: note?.trim() || null,
-    total: Number(total),
-    status: 'placed',
-    statusHistory: [{ status: 'placed', at: now }],
-    createdAt: now,
-  };
+export async function createOrder({ order, items }) {
+  const { data, error } = await supabase.rpc('place_order_with_inventory', {
+    p_order: order,
+    p_items: items.map(({ id, quantity }) => ({ menu_item_id: id, quantity })),
+  });
 
-  const { data, error } = await supabase
-    .from('orders')
-    .insert(toDb(order))
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[Supabase Create Order Error]:', JSON.stringify(error, null, 2));
-    throw new Error(error.message || 'Database rejected order');
-  }
-  
-  return fromDb(data);
+  if (error) throw toOrderError(error);
+  return { id: data.order_id };
 }
 
 export async function getOrders() {

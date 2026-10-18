@@ -1,36 +1,31 @@
-﻿import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
-const PrefsContext = createContext(null);
-const KEY = 'ceekay-prefs';
-
-const DEFAULTS = {
-  sound: false,      /* off by default — least likely to annoy */
-  confetti: true,    /* on by default — it's the reward */
-  animations: true,  /* respects OS reduce-motion too */
-};
+const PreferencesContext = createContext(null);
+const STORAGE_KEY = 'ceekay-prefs';
 
 export function PreferencesProvider({ children }) {
   const [prefs, setPrefs] = useState(() => {
     try {
-      const raw = localStorage.getItem(KEY);
-      return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : { sound: true, confetti: true, animations: true };
     } catch {
-      return DEFAULTS;
+      return { sound: true, confetti: true, animations: true };
     }
   });
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(prefs));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
   }, [prefs]);
 
-  const setPref = (key, value) =>
-    setPrefs(prev => ({ ...prev, [key]: value }));
+  const togglePref = (key) => {
+    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
-    <PrefsContext.Provider value={{ prefs, setPref }}>
+    <PreferencesContext.Provider value={{ prefs, togglePref }}>
       {children}
-    </PrefsContext.Provider>
+    </PreferencesContext.Provider>
   );
 }
 
-export const usePrefs = () => useContext(PrefsContext);
+export const usePrefs = () => useContext(PreferencesContext);

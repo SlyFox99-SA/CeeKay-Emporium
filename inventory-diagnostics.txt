@@ -1,0 +1,317 @@
+
+======================================================================
+  Environment
+======================================================================
+PWD          : C:\dev\ceekay-react
+Node         : v24.18.0
+npm          : 11.16.0
+npx          : 11.16.0
+
+======================================================================
+  Inventory feature files on disk
+======================================================================
+  [OK ] supabase/migrations/20250210000000_inventory_tracking.sql
+  [OK ] supabase/migrations/20250210000100_place_order_with_inventory.sql
+  [OK ] src/hooks/useInventorySync.js
+  [OK ] src/components/mobile/SoldOutBadge.jsx
+  [OK ] src/components/admin/StockEditor.jsx
+
+======================================================================
+  src/components/mobile/*.jsx (all files)
+======================================================================
+  src\components\mobile\ActiveOrderBar.jsx
+  src\components\mobile\BrandLoader.jsx
+  src\components\mobile\EmptyState.jsx
+  src\components\mobile\ErrorState.jsx
+  src\components\mobile\MobileCartSidebar.jsx
+  src\components\mobile\MobileImageUploader.jsx
+  src\components\mobile\MobileItemModal.jsx
+  src\components\mobile\MobileMenuModal.jsx
+  src\components\mobile\PullToRefresh.jsx
+  src\components\mobile\PwaInstallBanner.jsx
+  src\components\mobile\SoldOutBadge.jsx
+
+======================================================================
+  Menu card candidates (name matches Menu|Item|Product|Food|Card)
+======================================================================
+  src\components\mobile\MobileItemModal.jsx
+  src\components\mobile\MobileMenuModal.jsx
+
+======================================================================
+  Checkout / cart candidates (name matches Checkout|Cart|Order)
+======================================================================
+  src\pages\MobileOrderStatus.jsx
+  src\pages\OrderStatus.jsx
+  src\pages\admin\AdminOrderModal.jsx
+  src\pages\admin\AdminOrders.jsx
+  src\components\mobile\ActiveOrderBar.jsx
+  src\components\mobile\MobileCartSidebar.jsx
+
+======================================================================
+  orderService.js - exported names
+======================================================================
+  export async function createOrder({ order, items }) {
+  export async function getOrders() {
+  export async function updateOrderStatus(id, status) {
+  export function subscribeToOrders(callback) {
+  export const ORDER_FLOW = ['placed', 'preparing', 'ready', 'completed'];
+  export const STATUS_LABELS = { placed: 'New', preparing: 'Preparing', ready: 'Ready', completed: 'Completed', cancelled: 'Cancelled' };
+
+======================================================================
+  components.css - lines 220..430 (the !important region, with context)
+======================================================================
+ 220 | .m-pwa-btn { background: var(--ck-warm); color: var(--ck-charcoal); border: none; padding: 8px 12px; border-radius: 99px; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+ 221 | .m-pwa-close { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 4px; }
+ 222 | 
+ 223 | /* =========================================
+ 224 |    FOOD APP VISUAL RESTORATION
+ 225 |    ========================================= */
+ 226 | 
+ 227 | /* Fix the Welcome Back Card (Restore Gradient) */
+ 228 | 
+ 229 | .mobile-welcome-back {
+ 230 |   display: flex; align-items: center; justify-content: space-between;
+ 231 |   background: linear-gradient(135deg, var(--ck-brand-deep), var(--ck-brand));
+ 232 |   border-radius: 20px; padding: 16px; margin-bottom: 20px; color: white;
+ 233 |   box-shadow: 0 10px 25px rgba(15, 46, 74, 0.2);
+ 234 | }
+ 235 | 
+ 236 | 
+ 237 | 
+ 238 | 
+ 239 | 
+ 240 | 
+ 241 | /* Restore the 3D Food Tiles */
+ 242 | .premium-food-img {
+ 243 |   background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+ 244 |   padding: 12px !important;
+ 245 |   display: flex !important;
+ 246 |   align-items: center !important;
+ 247 |   justify-content: center !important;
+ 248 |   aspect-ratio: 1 / 1 !important;
+ 249 | }
+ 250 | .premium-food-img img {
+ 251 |   width: 100% !important;
+ 252 |   height: 100% !important;
+ 253 |   object-fit: contain !important;
+ 254 |   filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2)) !important;
+ 255 | }
+ 256 | 
+ 257 | /* Restore the + Button */
+ 258 | 
+ 259 | .premium-add-btn {
+ 260 |   position: absolute; bottom: 12px; right: 12px;
+ 261 |   width: 32px; height: 32px; border-radius: 50%;
+ 262 |   background: var(--ck-brand-deep); color: white;
+ 263 |   border: 2px solid #fff; display: flex; align-items: center; justify-content: center;
+ 264 |   box-shadow: 0 4px 12px rgba(15, 46, 74, 0.25);
+ 265 |   z-index: 10; padding: 0; cursor: pointer;
+ 266 | }
+ 267 | .premium-add-btn svg { stroke: white; }
+ 268 | 
+ 269 | .premium-add-btn svg {
+ 270 |   color: white !important;
+ 271 |   width: 18px !important;
+ 272 |   height: 18px !important;
+ 273 |   display: block !important;
+ 274 | }
+ 275 | 
+ 276 | /* Fix the Modal Image Container (3D) */
+ 277 | .m-modal-photo-wrapper {
+ 278 |   background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+ 279 |   display: flex !important;
+ 280 |   align-items: center !important;
+ 281 |   justify-content: center !important;
+ 282 |   padding: 24px !important;
+ 283 | }
+ 284 | .m-modal-photo-wrapper img {
+ 285 |   width: 100% !important;
+ 286 |   height: 100% !important;
+ 287 |   object-fit: contain !important;
+ 288 |   filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25)) !important;
+ 289 | }
+ 290 | 
+ 291 | /* Make the drag handle prominent */
+ 292 | .m-sheet-handle {
+ 293 |   width: 48px !important;
+ 294 |   height: 6px !important;
+ 295 |   background: rgba(0, 0, 0, 0.25) !important;
+ 296 |   border-radius: 4px !important;
+ 297 |   margin: 0 auto !important;
+ 298 |   display: block !important;
+ 299 | }
+ 300 | .m-modal-header, .m-cart-header {
+ 301 |   justify-content: center !important; /* Center the handle */
+ 302 | }
+ 303 | 
+ 304 | /* =========================================
+ 305 |    PREMIUM BOTTOM NAVIGATION
+ 306 |    ========================================= */
+ 307 | 
+ 308 | 
+ 309 | 
+ 310 | 
+ 311 | 
+ 312 | 
+ 313 | 
+ 314 | 
+ 315 | /* The Cart Icon Wrapper */
+ 316 | 
+ 317 | 
+ 318 | /* The Red Cart Badge */
+ 319 | 
+ 320 | 
+ 321 | /* =========================================
+ 322 |    PREMIUM BOTTOM NAVIGATION
+ 323 |    ========================================= */
+ 324 | .mobile-bottom-nav {
+ 325 |   position: fixed; bottom: 0; left: 0; right: 0;
+ 326 |   height: calc(64px + env(safe-area-inset-bottom));
+ 327 |   background: rgba(255, 255, 255, 0.92);
+ 328 |   backdrop-filter: blur(16px);
+ 329 |   -webkit-backdrop-filter: blur(16px);
+ 330 |   border-top: 1px solid var(--ck-border);
+ 331 |   display: flex; align-items: center; justify-content: space-around;
+ 332 |   padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
+ 333 |   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
+ 334 | }
+ 335 | 
+ 336 | .mobile-nav-item {
+ 337 |   display: flex; flex-direction: column; align-items: center; justify-content: center;
+ 338 |   gap: 4px; color: #999; font-size: 10px; font-weight: 700; flex: 1; height: 100%;
+ 339 |   background: transparent; border: none; transition: color 0.2s ease;
+ 340 | }
+ 341 | 
+ 342 | .mobile-nav-item.active {
+ 343 |   color: var(--ck-brand-deep);
+ 344 | }
+ 345 | 
+ 346 | .mobile-nav-item.active svg {
+ 347 |   transform: translateY(-2px);
+ 348 |   transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
+ 349 | }
+ 350 | 
+ 351 | /* The Cart Icon Wrapper */
+ 352 | .mobile-cart-icon-wrap {
+ 353 |   position: relative;
+ 354 |   display: inline-flex;
+ 355 |   align-items: center;
+ 356 |   justify-content: center;
+ 357 | }
+ 358 | 
+ 359 | /* The Red Cart Badge */
+ 360 | .mobile-cart-badge {
+ 361 |   position: absolute;
+ 362 |   top: -6px;
+ 363 |   right: -10px;
+ 364 |   background: var(--ck-action);
+ 365 |   color: white;
+ 366 |   font-size: 10px;
+ 367 |   font-weight: 800;
+ 368 |   min-width: 18px;
+ 369 |   height: 18px;
+ 370 |   border-radius: 9px;
+ 371 |   display: flex;
+ 372 |   align-items: center;
+ 373 |   justify-content: center;
+ 374 |   border: 2px solid #fff;
+ 375 |   box-shadow: 0 2px 4px rgba(139, 30, 18, 0.2);
+ 376 | }
+ 377 | 
+ 378 | /* =========================================
+ 379 |    MOBILE IMAGE UPLOADER
+ 380 |    ========================================= */
+ 381 | .m-image-uploader { width: 100%; margin-top: 8px; }
+ 382 | .m-image-upload-btn {
+ 383 |   width: 100%; height: 120px;
+ 384 |   border: 2px dashed var(--ck-border-strong);
+ 385 |   border-radius: 16px;
+ 386 |   background: #fafafa;
+ 387 |   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+ 388 |   color: var(--ck-brand-deep); font-weight: 700; font-size: 14px;
+ 389 | }
+ 390 | .m-image-preview {
+ 391 |   position: relative; width: 100%; height: 200px;
+ 392 |   border-radius: 16px; overflow: hidden; background: var(--ck-cream-warm);
+ 393 |   display: flex; align-items: center; justify-content: center;
+ 394 | }
+ 395 | .m-image-preview img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+ 396 | .m-image-remove {
+ 397 |   position: absolute; top: 12px; right: 12px;
+ 398 |   width: 36px; height: 36px; border-radius: 50%;
+ 399 |   background: rgba(0,0,0,0.5); color: white; border: none;
+ 400 |   display: flex; align-items: center; justify-content: center;
+ 401 |   backdrop-filter: blur(4px);
+ 402 | }
+ 403 | 
+ 404 | /* =========================================
+ 405 |    GLOBAL BUTTON TACTILITY
+ 406 |    ========================================= */
+ 407 | button, .premium-add-btn, .mobile-nav-item {
+ 408 |   transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1) !important;
+ 409 | }
+ 410 | button:active, .premium-add-btn:active, .mobile-nav-item:active {
+ 411 |   transform: scale(0.94) !important;
+ 412 | }
+ 413 | 
+ 414 | /* =========================================
+ 415 |    CINEMATIC SPLASH SCREEN
+ 416 |    ========================================= */
+ 417 | .ck-splash-screen {
+ 418 |   position: fixed;
+ 419 |   inset: 0;
+ 420 |   z-index: 999999;
+ 421 |   display: flex;
+ 422 |   align-items: center;
+ 423 |   justify-content: center;
+ 424 |   overflow: hidden;
+ 425 |   background: radial-gradient(circle at center, #1e5f9c 0%, #0f2e4a 100%);
+ 426 | }
+ 427 | 
+ 428 | .ck-splash-content {
+ 429 |   display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; width: 100%; max-width: 400px;
+ 430 | }
+
+======================================================================
+  Every !important in components.css (line numbers only)
+======================================================================
+  line  243: background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+  line  244: padding: 12px !important;
+  line  245: display: flex !important;
+  line  246: align-items: center !important;
+  line  247: justify-content: center !important;
+  line  248: aspect-ratio: 1 / 1 !important;
+  line  251: width: 100% !important;
+  line  252: height: 100% !important;
+  line  253: object-fit: contain !important;
+  line  254: filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2)) !important;
+  line  270: color: white !important;
+  line  271: width: 18px !important;
+  line  272: height: 18px !important;
+  line  273: display: block !important;
+  line  278: background: radial-gradient(circle at center, #ffffff 0%, var(--ck-cream-warm) 100%) !important;
+  line  279: display: flex !important;
+  line  280: align-items: center !important;
+  line  281: justify-content: center !important;
+  line  282: padding: 24px !important;
+  line  285: width: 100% !important;
+  line  286: height: 100% !important;
+  line  287: object-fit: contain !important;
+  line  288: filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25)) !important;
+  line  293: width: 48px !important;
+  line  294: height: 6px !important;
+  line  295: background: rgba(0, 0, 0, 0.25) !important;
+  line  296: border-radius: 4px !important;
+  line  297: margin: 0 auto !important;
+  line  298: display: block !important;
+  line  301: justify-content: center !important; /* Center the handle */
+  line  408: transition: transform 0.1s cubic-bezier(0.3, 1.4, 0.5, 1) !important;
+  line  411: transform: scale(0.94) !important;
+
+======================================================================
+  Every !important across src/styles/*.css (all files)
+======================================================================
+  src\styles\animations.css  ->  0 !important occurrence(s)
+  src\styles\base.css  ->  0 !important occurrence(s)
+  src\styles\components.css  ->  32 !important occurrence(s)
+  src\styles\tokens.css  ->  0 !important occurrence(s)
