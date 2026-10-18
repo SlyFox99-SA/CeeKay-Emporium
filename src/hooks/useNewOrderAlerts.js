@@ -1,70 +1,37 @@
-﻿import { useEffect, useRef, useState } from 'react';
-import { playChime, primeAudio } from '../lib/chime';
+import { useEffect, useState, useRef } from 'react';
+import { supabase } from '../lib/supabase';
+import { playChime } from '../lib/chime';
 
-const PREF_KEY = 'ceekay-kitchen-alerts';
-
-export function useNewOrderAlerts(orders) {
-  const [enabled, setEnabled] = useState(() => {
-    try { return localStorage.getItem(PREF_KEY) === 'true'; }
-    catch { return false; }
-  });
-
-  const [permission, setPermission] = useState(() =>
-    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
-  );
-
-  const prevIdsRef = useRef(null);
+export function useNewOrderAlerts(initialEnabled = true) {
+  const [enabled, setEnabled] = useState(initialEnabled);
+  const enabledRef = useRef(initialEnabled);
 
   useEffect(() => {
-    try { localStorage.setItem(PREF_KEY, String(enabled)); } catch {}
-    if (enabled) primeAudio();
+    enabledRef.current = enabled;
   }, [enabled]);
 
   useEffect(() => {
-    if (!enabled) return;
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      Notification.requestPermission().then(p => setPermission(p));
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    const ids = orders.map(o => o.id);
-    const prev = prevIdsRef.current;
-
-    if (prev === null) {
-      prevIdsRef.current = ids;
-      return;
-    }
-
-    const newOrders = orders.filter(o => !prev.includes(o.id) && o.status === 'placed');
-    prevIdsRef.current = ids;
-
-    if (newOrders.length === 0) return;
-
-    if (enabled) {
-      playChime().catch(() => {});
-      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        newOrders.forEach(o => {
+    const channel = supabase
+      .channel('kitchen-alerts')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (!enabledRef.current) return;
+          
           try {
-            const notif = new Notification(`New order #${o.id}`, {
-              body: `${o.customer?.name || 'Guest'} · ${o.items.length} item${o.items.length > 1 ? 's' : ''} · R${o.total.toFixed(2)}`,
-              tag: o.id,
-            });
-            notif.onclick = () => { window.focus(); notif.close(); };
-          } catch {}
-        });
-      }
-    }
-  }, [orders, enabled]);
+            playChime();
+          } catch (err) {
+            console.warn('Audio blocked by browser', err);
+          }
+        }
+      )
+      .subscribe();
 
-  useEffect(() => {
-    const placedCount = orders.filter(o => o.status === 'placed').length;
-    document.title = placedCount > 0
-      ? `(${placedCount}) Kitchen — CeeKay`
-      : 'Kitchen — CeeKay Emporium';
-  }, [orders]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
-  useEffect(() => () => { document.title = 'CeeKay Emporium'; }, []);
-
-  return { enabled, setEnabled, permission };
+  return { enabled, setEnabled, toggle: () => setEnabled(e => !e) };
 }

@@ -1,125 +1,73 @@
-﻿import { useState } from 'react';
-import Header from '../components/Header';
-import KotaCard from '../components/KotaCard';
-import DrinkCard from '../components/DrinkCard';
-import CartSidebar from '../components/CartSidebar';
-import StoreSelector from '../components/StoreSelector';
-import Toast from '../components/Toast';
-import Ticker from '../components/Ticker';
-import TrustStrip from '../components/TrustStrip';
-import WelcomeBack from '../components/WelcomeBack';
-import InstallPrompt from '../components/InstallPrompt';
-import Preferences from '../components/Preferences';
-import ItemModal from '../components/ItemModal';
-import { useReveal } from '../hooks/useReveal';
+import { useState, useEffect } from 'react';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { KOTAS, DRINKS } from '../data/menu';
+import { useHaptics } from '../hooks/useHaptics';
+import { getMenu } from '../services/menuService';
+import ItemImage from '../components/ItemImage';
+import CartSidebar from '../components/CartSidebar';
+import ItemModal from '../components/ItemModal';
+import CKMark from '../components/CKMark';
+import StoreSelector from '../components/StoreSelector';
 
 export default function Storefront() {
+  const [menu, setMenu] = useState({ kotas: [], drinks: [] });
+  const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
-  const [toast, setToast] = useState('');
-  const [toastAction, setToastAction] = useState(null);
   const [modalItem, setModalItem] = useState(null);
+  
+  const { addToCart, count } = useCart();
+  const haptics = useHaptics();
 
-  const { addToCart } = useCart();
-  useReveal();
-
-  const handleAdd = (item) => {
-    setToastAction(null);
-    setToast(`${item.name} added to order`);
-  };
-
-  const handleToastWithAction = (message, action, onAction) => {
-    setToast(message);
-    setToastAction({ label: action, handler: onAction });
-  };
+  useEffect(() => {
+    getMenu().then(data => {
+      setMenu(data);
+      setLoading(false);
+    });
+  }, []);
 
   const handleModalConfirm = (item, options) => {
     addToCart(item, options);
-    setToastAction(null);
-    setToast(`${item.name} × ${options.qty} added`);
+    setModalItem(null);
   };
 
   return (
-    <>
-      <Ticker />
-      <Header onCartClick={() => setCartOpen(o => !o)} />
+    <div style={{ background: 'var(--ck-cream)', minHeight: '100vh', paddingBottom: '100px' }}>
+      <header style={{ background: 'white', borderBottom: '1px solid var(--ck-border)', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '24px', fontWeight: 900, color: 'var(--ck-brand-deep)' }}>
+          <CKMark size={32} /> CeeKay Emporium
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <StoreSelector />
+          <button onClick={() => setCartOpen(true)} style={{ background: 'var(--ck-brand-deep)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '99px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <ShoppingBag size={18} /> Cart ({count})
+          </button>
+        </div>
+      </header>
 
-      <main>
-        <section className="hero">
-          <div className="hero-stamp">
-            <span className="hero-stamp-line" />
-            <span>Est. 2021 · Benoni, Gauteng</span>
-            <span className="hero-stamp-line" />
-          </div>
-          <h1 className="hero-title">
-            Benoni's
-            <span className="hero-title-accent">Kota Spot</span>
-          </h1>
-          <p className="hero-tagline">
-            Handcrafted, packed with achaar, and made like we're feeding our own family. From R20.
-          </p>
-          <div className="hero-actions">
-            <a href="#menu" className="hero-cta hero-cta-primary">See the menu</a>
-            <button className="hero-cta hero-cta-ghost" onClick={() => setCartOpen(true)}>
-              Start an order
-            </button>
-          </div>
-        </section>
-
-        <TrustStrip />
-        <WelcomeBack />
-
-        <section className="menu-section" id="menu">
-          <div className="menu-heading" data-reveal>
-            <span className="menu-heading-eyebrow">What we serve</span>
-            <h2>Our Menu</h2>
-          </div>
-
-          <h3 className="menu-cat" data-reveal>Signature Kotas</h3>
-          <div className="kota-grid">
-            {KOTAS.map((k, i) => (
-              <div key={k.id} data-reveal style={{ '--delay': `${i * 90}ms` }}>
-                <KotaCard item={k} onAdd={handleAdd} onOpenModal={setModalItem} />
-              </div>
-            ))}
-          </div>
-
-          <h3 className="menu-cat" data-reveal>Cold Drinks</h3>
-          <div className="drink-grid">
-            {DRINKS.map((d, i) => (
-              <div key={d.id} data-reveal style={{ '--delay': `${i * 90}ms` }}>
-                <DrinkCard item={d} onAdd={handleAdd} onOpenModal={setModalItem} />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="storefront-footer" data-reveal>
-          <div className="footer-promise">
-            <span className="footer-promise-eyebrow">The CeeKay Promise</span>
-            <p>No shortcuts. No pre-cooking. Every kota made properly.</p>
-          </div>
-        </section>
+      <main style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 40px' }}>
+        {loading ? (
+          <div>Loading menu...</div>
+        ) : (
+          <>
+            <h2 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '32px', marginBottom: '24px' }}>Signature Kotas</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+              {menu.kotas.map(item => (
+                <div key={item.id} onClick={() => setModalItem(item)} style={{ background: 'white', borderRadius: '24px', padding: '20px', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                  <div style={{ height: '180px', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }}>
+                    <ItemImage src={item.image} alt={item.name} />
+                  </div>
+                  <h3 style={{ margin: '0 0 8px', fontSize: '20px', fontWeight: 800 }}>{item.name}</h3>
+                  <p style={{ margin: '0 0 16px', color: 'var(--ck-ink-soft)', fontSize: '14px' }}>{item.desc}</p>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--ck-brand-deep)' }}>R {item.price}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
-      <CartSidebar
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        onToast={setToast}
-        onToastAction={handleToastWithAction}
-      />
-      <ItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />
-      <StoreSelector />
-      <Preferences />
-      <InstallPrompt />
-      <Toast
-        message={toast}
-        action={toastAction?.label}
-        onAction={toastAction?.handler}
-        onDone={() => { setToast(''); setToastAction(null); }}
-        duration={toastAction ? 5000 : 2800}
-      />
-    </>
+      {cartOpen && <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />}
+      {modalItem && <ItemModal item={modalItem} onClose={() => setModalItem(null)} onConfirm={handleModalConfirm} />}
+    </div>
   );
 }

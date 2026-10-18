@@ -4,75 +4,56 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [state, setState] = useState({ user: null, profile: null, loading: true });
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const resolve = async (session) => {
-      if (!mounted) return;
-
-      if (!session?.user) {
-        setState({ user: null, profile: null, loading: false });
-        return;
-      }
-
-      setState((s) => ({ ...s, user: session.user, loading: true }));
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      if (!mounted) return;
-      setState({ user: session.user, profile: data || null, loading: false });
-    };
-
-    supabase.auth.getSession().then(({ data: { session } }) => resolve(session));
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => { resolve(session); }
-    );
-
-    return () => {
-      mounted = false;
-      subscription?.unsubscribe();
-    };
-  }, []);
-
-  const signIn = async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+  // Fetch the profile data (loyalty points, phone, etc.)
+  const fetchProfile = async (userId) => {
+    if (!userId) return setProfile(null);
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    setProfile(data);
   };
 
-  const signUp = async (email, password, fullName) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+      setLoading(false);
     });
-    if (error) throw error;
+
+    // Listen for auth changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+      else setProfile(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+    const signInWithGoogle = async () => {
+    return await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  };
+
+  const signInWithEmail = async (email) => {
+    return await supabase.auth.signInWithOtp({ email });
+  };
+
+  const verifyOtp = async (email, token) => {
+    return await supabase.auth.verifyOtp({ email, token, type: 'email' });
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setState({ user: null, profile: null, loading: false });
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user: state.user,
-        profile: state.profile,
-        loading: state.loading,
-        signIn,
-        signUp,
-        signOut,
-        isAdmin: state.profile?.role === 'admin',
-        isKitchen: state.profile?.role === 'kitchen' || state.profile?.role === 'admin',
-      }}
-    >
+    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, signInWithEmail, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

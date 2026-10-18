@@ -458,3 +458,204 @@ button:active, .premium-add-btn:active, .mobile-nav-item:active {
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
+/* --- ADMIN & KITCHEN LAYOUT FIXES --- */
+.admin-page {
+  padding: 24px 20px;
+}
+
+.admin-page-head {
+  margin-bottom: 24px;
+}
+
+.admin-page-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ck-brand-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.admin-page-title {
+  font-family: var(--ck-font-serif);
+  font-size: 28px;
+  margin: 0;
+  color: var(--ck-ink);
+}
+
+/* Admin Menu List */
+.admin-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.admin-menu-item {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  border: 1px solid var(--ck-border);
+}
+.admin-menu-info h4 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--ck-ink);
+}
+.admin-menu-info p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ck-ink-soft);
+}
+
+/* Kitchen Layout */
+.kitchen-container {
+  background: #f4f5f7;
+  min-height: 100dvh;
+  padding: 16px;
+}
+.kitchen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+}
+.kitchen-columns {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 24px;
+}
+.kitchen-column {
+  min-width: 280px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+}
+.kitchen-order-card {
+  background: var(--ck-cream);
+  border: 1px solid var(--ck-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.kitchen-order-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+/* --- PREMIUM SCROLL & FLOW FIXES --- */
+html, body {
+  overscroll-behavior-y: none;
+}
+
+/* Ensure main shells scroll properly but headers/navs stay fixed */
+.mobile-app-shell, .admin-shell-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* The main scrollable area */
+.m-main-content, .admin-main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Add padding so the bottom nav doesn't cover the last item */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Modal Body Scrolling */
+.m-modal-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+/* Prevent background scrolling when modals are open */
+body.modal-open {
+  overflow: hidden;
+}
+/* --- SYSTEM-WIDE SCROLL & LAYOUT LOCK --- */
+html, body, #root {
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent double scrolling */
+}
+
+/* The Shell (Admin & Customer) */
+.mobile-app-shell, .admin-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* The Fixed Header */
+.mobile-topbar, .admin-topbar {
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+/* The Scrollable Content Area */
+.m-main-content, .admin-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* This padding ensures the bottom of the list clears the fixed nav */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
+}
+/* ==========================================
+   SYSTEM-WIDE SCROLL & FLOW ENGINE
+   ========================================== */
+html, body, #root {
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Stop double bounce scrolling */
+}
+
+/* Flex container for app shells */
+.mobile-app-shell, .admin-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* The scrolling middle section */
+.m-main-content, .admin-main-scroll {
+  flex: 1;
+  min-height: 0; /* CRITICAL: Allows flex child to shrink and scroll */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+/* Modals must stretch but allow internal scrolling */
+.m-modal-sheet, .m-cart-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 90dvh; /* Never push past screen height */
+}
+
+.m-modal-body, .m-cart-items {
+  flex: 1;
+  min-height: 0; /* CRITICAL: Allows the modal body to scroll */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent background scrolling */
+body.modal-open {
+  overflow: hidden;
+}

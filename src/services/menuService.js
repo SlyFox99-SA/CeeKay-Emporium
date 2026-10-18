@@ -1,99 +1,69 @@
-﻿import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
-/* Map a Supabase row to the shape the storefront expects */
-function fromDb(row) {
-  return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    category: row.category,
-    price: Number(row.price),
-    image: row.image,
-    desc: row.description,
-    tag: row.tag,
-    tagClass: row.tag_class,
-    ribbon: row.ribbon,
-    ingredients: row.ingredients || [],
-    popular: row.popular,
-    available: row.available,
-    sortOrder: row.sort_order,
-  };
-}
+// ==========================================
+// CUSTOMER APP FUNCTIONS
+// ==========================================
 
-/* ── PUBLIC ── */
 export async function getMenu() {
   const { data, error } = await supabase
     .from('menu_items')
-    .select('*')
-    .eq('available', true)
-    .order('sort_order', { ascending: true });
+    .select(`
+      *,
+      modifiers:menu_item_modifiers(
+        modifier:modifiers(*)
+      )
+    `)
+    .order('category', { ascending: true });
 
   if (error) {
-    console.error('[getMenu]', error);
-    return { kotas: [], drinks: [] };
+    console.error('Error fetching menu:', error);
+    throw error;
   }
 
-  const items = (data || []).map(fromDb);
-  return {
-    kotas: items.filter((i) => i.category === 'kota'),
-    drinks: items.filter((i) => i.category === 'drink'),
-  };
+  const kotas = data.filter(item => item.category === 'kota').map(item => ({
+    ...item,
+    available_modifiers: item.modifiers.map(m => m.modifier)
+  }));
+
+  const drinks = data.filter(item => item.category === 'drink');
+
+  return { kotas, drinks };
 }
 
-/* ── ADMIN ── */
-export async function getAllMenu() {
-  const { data, error } = await supabase
-    .from('menu_items')
-    .select('*')
-    .order('sort_order', { ascending: true });
+// ==========================================
+// ADMIN PANEL FUNCTIONS
+// ==========================================
 
-  if (error) {
-    console.error('[getAllMenu]', error);
-    return [];
-  }
-  return (data || []).map(fromDb);
+// Note: We provide BOTH names to satisfy any historical imports
+export async function getAllMenu() {
+  const { data, error } = await supabase.from('menu_items').select('*').order('created_at', { ascending: false });
+  if (error) return [];
+  return data;
+}
+
+export async function getAllMenuItems() {
+  return getAllMenu();
+}
+
+export async function getModifiers() {
+  const { data, error } = await supabase.from('modifiers').select('*').eq('is_available', true);
+  if (error) return [];
+  return data;
 }
 
 export async function createMenuItem(item) {
-  const { data, error } = await supabase
-    .from('menu_items')
-    .insert(toDb(item))
-    .select()
-    .single();
+  const { data, error } = await supabase.from('menu_items').insert(item).select().single();
   if (error) throw error;
-  return fromDb(data);
+  return data;
 }
 
-export async function updateMenuItem(id, patch) {
-  const { data, error } = await supabase
-    .from('menu_items')
-    .update({ ...toDb(patch), updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
+export async function updateMenuItem(id, updates) {
+  const { data, error } = await supabase.from('menu_items').update(updates).eq('id', id).select().single();
   if (error) throw error;
-  return fromDb(data);
+  return data;
 }
 
 export async function deleteMenuItem(id) {
   const { error } = await supabase.from('menu_items').delete().eq('id', id);
   if (error) throw error;
-}
-
-function toDb(item) {
-  return {
-    slug: item.slug,
-    name: item.name,
-    category: item.category,
-    price: item.price,
-    image: item.image,
-    description: item.desc,
-    tag: item.tag,
-    tag_class: item.tagClass,
-    ribbon: item.ribbon,
-    ingredients: item.ingredients || [],
-    popular: !!item.popular,
-    available: item.available !== false,
-    sort_order: item.sortOrder ?? 0,
-  };
 }

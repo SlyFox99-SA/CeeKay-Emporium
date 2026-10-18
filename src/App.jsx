@@ -21,14 +21,13 @@ import AdminMenu from './pages/admin/AdminMenu';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
+import AdminPOS from './pages/admin/AdminPOS';
 import SplashScreen from './components/SplashScreen';
 
 function AppRoutes() {
   const isMobile = useIsMobile();
   const location = useLocation();
   useDynamicManifest();
-
-  // Audio unlocking is strictly handled by AudioWrapper in main.jsx
 
   return (
     <AnimatePresence mode="wait">
@@ -37,6 +36,7 @@ function AppRoutes() {
         <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="menu" element={<AdminMenu />} />
+          <Route path="pos" element={<AdminPOS />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="stores" element={<AdminStores />} />
           <Route path="staff" element={<AdminStaff />} />
@@ -48,11 +48,9 @@ function AppRoutes() {
         <Route
           path="/*"
           element={
-            <StoreProvider>
-              <CartProvider>
-                {isMobile ? <MobileStorefront /> : <Storefront />}
-              </CartProvider>
-            </StoreProvider>
+            <CartProvider>
+              {isMobile ? <MobileStorefront /> : <Storefront />}
+            </CartProvider>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -72,7 +70,9 @@ export default function App() {
   return (
     <AuthProvider>
       <PreferencesProvider>
-        <AppRoutes />
+        <StoreProvider>
+          <AppRoutes />
+        </StoreProvider>
         <AnimatePresence>
           {isBooting && <SplashScreen key="splash" />}
         </AnimatePresence>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 /**
  * Subscribes to menu_items UPDATEs and invokes onMenuChange(updatedRow)

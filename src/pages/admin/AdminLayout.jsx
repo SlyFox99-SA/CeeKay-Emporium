@@ -1,75 +1,60 @@
-﻿import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Utensils, Receipt, Store, Users, LogOut, ExternalLink } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import CKMark from '../../components/CKMark';
-
-const NAV = [
-  { to: '/admin',        icon: LayoutDashboard, label: 'Home', end: true },
-  { to: '/admin/menu',   icon: Utensils,        label: 'Menu' },
-  { to: '/admin/orders', icon: Receipt,         label: 'Orders' },
-  { to: '/admin/stores', icon: Store,           label: 'Stores' },
-  { to: '/admin/staff',  icon: Users,           label: 'Staff' },
-];
+import { FEATURES } from '../../config/features';
 
 export default function AdminLayout() {
-  const { user, profile, loading, signOut, isAdmin } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loading && !user) navigate('/admin/login', { replace: true });
-  }, [loading, user, navigate]);
-
-  if (loading) return <div className="admin-loading">Loading...</div>;
-  if (!user) return null;
-
-  if (!isAdmin) {
-    return (
-      <div className="admin-login">
-        <div className="admin-login-card">
-          <div className="admin-login-head">
-            <span className="admin-login-mark"><CKMark size={44} /></span>
-            <h1 className="admin-login-title">No admin access</h1>
-            <p className="admin-login-sub">Signed in as <strong>{profile?.email || user?.email}</strong>.</p>
-          </div>
-          <button className="admin-login-submit" onClick={signOut} style={{ marginTop: 24 }}>Sign out</button>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    signOut();
+    navigate('/admin/login');
+  };
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-brand">
-          <CKMark size={28} />
-          <div>
-            <div className="admin-sidebar-name">CeeKay</div>
-            <div className="admin-sidebar-role">Back office</div>
-          </div>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--ck-cream)' }}>
+      <aside style={{ width: '260px', background: 'white', borderRight: '1px solid var(--ck-border)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '24px' }}>
+          <h1 style={{ margin: 0, fontSize: '24px', fontFamily: 'var(--ck-font-serif)', color: 'var(--ck-brand-deep)' }}>CeeKay</h1>
+          <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', textTransform: 'uppercase' }}>Admin Panel</p>
         </div>
-        <nav className="admin-nav">
-          {NAV.map(({ to, icon: Icon, label, end }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
-              <Icon size={16} />
-              <span>{label}</span>
+        
+        <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <NavLink to="/admin" end style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600, fontSize: '14px', background: isActive ? 'var(--ck-cream)' : 'transparent', color: isActive ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)' })}>
+            <Home size={18} /> Dashboard
+          </NavLink>
+          
+          <NavLink to="/admin/menu" style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600, fontSize: '14px', background: isActive ? 'var(--ck-cream)' : 'transparent', color: isActive ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)' })}>
+            <Utensils size={18} /> Menu
+          </NavLink>
+
+          {FEATURES.enablePOS && (
+            <NavLink to="/admin/pos" style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600, fontSize: '14px', background: isActive ? 'var(--ck-cream)' : 'transparent', color: isActive ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)' })}>
+              <ShoppingCart size={18} /> Cashier POS
             </NavLink>
-          ))}
+          )}
+
+          <NavLink to="/admin/orders" style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600, fontSize: '14px', background: isActive ? 'var(--ck-cream)' : 'transparent', color: isActive ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)' })}>
+            <Receipt size={18} /> Orders
+          </NavLink>
+
+          {FEATURES.enableKitchenLink && (
+            <button onClick={() => navigate('/kitchen')} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '12px', background: 'transparent', border: 'none', color: 'var(--ck-ink-soft)', fontWeight: 600, fontSize: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+              <Flame size={18} /> Kitchen Display
+            </button>
+          )}
         </nav>
-        <div className="admin-sidebar-foot">
-          <a href="/" target="_blank" rel="noreferrer" className="admin-nav-item">
-            <ExternalLink size={16} />
-            <span>View store</span>
-          </a>
-          <button className="admin-nav-item" onClick={signOut}>
-            <LogOut size={16} />
-            <span>Sign out</span>
+
+        <div style={{ padding: '24px' }}>
+          <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'transparent', border: 'none', color: 'var(--ck-achaar-red)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+            <LogOut size={18} /> Sign Out
           </button>
         </div>
       </aside>
 
-      <main className="admin-main">
-        <Outlet />
+      <main style={{ flex: 1, padding: '40px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}><Outlet /></div>
       </main>
     </div>
   );
