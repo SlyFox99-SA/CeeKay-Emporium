@@ -8,7 +8,7 @@ export async function validatePromo(code) {
     .select('*')
     .eq('code', code.trim().toUpperCase())
     .eq('active', true)
-    .single();
+    .maybeSingle(); // FIXED: Gracefully handles invalid codes without 406
 
   if (error || !data) return null;
   return data;

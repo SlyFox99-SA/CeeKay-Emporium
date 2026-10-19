@@ -39,9 +39,9 @@ export async function getLastOrder() {
   return h.length > 0 ? h[0] : null;
 }
 
-/* ── LEGACY STUBS (Kept so imports don't break) ── */
-export function recordOrder(_order) { /* Supabase handles this now */ }
-export function updateHistoryStatus(_orderId, _status) { /* Supabase handles this now */ }
+/* ── LEGACY STUBS ── */
+export function recordOrder(_order) { }
+export function updateHistoryStatus(_orderId, _status) { }
 
 /* ── LOYALTY ── */
 export async function getLoyaltyProgress() {
@@ -50,7 +50,7 @@ export async function getLoyaltyProgress() {
     .from('loyalty')
     .select('kotas_count')
     .eq('device_id', deviceId)
-    .maybeSingle();
+    .maybeSingle(); // FIXED: Gracefully handles 0 rows
 
   const count = data?.kotas_count || 0;
   const threshold = 5;
@@ -70,7 +70,7 @@ export async function redeemLoyalty() {
     .from('loyalty')
     .select('kotas_count')
     .eq('device_id', deviceId)
-    .single();
+    .maybeSingle(); // FIXED: Gracefully handles 0 rows
     
   if (!data || data.kotas_count < 5) throw new Error("Not enough points");
 

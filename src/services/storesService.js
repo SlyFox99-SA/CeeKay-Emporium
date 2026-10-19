@@ -15,8 +15,9 @@ export async function updateStore(id, patch) {
     .update(patch)
     .eq('id', id)
     .select()
-    .single();
+    .maybeSingle(); // FIXED
   if (error) throw error;
+  if (!data) throw new Error('RLS restricted return on store update.');
   return data;
 }
 
@@ -25,7 +26,8 @@ export async function createStore(store) {
     .from('stores')
     .insert(store)
     .select()
-    .single();
+    .maybeSingle(); // FIXED
   if (error) throw error;
+  if (!data) throw new Error('RLS restricted return on store creation.');
   return data;
 }

@@ -20,7 +20,7 @@ export async function getMenu() {
     };
   } catch (err) {
     console.error('getMenu failed:', err);
-    return { kotas: [], drinks: [] }; // Safe fallback
+    return { kotas: [], drinks: [] };
   }
 }
 
@@ -34,33 +34,41 @@ export async function getAllMenu() {
     return [];
   }
 }
+
 export async function getAllMenuItems() { return getAllMenu(); }
+
 export async function getModifiers() {
   try {
     const { data } = await supabase.from('modifiers').select('*').eq('is_available', true);
     return data || [];
   } catch (err) { return []; }
 }
+
 export async function createMenuItem(item) {
   try {
-    const { data, error } = await supabase.from('menu_items').insert(item).select().single();
+    const { data, error } = await supabase.from('menu_items').insert(item).select().maybeSingle(); // FIXED
     if (error) throw error;
+    if (!data) throw new Error('RLS restricted return on create.');
     return data;
   } catch (err) { throw err; }
 }
+
 export async function updateMenuItem(id, updates) {
   try {
-    const { data, error } = await supabase.from('menu_items').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase.from('menu_items').update(updates).eq('id', id).select().maybeSingle(); // FIXED
     if (error) throw error;
+    if (!data) throw new Error('RLS restricted return on update.');
     return data;
   } catch (err) { throw err; }
 }
+
 export async function deleteMenuItem(id) {
   try {
     const { error } = await supabase.from('menu_items').delete().eq('id', id);
     if (error) throw error;
   } catch (err) { throw err; }
 }
+
 export async function updateItemModifiers(itemId, modifierIds) {
   try {
     await supabase.from('menu_item_modifiers').delete().eq('menu_item_id', itemId);
@@ -71,10 +79,11 @@ export async function updateItemModifiers(itemId, modifierIds) {
     }
   } catch (err) { throw err; }
 }
+
 export function subscribeToMenu(callback) {
   const channel = supabase
     .channel('menu-stream')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, () => {
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items'}, () => {
       getMenu().then(callback);
     })
     .subscribe();

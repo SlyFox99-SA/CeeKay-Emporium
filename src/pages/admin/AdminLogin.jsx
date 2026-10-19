@@ -40,11 +40,7 @@ export default function AdminLogin() {
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Email</label>
             <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="admin@ceekay.com" 
-              required 
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@ceekay.com" required 
               style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '16px', outline: 'none' }}
             />
           </div>
@@ -52,19 +48,13 @@ export default function AdminLogin() {
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Password</label>
             <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="••••••••" 
-              minLength={6} 
-              required 
+              type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" minLength={6} required 
               style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '16px', outline: 'none' }}
             />
           </div>
 
           <button 
-            type="submit" 
-            disabled={loading}
+            type="submit" disabled={loading}
             style={{ width: '100%', padding: '16px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 800, fontSize: '16px', cursor: loading ? 'not-allowed' : 'pointer', marginTop: '8px' }}
           >
             {loading ? 'Signing in...' : 'Sign In'}

@@ -23,6 +23,7 @@ import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminPOS from './pages/admin/AdminPOS';
 import SplashScreen from './components/SplashScreen';
+import InstallPWA from './components/mobile/InstallPWA';
 
 function AppRoutes() {
   const isMobile = useIsMobile();
@@ -74,7 +75,7 @@ function AppRoutes() {
           <CartProvider>
             
             <motion.div
-              initial={isOperational ? { opacity: 1 } : { scale: 1.05, opacity: 0 }}
+              initial={isOperational ? { opacity: 1 } : { scale: 1.05, opacity:0 }}
               animate={{ 
                 scale: isBooting ? 1.05 : 1, 
                 opacity: isBooting ? 0 : 1 
@@ -85,7 +86,7 @@ function AppRoutes() {
               <AnimatePresence mode="wait">
                 <Routes location={location} key={location.pathname}>
                   <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
+                  <Route path="/admin" element={isMobile ? <MobileAdminShell />: <AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
                     <Route path="pos" element={<AdminPOS />} />
@@ -111,6 +112,9 @@ function AppRoutes() {
             <AnimatePresence>
               {isBooting && !isOperational && <SplashScreen key="splash" />}
             </AnimatePresence>
+
+            {/* PWA Install Tile - Only on customer-facing routes */}
+            {!isOperational && <InstallPWA />}
 
           </CartProvider>
         </StoreProvider>

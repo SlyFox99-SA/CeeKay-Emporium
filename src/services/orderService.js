@@ -59,11 +59,11 @@ export async function getOrders() {
 
 export async function updateOrderStatus(id, status) {
   try {
-    // 1. Fetch current history
-    const { data: current } = await supabase.from('orders').select('status_history').eq('id', id).single();
+    // 1. Fetch current history gracefully
+    const { data: current } = await supabase.from('orders').select('status_history').eq('id', id).maybeSingle(); // FIXED
     const history = [...((current?.status_history) || []), { status, at: new Date().toISOString() }];
 
-    // 2. Update the row (Removed .select().single() to prevent RLS return errors)
+    // 2. Update the row
     const updates = { status, status_history: history };
     if (status === 'preparing') {
       updates.prep_started_at = new Date().toISOString();
@@ -76,7 +76,7 @@ export async function updateOrderStatus(id, status) {
 
     if (error) throw error;
     
-    // 3. Return the expected object so the UI doesn't crash
+    // 3. Return the expected object
     return { id, status, status_history: history };
   } catch (err) {
     console.error('updateOrderStatus failed:', err);

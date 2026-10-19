@@ -53,72 +53,40 @@ export default function SplashScreen() {
       exit={{ scale: 2, opacity: 0, transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] } }}
       style={{ position: 'fixed', inset: 0, zIndex: 999999, overflow: 'hidden', backgroundColor: '#0F2E4A', transformOrigin: 'center center', willChange: 'transform, opacity' }}
     >
-      
       <Embers />
 
       <motion.div
         initial={{ x: 0 }}
         animate={{ x: isOpen ? '-100%' : 0 }}
         transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
-        style={{
-          position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%',
-          backgroundColor: '#0F2E4A',
-          borderRight: '1px solid rgba(212, 175, 55, 0.2)',
-          zIndex: 10,
-          boxShadow: isOpen ? '10px 0 50px rgba(0,0,0,0.5)' : 'none',
-          willChange: 'transform'
-        }}
+        style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%', backgroundColor: '#0F2E4A', borderRight: '1px solid rgba(212, 175, 55, 0.2)', zIndex: 10, boxShadow: isOpen ? '10px 0 50px rgba(0,0,0,0.5)' : 'none', willChange: 'transform' }}
       />
 
       <motion.div
         initial={{ x: 0 }}
         animate={{ x: isOpen ? '100%' : 0 }}
         transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
-        style={{
-          position: 'absolute', top: 0, right: 0, bottom: 0, width: '50%',
-          backgroundColor: '#0F2E4A',
-          borderLeft: '1px solid rgba(212, 175, 55, 0.2)',
-          zIndex: 10,
-          boxShadow: isOpen ? '-10px 0 50px rgba(0,0,0,0.5)' : 'none',
-          willChange: 'transform'
-        }}
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '50%', backgroundColor: '#0F2E4A', borderLeft: '1px solid rgba(212, 175, 55, 0.2)', zIndex: 10, boxShadow: isOpen ? '-10px 0 50px rgba(0,0,0,0.5)' : 'none', willChange: 'transform' }}
       />
 
       <motion.div
         initial={{ opacity: 0, scaleX: 0, scaleY: 0 }}
-        animate={{ 
-          opacity: isOpen ? [0, 1, 0] : 0, 
-          scaleX: isOpen ? [0.1, 2, 3] : 0.1,
-          scaleY: isOpen ? [0.1, 1, 2] : 0.1
-        }}
+        animate={{ opacity: isOpen ? [0, 1, 0] : 0, scaleX: isOpen ? [0.1, 2, 3] : 0.1, scaleY: isOpen ? [0.1, 1, 2] : 0.1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: '100vw', height: '100vh',
-          background: 'radial-gradient(ellipse at center, #FFFFFF 0%, #D4AF37 20%, transparent 60%)',
-          zIndex: 5, pointerEvents: 'none', filter: 'blur(40px)',
-          willChange: 'transform, opacity'
-        }}
+        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100vw', height: '100vh', background: 'radial-gradient(ellipse at center, #FFFFFF 0%, #D4AF37 20%, transparent 60%)', zIndex: 5, pointerEvents: 'none', filter: 'blur(40px)', willChange: 'transform, opacity' }}
       />
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isOpen ? [0, 0.8, 0] : 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        style={{
-          position: 'absolute', inset: 0, backgroundColor: '#FFFFFF', zIndex: 6, pointerEvents: 'none',
-          willChange: 'opacity'
-        }}
+        style={{ position: 'absolute', inset: 0, backgroundColor: '#FFFFFF', zIndex: 6, pointerEvents: 'none', willChange: 'opacity' }}
       />
 
       <motion.div
         animate={{ opacity: isOpen ? 0 : 1, scale: isOpen ? 1.5 : 1 }}
         transition={{ duration: 0.8, ease: "easeIn" }}
-        style={{
-          position: 'absolute', inset: 0, zIndex: 20,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          willChange: 'transform, opacity'
-        }}
+        style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', willChange: 'transform, opacity' }}
       >
         <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           
@@ -140,10 +108,7 @@ export default function SplashScreen() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            style={{
-              position: 'absolute', inset: '-20px', borderRadius: '50%',
-              border: '1px dashed rgba(212, 175, 55, 0.3)'
-            }}
+            style={{ position: 'absolute', inset: '-20px', borderRadius: '50%', border: '1px dashed rgba(212, 175, 55, 0.3)' }}
           />
 
           <motion.div
@@ -159,8 +124,8 @@ export default function SplashScreen() {
         <motion.h1 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.4 }}
-          style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '42px', color: 'white', margin: '40px 0 0 0', letterSpacing: '0.02em' }}
+          transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.4}}
+          style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '42px', color:'white', margin: '40px 0 0 0', letterSpacing: '0.02em' }}
         >
           CeeKay
         </motion.h1>
@@ -168,7 +133,7 @@ export default function SplashScreen() {
         <motion.p 
           initial={{ letterSpacing: '0em', opacity: 0 }}
           animate={{ letterSpacing: '0.6em', opacity: 1 }}
-          transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.6 }}
+          transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.6}}
           style={{ fontFamily: 'var(--ck-font-display)', fontSize: '14px', color: '#D4AF37', textTransform: 'uppercase', margin: '8px 0 32px 0', fontWeight: 900 }}
         >
           Emporium
@@ -182,17 +147,13 @@ export default function SplashScreen() {
               animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
               exit={{ y: -15, opacity: 0, filter: 'blur(5px)' }}
               transition={{ duration: 0.4 }}
-              style={{ 
-                position: 'absolute', fontSize: '12px', color: 'rgba(255,255,255,0.7)', 
-                textTransform: 'uppercase', letterSpacing: '0.25em', fontWeight: 700
-              }}
+              style={{ position: 'absolute', fontSize: '12px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.25em', fontWeight: 700 }}
             >
               {loadingText}
             </motion.span>
           </AnimatePresence>
         </div>
       </motion.div>
-
     </motion.div>
   );
 }
