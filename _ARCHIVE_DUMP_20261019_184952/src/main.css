@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/animations.css';
+@import './styles/components.css';
+@import './styles/banner.css';
+@import './styles/modal.css';
+@import './styles/cart.css';
+
+/* =========================================
+   CEEKY DESKTOP SHELL (MONOLITHIC)
+   Strictly scoped with .ck-dk- to NEVER break mobile
+   ========================================= */
+
+.ck-dk-shell {
+  min-height: 100vh;
+  background-color: var(--ck-cream);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-family: var(--ck-font-body);
+}
+
+/* Top Marquee Ticker */
+.ck-dk-marquee {
+  background-color: var(--ck-brand-deep);
+  color: var(--ck-cream);
+  padding: 10px 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+}
+.ck-dk-marquee-content {
+  display: flex;
+  gap: 40px;
+  animation: ck-marquee 25s linear infinite;
+}
+.ck-dk-marquee-content span::before {
+  content: "•";
+  margin-right: 40px;
+  color: var(--ck-warm);
+}
+@keyframes ck-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Header */
+.ck-dk-header {
+  position: relative;
+  z-index: 100;
+  background: var(--ck-cream);
+  border-bottom: 1px solid var(--ck-border);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ck-dk-brand { display: flex; align-items: center; gap: 16px; }
+.ck-dk-brand-name { font-family: var(--ck-font-serif); font-size: 24px; font-weight: 800; color: var(--ck-brand-deep); line-height: 1.1; }
+.ck-dk-brand-sub { font-size: 12px; color: var(--ck-ink-soft); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.ck-dk-header-actions { display: flex; align-items: center; gap: 16px; }
+.ck-dk-store-pill { background: white; padding: 10px 18px; border-radius: 99px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: var(--ck-brand-deep); border: 1px solid var(--ck-border); cursor: pointer; transition: all 0.2s ease; }
+.ck-dk-store-pill:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.ck-dk-store-change { color: var(--ck-achaar-red); margin-left: 4px; font-size: 11px; text-transform: uppercase; }
+.ck-dk-cart-btn { background: var(--ck-brand-deep); color: white; border: none; padding: 12px 24px; border-radius: 99px; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s ease; }
+.ck-dk-cart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 46, 74, 0.2); }
+.ck-dk-cart-count { background: var(--ck-warm); color: var(--ck-brand-deep); padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 900; }
+
+/* Hero */
+.ck-dk-hero {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 100px 20px 80px; max-width: 900px; margin: 0 auto;
+}
+.ck-dk-hero-label { display: flex; align-items: center; gap: 16px; font-size: 12px; font-weight: 800; letter-spacing: 0.15em; color: var(--ck-brand-deep); text-transform: uppercase; margin-bottom: 24px; }
+.ck-dk-hero-label::before, .ck-dk-hero-label::after { content: ""; height: 1px; width: 50px; background: var(--ck-border); }
+.ck-dk-hero-title { font-family: var(--ck-font-serif); font-size: 86px; line-height: 1.05; color: var(--ck-ink); margin: 0 0 24px; letter-spacing: -0.02em; }
+.ck-dk-hero-title span { color: var(--ck-brand-deep); font-style: italic; }
+.ck-dk-hero-subtitle { font-family: var(--ck-font-serif); font-size: 22px; color: var(--ck-ink-soft); max-width: 600px; margin: 0 auto 48px; line-height: 1.5; font-weight: 500; }
+.ck-dk-hero-ctas { display: flex; gap: 16px; margin-bottom: 80px; }
+.ck-dk-btn-primary { background: var(--ck-brand-deep); color: white; padding: 18px 36px; border-radius: 99px; font-weight: 800; font-size: 15px; border: none; cursor: pointer; transition: all 0.2s ease; }
+.ck-dk-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 46, 74, 0.2); }
+.ck-dk-btn-secondary { background: transparent; color: var(--ck-brand-deep); padding: 18px 36px; border-radius: 99px; font-weight: 800; font-size: 15px; border: 2px solid var(--ck-brand-deep); cursor: pointer; transition: all 0.2s ease; }
+.ck-dk-btn-secondary:hover { background: var(--ck-brand-deep); color: white; }
+
+/* Features */
+.ck-dk-features-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1000px; margin: 0 auto; }
+.ck-dk-feature-card { background: white; padding: 24px; border-radius: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid var(--ck-border); text-align: left; }
+.ck-dk-feature-icon { background: var(--ck-cream); color: var(--ck-brand-deep); padding: 12px; border-radius: 12px; display: flex; }
+.ck-dk-feature-title { font-size: 14px; font-weight: 800; color: var(--ck-ink); margin-bottom: 4px; }
+.ck-dk-feature-desc { font-size: 13px; color: var(--ck-ink-soft); font-weight: 600; }
+
+/* Menu Grid */
+.ck-dk-main { padding: 60px 40px 100px; max-width: 1280px; margin: 0 auto; width: 100%; }
+.ck-dk-category-title { font-family: var(--ck-font-serif); font-size: 36px; margin: 0 0 32px; color: var(--ck-ink); }
+.ck-dk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px; margin-bottom: 60px; }
+.ck-dk-card { background: white; border-radius: 24px; padding: 16px; cursor: pointer; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--ck-border); display: flex; flex-direction: column; }
+.ck-dk-card-img { height: 220px; border-radius: 16px; overflow: hidden; margin-bottom: 20px; position: relative; background: var(--ck-cream); }
+.ck-dk-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.ck-dk-card-title { margin: 0 0 8px; font-size: 22px; font-weight: 800; color: var(--ck-ink); }
+.ck-dk-card-desc { margin: 0 0 20px; color: var(--ck-ink-soft); font-size: 15px; line-height: 1.4; flex: 1; }
+.ck-dk-card-price { font-size: 22px; font-weight: 900; color: var(--ck-brand-deep); }
+.ck-dk-add-btn { position: absolute; bottom: 16px; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--ck-brand-deep); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 46, 74, 0.2); }

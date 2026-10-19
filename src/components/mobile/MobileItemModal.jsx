@@ -5,6 +5,7 @@ import SoldOutBadge from './SoldOutBadge';
 import { useHaptics } from '../../hooks/useHaptics';
 import ModifierSelector from './item-modal/ModifierSelector';
 import PreferenceSelector from './item-modal/PreferenceSelector';
+import ItemImage from '../ItemImage'; // IMPORT ITEMIMAGE
 
 export default function MobileItemModal({ item, onClose, onConfirm }) {
   const haptics = useHaptics();
@@ -22,7 +23,6 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
 
   if (!item) return null;
   const isSoldOut = item.available === false;
-  const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
 
   const extras = item.available_modifiers?.filter(m => m.category === 'extra') || [];
   const prefs = item.available_modifiers?.filter(m => m.category === 'preference') || [];
@@ -88,7 +88,7 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
       onClick={onClose}
     >
       <motion.div 
-        style={{ width: '100%', height: '90dvh', background: 'var(--ck-cream)', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}
+        style={{ width: '100%', height: '90dvh', background: 'var(--ck-cream)',borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}
         onClick={e => e.stopPropagation()}
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 350 }}
@@ -98,7 +98,6 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
         dragElastic={{ top: 0, bottom: 0.5 }}
         onDragEnd={(e, info) => { if (info.offset.y > 100 || info.velocity.y > 500) onClose(); }}
       >
-        {/* 1. ABSOLUTE HEADER (DRAG HANDLE) */}
         <div 
           style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '16px', display: 'flex', justifyContent: 'center', zIndex: 50, cursor: 'grab' }}
           onPointerDown={(e) => dragControls.start(e)}
@@ -106,12 +105,11 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
           <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.8)', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
         </div>
 
-        {/* 2. SCROLLABLE BODY */}
         <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: 0 }}>
           
-          {/* HERO IMAGE */}
+          {/* HERO IMAGE - Now uses ItemImage to perfectly handle missing images */}
           <div style={{ width: '100%', height: '260px', background: 'var(--ck-cream)', position: 'relative' }}>
-             <img src={imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+             <ItemImage src={item.image} alt={item.name} />
              {isSoldOut && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><SoldOutBadge /></div>}
           </div>
 
@@ -128,14 +126,13 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
                 <ModifierSelector extras={extras} selectedMods={selectedMods} onUpdate={updateMod} />
                 <PreferenceSelector prefs={prefs} selectedMods={selectedMods} onToggle={togglePref} />
                 <div style={{ marginTop: '24px' }}>
-                  <textarea style={{ width: '100%', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '12px', padding: '16px', fontSize: '14px', minHeight: '80px', resize: 'none', outline: 'none' }} placeholder="Add a note (e.g. extra crispy)..." value={note} onChange={e => setNote(e.target.value)} />
+                  <textarea style={{ width: '100%', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '12px', padding: '16px',fontSize: '14px', minHeight: '80px', resize: 'none', outline: 'none' }} placeholder="Add a note (e.g. extra crispy)..." value={note} onChange={e => setNote(e.target.value)} />
                 </div>
               </>
             )}
           </div>
         </div>
 
-        {/* 3. FIXED FOOTER */}
         <div style={{ flexShrink: 0, background: 'white', padding: '16px 20px calc(16px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--ck-border)', boxShadow: '0 -4px 20px rgba(0,0,0,0.05)', zIndex: 10, display: 'flex', gap: '12px', alignItems: 'center' }}>
           {isSoldOut ? (
             <div style={{ width: '100%', textAlign: 'center', padding: '12px', color: 'var(--ck-achaar-red)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
@@ -148,7 +145,7 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
                 <span style={{ width: '32px', textAlign: 'center', fontWeight: 800, fontSize: '16px' }}>{qty}</span>
                 <button onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }} style={{ background: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}><Plus size={16} /></button>
               </div>
-              <button onClick={handleConfirm} style={{ flex: 1, height: '56px', background: isAdded ? 'var(--ck-green)' : 'var(--ck-brand-deep)', color: 'white', borderRadius: '99px', border: 'none', fontWeight: 800, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(15, 46, 74, 0.2)' }}>
+              <button onClick={handleConfirm} style={{ flex: 1, height: '56px',background: isAdded ? 'var(--ck-green)' : 'var(--ck-brand-deep)', color: 'white', borderRadius: '99px', border: 'none', fontWeight: 800, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor:'pointer', boxShadow: '0 4px 12px rgba(15, 46, 74, 0.2)' }}>
                 {isAdded ? (<><Check size={20} /> Added!</>) : (`Add • R ${subtotal.toFixed(2)}`)}
               </button>
             </>

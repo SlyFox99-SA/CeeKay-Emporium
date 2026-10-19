@@ -21,7 +21,7 @@ export default function ActiveOrderBar() {
       .in('status', ['pending', 'placed', 'preparing', 'ready'])
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setActiveOrder(data);

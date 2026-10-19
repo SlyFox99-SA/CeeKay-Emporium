@@ -1,0 +1,102 @@
+/* =========================================
+   ISOLATED: WELCOME BACK BANNER
+   ========================================= */
+
+.mobile-welcome-back {
+  display: flex;
+  flex-direction: row; /* Forces the tile to be wide/thick */
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--ck-brand-deep), var(--ck-brand));
+  border-radius: 20px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(15, 46, 74, 0.2);
+  width: 100%;
+}
+
+/* 1. The text and images container */
+.mwb-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0; 
+}
+
+.mwb-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--ck-warm);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.mwb-title {
+  font-family: var(--ck-font-serif);
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* 2. The thumbnails and count */
+.mwb-thumbs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.mwb-thumbs {
+  display: flex;
+  align-items: center;
+}
+
+.mwb-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  overflow: hidden;
+  background: white;
+  margin-left: -8px; 
+}
+
+.mwb-thumb:first-child {
+  margin-left: 0;
+}
+
+.mwb-thumb img, 
+.mwb-thumb .item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mwb-count {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* 3. The Reorder Button */
+.mwb-btn {
+  background: var(--ck-warm);
+  color: var(--ck-charcoal);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}

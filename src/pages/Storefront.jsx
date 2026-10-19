@@ -10,6 +10,7 @@ import ItemImage from '../components/ItemImage';
 import CartSidebar from '../components/CartSidebar';
 import ItemModal from '../components/ItemModal';
 import CKMark from '../components/CKMark';
+import GuestModeBanner from '../components/mobile/GuestModeBanner';
 
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const cardVariants = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } } };
@@ -33,7 +34,7 @@ export default function Storefront() {
   const scrollToMenu = () => { menuRef.current?.scrollIntoView({ behavior: 'smooth' }); };
 
   return (
-    <div className="ck-dk-shell">
+    <div className="ck-dk-shell">`n      <GuestModeBanner />
       <div className="ck-dk-marquee">
         <div className="ck-dk-marquee-content">
           <span>HAAR DAILY</span><span>|</span><span>EST. 2021 - BENONI, GAUTENG</span><span>|</span><span>KOTAS FROM R20</span><span>|</span><span>MADE LIKE WE'RE FEEDING FAMILY</span><span>|</span><span>ORDER ONLINE - READY IN 15 MIN</span><span>|</span><span>REAL FLAVOUR. REAL VALUE.</span><span>|</span>

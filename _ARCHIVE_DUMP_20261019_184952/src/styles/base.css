@@ -1,0 +1,39 @@
+/* =========================================
+   BASE RESET & TYPOGRAPHY
+   ========================================= */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--ck-cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--ck-ink);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  margin-top: 0;
+}
+
+input, textarea, select {
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 1px solid var(--ck-brand-deep);
+  border-color: var(--ck-brand-deep);
+}
+
+button {
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+/* Standard browser focus behavior is kept intact */

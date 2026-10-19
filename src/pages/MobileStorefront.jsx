@@ -24,6 +24,7 @@ import ActiveOrderBar from '../components/mobile/ActiveOrderBar';
 import ErrorState from '../components/mobile/ErrorState';
 import PullToRefresh from '../components/mobile/PullToRefresh';
 import Toast from '../components/mobile/Toast';
+import GuestModeBanner from '../components/mobile/GuestModeBanner';
 
 const CATEGORY_TITLES = {
   kotas: 'Signature Kotas',
@@ -143,7 +144,7 @@ export default function MobileStorefront() {
         <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop" alt="3D Background" />
       </motion.div>
 
-      <NetworkStatus />
+      <NetworkStatus />`n      <GuestModeBanner />
       
       <header className="mobile-topbar" style={{ position: 'relative', zIndex: 10 }}>
         <div className="mobile-brand">
