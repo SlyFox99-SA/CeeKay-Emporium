@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Home, ReceiptText, User, Plus, Share2, MapPin } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useStore } from '../context/StoreContext'; // IMPORTED
+import { useStore } from '../context/StoreContext';
 import { useHaptics } from '../hooks/useHaptics';
 import { getMenu, subscribeToMenu } from '../services/menuService';
 import { useSilentPolling } from '../hooks/useSilentPolling';
 import { flyToCart } from '../lib/flyToCart';
 import { playPop } from '../lib/chime'; 
 import { usePrefs } from '../context/PreferencesContext';
-import { openGoogleMaps } from '../lib/mapsUtils'; // IMPORTED
+import { openGoogleMaps } from '../lib/mapsUtils';
 
 import ItemImage from '../components/ItemImage';
 import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
@@ -43,12 +43,12 @@ const slideVariants = {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } }
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 }}
 };
 
 const cardVariants = {
   hidden: { opacity: 0, y: 60, scale: 0.9, rotateX: 15 },
-  show: { opacity: 1, y: 0, scale: 1, rotateX: 0, transition: { type: "spring", stiffness: 150, damping: 20, mass: 1.2 } }
+  show: { opacity: 1, y: 0, scale: 1, rotateX: 0, transition: { type: "spring",stiffness: 150, damping: 20, mass: 1.2 } }
 };
 
 export default function MobileStorefront() {
@@ -64,7 +64,7 @@ export default function MobileStorefront() {
   const [menu, setMenu] = useState({});
 
   const { addToCart, count } = useCart();
-  const { store } = useStore(); // GET ACTIVE STORE
+  const { store } = useStore();
   const { prefs } = usePrefs();
   const haptics = useHaptics();
 
@@ -122,7 +122,7 @@ export default function MobileStorefront() {
     haptics.light();
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'CeeKay Emporium', text: 'Order the best kotas in Benoni!', url: window.location.origin });
+        await navigator.share({ title: 'CeeKay Emporium', text: 'Order the bestkotas in Benoni!', url: window.location.origin });
       } catch (err) {}
     } else {
       navigator.clipboard.writeText(window.location.origin);
@@ -144,7 +144,7 @@ export default function MobileStorefront() {
         <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop" alt="3D Background" />
       </motion.div>
 
-      <NetworkStatus />`n      <GuestModeBanner />
+      <NetworkStatus />
       
       <header className="mobile-topbar" style={{ position: 'relative', zIndex: 10 }}>
         <div className="mobile-brand">
@@ -165,7 +165,10 @@ export default function MobileStorefront() {
         </div>
       </header>
 
-      <div className="m-main-content" style={{ position: 'relative', zIndex: 10 }}>
+      {/* GUEST MODE BANNER - Placed cleanly below the header */}
+      <GuestModeBanner />
+
+      <div className="m-main-content" style={{ position: 'relative', zIndex: 10}}>
         <PullToRefresh onRefresh={reloadData}>
           <AnimatePresence initial={false} custom={direction} mode="wait">
             {activeTab === 'menu' && (
@@ -258,7 +261,7 @@ export default function MobileStorefront() {
 
       <ActiveOrderBar />
 
-      <nav className="mobile-bottom-nav" style={{ position: 'relative', zIndex: 10 }}>
+      <nav className="mobile-bottom-nav" style={{ position: 'relative', zIndex:10 }}>
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('menu')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'menu' ? 'var(--ck-brand-deep)' : '#999' }}>
           {activeTab === 'menu' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} style={{zIndex: 1 }} />
@@ -267,7 +270,7 @@ export default function MobileStorefront() {
 
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('orders')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'orders' ? 'var(--ck-brand-deep)' : '#999' }}>
           {activeTab === 'orders' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
-          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2} style={{ zIndex: 1 }} />
+          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2}style={{ zIndex: 1 }} />
           <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Orders</span>
         </motion.button>
 

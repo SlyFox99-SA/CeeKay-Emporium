@@ -1,4 +1,4 @@
-﻿node_modules
+node_modules
 dist
 .env
 .env.local
@@ -21,3 +21,8 @@ dist
 # Environment
 .env
 .env.local
+
+# Ignore Archive Dumps
+_ARCHIVE_DUMP_*
+*.bak
+*.bak-*

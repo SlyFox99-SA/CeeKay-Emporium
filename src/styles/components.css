@@ -65,7 +65,7 @@ html, body {
   overflow-y: auto;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-bottom: calc(160px + env(safe-area-inset-bottom)); /* Increased to clear PWA banner */
 }
 
 /* =========================================
