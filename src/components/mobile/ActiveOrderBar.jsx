@@ -1,110 +1,134 @@
-
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { ChefHat, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { getOrders, subscribeToOrders } from '../../services/orderService';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { ChefHat, ChevronRight, X } from 'lucide-react';
+import { supabase, getDeviceId } from '../../lib/supabase';
+import { useHaptics } from '../../hooks/useHaptics';
 
 export default function ActiveOrderBar() {
   const [activeOrder, setActiveOrder] = useState(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  
   const navigate = useNavigate();
-  const location = useLocation();
-  const x = useMotionValue(0);
-  const barRef = useRef(null);
+  const haptics = useHaptics();
 
-  useEffect(() => {
-    const checkActive = async () => {
-      const orders = await getOrders();
-      const active = orders.find(o => ['placed', 'preparing', 'ready'].includes(o.status));
-      
-      if (active) {
-        setActiveOrder(active);
-        // If this specific order was previously dismissed, keep it hidden
-        const dismissedId = localStorage.getItem('ceekay-dismissed-order');
-        if (dismissedId === active.id) {
-          setDismissed(true);
-        } else {
-          setDismissed(false);
-        }
-      } else {
-        // No active order, clear the history so future orders appear
-        setActiveOrder(null);
-        localStorage.removeItem('ceekay-dismissed-order');
-      }
-    };
+  // 1. Fetch active order logic
+  const checkActiveOrder = async () => {
+    const { data } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('device_id', getDeviceId())
+      .in('status', ['pending', 'placed', 'preparing', 'ready'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
 
-    checkActive();
-    const unsub = subscribeToOrders(checkActive);
-    return unsub;
-  }, []);
-
-  const handleDismiss = () => {
-    setDismissed(true);
-    if (activeOrder) {
-      localStorage.setItem('ceekay-dismissed-order', activeOrder.id);
+    if (data) {
+      setActiveOrder(data);
+    } else {
+      setActiveOrder(null);
     }
   };
 
-  // Auto-dismiss after 6 seconds
+  // 2. Initial fetch and Realtime listener
   useEffect(() => {
-    if (!activeOrder || dismissed) return;
-    const timer = setTimeout(() => {
-      handleDismiss();
-    }, 6000);
-    return () => clearTimeout(timer);
-  }, [activeOrder, dismissed]);
+    checkActiveOrder();
 
-  // Dismiss when clicking outside
+    const channel = supabase
+      .channel('active-order-bar')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        checkActiveOrder();
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, []);
+
+  // 3. Listen for the custom "Done" event
   useEffect(() => {
-    if (!activeOrder || dismissed) return;
-    const handleOutsideClick = (e) => {
-      if (barRef.current && !barRef.current.contains(e.target)) {
-        handleDismiss();
-      }
+    const handleOrderPlaced = () => {
+      checkActiveOrder(); // Fetch the fresh order
+      setIsVisible(true); // Show the bar
     };
-    document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
-  }, [activeOrder, dismissed]);
 
-  if (!activeOrder || dismissed || location.pathname.startsWith('/order') || location.pathname === '/admin') {
-    return null;
-  }
+    window.addEventListener('order_placed', handleOrderPlaced);
+    return () => window.removeEventListener('order_placed', handleOrderPlaced);
+  }, []);
 
-  const getStatusText = (status) => {
-    if (status === 'placed') return 'Order received';
-    if (status === 'preparing') return 'Cooking your order';
-    if (status === 'ready') return 'Ready for pickup!';
-    return 'In progress';
-  };
+  // 4. Auto-hide timer
+  useEffect(() => {
+    if (!isVisible) return;
+    
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+    }, 8000); // Hide after 8 seconds
+
+    return () => clearTimeout(timer);
+  }, [isVisible]);
+
+  if (!activeOrder || !isVisible) return null;
+
+  // Formatting the Order Number safely
+  const displayId = activeOrder.order_number 
+    ? activeOrder.order_number 
+    : activeOrder.id.split('-')[0].toUpperCase(); 
+
+  const statusText = {
+    pending: 'Awaiting payment',
+    placed: 'Order received',
+    preparing: 'Cooking now',
+    ready: 'Ready for collection',
+  }[activeOrder.status] || 'Order in progress';
 
   return (
     <AnimatePresence>
-      <motion.div 
-        ref={barRef}
+      <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.4}
-        style={{ x }}
-        onDragEnd={(e, info) => {
-          if (info.offset.x > 80) {
-            handleDismiss();
-          }
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        onClick={() => { haptics.light(); navigate(`/order/${activeOrder.id}`); setIsVisible(false); }}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(80px + env(safe-area-inset-bottom))',
+          left: '20px',
+          right: '20px',
+          background: '#0F2E4A',
+          borderRadius: '99px',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: '0 8px 30px rgba(15, 46, 74, 0.3)',
+          zIndex: 90,
+          cursor: 'pointer',
+          border: '1px solid rgba(255,255,255,0.1)'
         }}
-        className={`active-order-bar status-${activeOrder.status}`}
-        onClick={() => navigate(`/order/${activeOrder.id}`)}
       >
-        <div className="aob-icon">
-          {activeOrder.status === 'ready' ? <CheckCircle2 size={20} /> : <ChefHat size={20} className="pulse-icon" />}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.1)', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChefHat size={18} color="#D4AF37" />
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: 'white' }}>
+              {statusText}
+            </span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+              #{displayId} • Tap to track
+            </span>
+          </div>
         </div>
-        <div className="aob-text">
-          <div className="aob-title">{getStatusText(activeOrder.status)}</div>
-          <div className="aob-sub">Order #{activeOrder.id}</div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ChevronRight size={20} color="rgba(255,255,255,0.5)" />
+          <button 
+            onClick={(e) => { e.stopPropagation(); setIsVisible(false); }}
+            style={{ background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', display: 'flex' }}
+          >
+            <X size={16} color="rgba(255,255,255,0.5)" />
+          </button>
         </div>
-        <ChevronRight size={20} className="aob-arrow" />
       </motion.div>
     </AnimatePresence>
   );

@@ -1,4 +1,4 @@
-import { ShoppingBag, ReceiptText, ChefHat } from 'lucide-react';
+
 
 const ICONS = {
   cart: ShoppingBag,

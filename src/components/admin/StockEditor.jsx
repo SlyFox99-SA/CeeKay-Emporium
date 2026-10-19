@@ -9,7 +9,8 @@ export function StockEditor({ item, onSaved }) {
 
   async function save() {
     setSaving(true);
-    const { data, error } = await supabase
+    try {
+      const { data, error } = await supabase
       .from('menu_items')
       .update({
         stock_quantity:      stock === '' ? null : Number(stock),
@@ -19,7 +20,13 @@ export function StockEditor({ item, onSaved }) {
       .eq('id', item.id)
       .select()
       .single();
-    setSaving(false);
+      setSaving(false);
+      if (error) throw error;
+      onSaved?.(data);
+    } catch (err) {
+      console.error('Stock update failed:', err);
+      setSaving(false);
+    }
     if (!error) onSaved?.(data);
   }
 

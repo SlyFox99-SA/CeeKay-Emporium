@@ -21,7 +21,7 @@ export default function MobileProfile() {
   const haptics = useHaptics();
   const [authOpen, setAuthOpen] = useState(false);
 
-  const storeName = store?.branch || store?.name || 'Benoni';
+  const storeName = store?.branch || store?.name || 'CeeKay';
   const points = profile?.loyalty_points || 0;
   const nextReward = 5;
   const progress = Math.min((points / nextReward) * 100, 100);

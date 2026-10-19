@@ -1,116 +1,192 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, ChefHat, CheckCircle2, Clock, Phone } from 'lucide-react';
-import { getHistory } from '../services/customerService';
-import { getOrders, subscribeToOrders } from '../services/orderService';
-import ItemImage from '../components/ItemImage';
+import { ArrowLeft, Clock, MapPin, CheckCircle2, Package, ChefHat, X, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { playSuccess } from '../lib/chime';
+import { cancelOrder } from '../services/orderService';
+import CancelConfirmModal from '../components/mobile/order-status/CancelConfirmModal';
 
 const STEPS = [
-  { key: 'placed',    label: 'Placed',    sub: 'We got your order', icon: Package },
-  { key: 'preparing', label: 'Preparing', sub: 'On the flat-top', icon: ChefHat },
-  { key: 'ready',     label: 'Ready',     sub: 'Come grab it', icon: CheckCircle2 },
-  { key: 'completed', label: 'Collected', sub: 'Enjoy!', icon: CheckCircle2 },
+  { id: 'placed', label: 'Placed', desc: 'We got your order', icon: Package },
+  { id: 'preparing', label: 'Preparing', desc: 'On the flat-top', icon: ChefHat },
+  { id: 'ready', label: 'Ready', desc: 'Come grab it', icon: Clock },
+  { id: 'completed', label: 'Collected', desc: 'Enjoy!', icon: CheckCircle2 },
 ];
+
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop";
 
 export default function MobileOrderStatus() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
-      // Await the promise from Supabase
-      const liveOrders = await getOrders();
-      const live = liveOrders.find(o => o.id === id);
-      
-      if (live) {
-        setOrder(live);
-      } else {
-        const hist = await getHistory();
-        const past = hist.find(h => h.id === id);
-        if (past) setOrder(past);
-      }
+    let subscription;
+
+    const fetchOrder = async () => {
+      const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+      if (!error && data) setOrder(data);
       setLoading(false);
     };
 
-    load();
-    const unsub = subscribeToOrders(load);
-    const i = setInterval(load, 5000);
-    return () => { unsub(); clearInterval(i); };
+    fetchOrder();
+
+    subscription = supabase
+      .channel(`order-status-${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` },
+        (payload) => {
+          setOrder(payload.new);
+          if (payload.new.status === 'ready') playSuccess();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (subscription) supabase.removeChannel(subscription);
+    };
   }, [id]);
 
-  if (loading) return <div className="mobile-app-shell"><div className="mobile-loading">Tracking...</div></div>;
-  if (!order) return <div className="mobile-app-shell"><div className="mobile-loading">Order not found.</div></div>;
+  const handleCancel = async () => {
+    setCancelling(true);
+    try {
+      await cancelOrder(order.id);
+      setOrder({ ...order, status: 'cancelled' });
+      setShowConfirm(false);
+    } catch (err) {
+      alert(err.message || "Failed to cancel order");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
-  const currentIdx = STEPS.findIndex(s => s.key === order.status);
-  const isReady = order.status === 'ready' || order.status === 'completed';
-  const isCancelled = order.status === 'cancelled';
+  if (loading) {
+    return <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-ink-soft)' }}>Loading order...</div>;
+  }
+
+  if (!order) {
+    return <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-achaar-red)' }}>Order not found.</div>;
+  }
+
+  const currentStepIndex = STEPS.findIndex(s => s.id === (order.status === 'pending' ? 'placed' : order.status));
+  const items = Array.isArray(order.items) ? order.items : [];
+  const canCancel = order.status === 'pending' || order.status === 'placed';
 
   return (
-    <div className="mobile-app-shell">
-      <header className="mobile-topbar" style={{ borderBottom: 'none' }}>
-        <button className="mobile-back-btn" onClick={() => navigate('/')}>
-          <ArrowLeft size={20} />
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--ck-cream)', overflow: 'hidden' }}>
+      
+      {/* Fixed Top Bar */}
+      <header style={{ flexShrink: 0, display: 'flex', alignItems: 'center', padding: '16px 20px', background: 'white', borderBottom: '1px solid var(--ck-border)', zIndex: 10 }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <ArrowLeft size={20} color="var(--ck-ink)" />
         </button>
-        <div className="mobile-brand" style={{ fontSize: 16 }}>Order #{order.id}</div>
-        <div style={{ width: 24 }} />
+        <div style={{ marginLeft: '8px', fontWeight: 800, fontSize: '16px', color: 'var(--ck-ink)' }}>
+          Order #{order.order_number || order.id.substring(0,6)}
+        </div>
       </header>
 
-      <main className="mobile-scroll-area">
-        <div className="mobile-track-header">
-          {isCancelled ? (
-            <h1 className="mobile-track-title" style={{ color: 'var(--ck-action)' }}>Cancelled</h1>
-          ) : isReady ? (
-            <h1 className="mobile-track-title" style={{ color: 'var(--ck-green)' }}>Ready!</h1>
+      {/* Scrollable Body */}
+      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        
+        {/* Tracking Timeline */}
+        <div style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid var(--ck-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <h2 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '24px', margin: '0 0 24px', color: 'var(--ck-ink)' }}>Tracking</h2>
+          
+          {order.status === 'cancelled' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', color: 'var(--ck-achaar-red)' }}>
+               <X size={48} strokeWidth={2} style={{ marginBottom: '16px' }} />
+               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Order Cancelled</h3>
+               <p style={{ margin: '4px 0 0', fontSize: '14px' }}>This order will not be prepared.</p>
+            </div>
           ) : (
-            <h1 className="mobile-track-title">Tracking</h1>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {STEPS.map((step, idx) => {
+                const isCompleted = idx <= currentStepIndex;
+                const isCurrent = idx === currentStepIndex;
+                const Icon = step.icon;
+                return (
+                  <div key={step.id} style={{ display: 'flex', gap: '16px', position: 'relative' }}>
+                    {idx !== STEPS.length - 1 && (
+                      <div style={{ position: 'absolute', left: '19px', top: '40px', bottom: '-24px', width: '2px', background: isCompleted ? 'var(--ck-brand-deep)' : 'var(--ck-border)', zIndex: 0 }} />
+                    )}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1, background: isCurrent ? 'var(--ck-brand-deep)' : (isCompleted ? 'var(--ck-brand-light, #e0f2fe)' : 'var(--ck-cream)'), color: isCurrent ? 'white' : (isCompleted ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)'), boxShadow: isCurrent ? '0 0 0 4px rgba(15, 46, 74, 0.1)' : 'none' }}>
+                      <Icon size={18} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '4px' }}>
+                      <span style={{ fontWeight: isCurrent ? 800 : 700, fontSize: '16px', color: isCompleted ? 'var(--ck-ink)' : 'var(--ck-ink-soft)' }}>{step.label}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--ck-ink-soft)', marginTop: '2px' }}>{step.desc}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
-          <p className="mobile-track-sub">Pickup at {order.storeBranch}</p>
         </div>
 
-        {!isCancelled && (
-          <div className="mobile-track-timeline">
-            {STEPS.map((step, i) => {
-              const reached = i <= currentIdx;
-              const active = i === currentIdx;
-              const Icon = step.icon;
+        {/* Order Details */}
+        <div style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1px solid var(--ck-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: 'var(--ck-ink)' }}>Pickup Details</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--ck-ink-soft)' }}>
+              <Clock size={16} /> {order.customer?.pickupTime || 'As soon as possible'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--ck-ink-soft)' }}>
+              <MapPin size={16} /> Benoni Branch
+            </div>
+          </div>
+
+          <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 800, color: 'var(--ck-ink)', borderTop: '1px solid var(--ck-border)', paddingTop: '24px' }}>Your Order</h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '24px' }}>
+            {items.map((item, idx) => {
+              const basePrice = Number(item.base_price) || Number(item.price) || 0;
+              const modsTotal = (item.mods || []).reduce((s, m) => s + (Number(m.price) || 0), 0);
+              const qty = Number(item.qty) || 1;
+              const itemTotal = (basePrice + modsTotal) * qty;
+
               return (
-                <div key={step.key} className={`mobile-track-step ${reached ? 'reached' : ''} ${active ? 'active' : ''}`}>
-                  <div className="mobile-track-icon-wrap">
-                    <div className="mobile-track-icon"><Icon size={18} /></div>
-                    {i !== STEPS.length - 1 && <div className="mobile-track-line" />}
+                <div key={item.id || idx} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '12px', overflow: 'hidden', background: 'var(--ck-cream)', flexShrink: 0 }}>
+                    <img src={item.image || FALLBACK_IMG} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                  <div className="mobile-track-text">
-                    <div className="mobile-track-label">{step.label}</div>
-                    <div className="mobile-track-sub-label">{step.sub}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--ck-ink)' }}>{qty}x {item.name}</div>
+                    {item.mods && item.mods.length > 0 && (
+                      <div style={{ fontSize: '12px', color: 'var(--ck-brand-deep)', fontWeight: 600, marginTop: '2px' }}>{item.mods.map(m => m.name).join(', ')}</div>
+                    )}
                   </div>
+                  <div style={{ fontWeight: 800, fontSize: '15px' }}>R {itemTotal.toFixed(2)}</div>
                 </div>
               );
             })}
           </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid var(--ck-border)' }}>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--ck-ink)' }}>Total</span>
+            <span style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '24px', fontWeight: 800, color: 'var(--ck-ink)' }}>R {Number(order.total || 0).toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* THE CANCEL BUTTON */}
+        {canCancel && (
+          <button 
+            onClick={() => setShowConfirm(true)} 
+            style={{ width: '100%', padding: '16px', background: 'transparent', color: 'var(--ck-achaar-red)', border: '1px solid var(--ck-achaar-red)', borderRadius: '99px', fontWeight: 800, fontSize: '16px', cursor: 'pointer', marginBottom: '40px' }}
+          >
+            Cancel Order
+          </button>
         )}
 
-        <div className="mobile-track-card">
-          <div className="mobile-track-row">
-            <Clock size={16} /> <span>{order.pickupTime || order.customer?.pickupTime || 'ASAP'}</span>
-          </div>
-          <div className="mobile-track-row">
-            <Phone size={16} /> <span>{order.customer?.phone || 'N/A'}</span>
-          </div>
-        </div>
+      </div>
 
-        <div className="mobile-track-items">
-          <h3>Your Order</h3>
-          {order.items.map((it, i) => (
-            <div key={i} className="mobile-track-item">
-              <div className="mobile-track-item-img"><ItemImage src={it.image} alt={it.name} /></div>
-              <div className="mobile-track-item-name">{it.name}</div>
-              <div className="mobile-track-item-qty">x{it.qty}</div>
-            </div>
-          ))}
-        </div>
-      </main>
+      {/* PREMIUM CONFIRMATION BOTTOM SHEET */}
+      
+
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { usePrefs } from '../context/PreferencesContext';
 import ItemImage from '../components/ItemImage';
 import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
 import MobileItemModal from '../components/mobile/MobileItemModal';
-import StoreSelector from '../components/StoreSelector'; // Correct path
+import StoreSelector from '../components/StoreSelector';
 import MobileOrders from '../components/MobileOrders';
 import MobileProfile from '../components/MobileProfile';
 import MobileSkeleton from '../components/MobileSkeleton';
@@ -24,6 +24,24 @@ import ErrorState from '../components/mobile/ErrorState';
 import PullToRefresh from '../components/mobile/PullToRefresh';
 import Toast from '../components/mobile/Toast';
 
+const CATEGORY_TITLES = {
+  kotas: 'Signature Kotas',
+  drinks: 'Cold Drinks',
+  sides: 'Sides & Extras',
+  desserts: 'Desserts'
+};
+
+// Stagger animation variants for the menu grid
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+
 export default function MobileStorefront() {
   const [activeTab, setActiveTab] = useState('menu');
   const [cartOpen, setCartOpen] = useState(false);
@@ -32,7 +50,7 @@ export default function MobileStorefront() {
   const [toast, setToast] = useState('');
   const [error, setError] = useState(null);
   
-  const [menu, setMenu] = useState({ kotas: [], drinks: [] });
+  const [menu, setMenu] = useState({});
 
   const { addToCart, count } = useCart();
   const { prefs } = usePrefs();
@@ -84,42 +102,6 @@ export default function MobileStorefront() {
     }
   };
 
-  const renderFoodItem = (item, index) => {
-    const isSoldOut = item.available === false;
-    const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
-
-    return (
-      <motion.div 
-        key={item.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 24, delay: index * 0.05 }}
-        whileTap={!isSoldOut ? { scale: 0.97 } : {}}
-        className={`premium-food-card ${isSoldOut ? 'sold-out' : ''}`} 
-        onClick={() => { if (!isSoldOut) { haptics.medium(); setModalItem(item); } }}
-      >
-        <div className="premium-food-img">
-          <img src={imageUrl} alt={item.name} onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop"; }} />
-          {isSoldOut && <div className="sold-out-overlay">Sold Out</div>}
-          {item.popular && <div className="premium-food-badge">Popular</div>}
-        </div>
-        
-        <div className="premium-food-body">
-          <div className="premium-food-header">
-            <h3 className="premium-food-name">{item.name}</h3>
-            <span className="premium-food-price">R {item.price}</span>
-          </div>
-          <p className="premium-food-desc">{item.desc}</p>
-        </div>
-
-        {!isSoldOut && (
-          <motion.button whileTap={{ scale: 0.8 }} className="premium-add-btn" onClick={(e) => {
-            e.stopPropagation(); addToCart(item, { qty: 1 }); haptics.light(); if (prefs.sound) playPop(); flyToCart(e, item.image);
-          }}>
-            <Plus size={20} strokeWidth={3} />
-          </motion.button>
-        )}
-      </motion.div>
-    );
-  };
-
   return (
     <div className="mobile-app-shell">
       <NetworkStatus />
@@ -140,16 +122,76 @@ export default function MobileStorefront() {
                 {loading ? <MobileSkeleton /> : error ? <ErrorState onRetry={reloadData} /> : (
                   <div className="mobile-menu-view">
                     <MobileWelcomeBack />
-                    <div className="mobile-category-header"><h2 className="mobile-section-title">Signature Kotas</h2></div>
-                    <div className="premium-food-grid">{menu.kotas.map((item, i) => renderFoodItem(item, i))}</div>
-                    <div className="mobile-category-header"><h2 className="mobile-section-title">Cold Drinks</h2></div>
-                    <div className="premium-food-grid">{menu.drinks.map((item, i) => renderFoodItem(item, i + menu.kotas.length))}</div>
+                    
+                    {Object.entries(menu).map(([categoryKey, items]) => {
+                      if (!items || items.length === 0) return null;
+                      const title = CATEGORY_TITLES[categoryKey] || (categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1));
+                      return (
+                        <div key={categoryKey} style={{ marginBottom: '32px' }}>
+                          <div className="mobile-category-header">
+                            <h2 className="mobile-section-title">{title}</h2>
+                          </div>
+                          
+                          {/* LIQUID STAGGER GRID */}
+                          <motion.div 
+                            className="premium-food-grid"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="show"
+                          >
+                            {items.map((item, i) => {
+                              const isSoldOut = item.available === false;
+                              const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
+                              return (
+                                <motion.div 
+                                  key={item.id} 
+                                  variants={itemVariants}
+                                  whileTap={!isSoldOut ? { scale: 0.95 } : {}}
+                                  className={`premium-food-card ${isSoldOut ? 'sold-out' : ''}`} 
+                                  onClick={() => { if (!isSoldOut) { haptics.medium(); setModalItem(item); } }}
+                                >
+                                  <div className="premium-food-img">
+                                    <img src={imageUrl} alt={item.name} />
+                                    {isSoldOut && <div className="sold-out-overlay">Sold Out</div>}
+                                    {item.popular && <div className="premium-food-badge">Popular</div>}
+                                  </div>
+                                  
+                                  <div className="premium-food-body">
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                      <h3 className="premium-food-name">{item.name}</h3>
+                                      <span className="premium-food-price">R {item.price}</span>
+                                    </div>
+                                    <p className="premium-food-desc">{item.desc}</p>
+                                  </div>
+
+                                  {!isSoldOut && (
+                                    <motion.button 
+                                      whileTap={{ scale: 0.7 }} 
+                                      className="premium-add-btn" 
+                                      onClick={(e) => {
+                                        e.stopPropagation(); 
+                                        addToCart(item, { qty: 1 }); 
+                                        haptics.light(); 
+                                        if (prefs.sound) playPop(); 
+                                        flyToCart(e, item.image);
+                                      }}
+                                    >
+                                      <Plus size={20} strokeWidth={3} />
+                                    </motion.button>
+                                  )}
+                                </motion.div>
+                              );
+                            })}
+                          </motion.div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </motion.div>
             )}
-            {activeTab === 'orders' && <motion.div key="orders" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}><MobileOrders /></motion.div>}
-            {activeTab === 'profile' && <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}><MobileProfile /></motion.div>}
+            {activeTab === 'orders' && <motion.div key="orders" initial={{ opacity: 0, scale: 0.98, x: 20 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.98, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 35 }}><MobileOrders /></motion.div>}
+            {activeTab === 'profile' && <motion.div key="profile" initial={{ opacity: 0, scale: 0.98, x: 20 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.98, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 35 }}><MobileProfile /></motion.div>}
           </AnimatePresence>
         </PullToRefresh>
       </div>
@@ -157,16 +199,33 @@ export default function MobileStorefront() {
       <ActiveOrderBar />
       <PwaInstallBanner />
 
-      <nav className="mobile-bottom-nav">
-        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'menu' ? 'active' :''}`} onClick={() => handleTabChange('menu')}><Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} /><span>Menu</span></motion.button>
-        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'orders' ? 'active': ''}`} onClick={() => handleTabChange('orders')}><ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2}/><span>Orders</span></motion.button>
-        <motion.button whileTap={{ scale: 0.9 }} className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabChange('profile')}><User size={22} strokeWidth={activeTab === 'profile' ? 2.5 : 2} /><span>Profile</span></motion.button>
-        <motion.button whileTap={{ scale: 0.9 }} className="mobile-nav-item cart-tab" onClick={() => { setCartOpen(true); haptics.light(); }}>
-          <div className="mobile-cart-icon-wrap">
+      {/* LIQUID BOTTOM NAVIGATION */}
+      <nav className="mobile-bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 'calc(64px + env(safe-area-inset-bottom))', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', borderTop: '1px solid var(--ck-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 100, boxShadow: '0 -4px 20px rgba(0,0,0,0.04)' }}>
+        
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('menu')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'menu' ? 'var(--ck-brand-deep)' : '#999' }}>
+          {activeTab === 'menu' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
+          <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} style={{ zIndex: 1 }} />
+          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Menu</span>
+        </motion.button>
+
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('orders')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'orders' ? 'var(--ck-brand-deep)' : '#999' }}>
+          {activeTab === 'orders' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
+          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2} style={{ zIndex: 1 }} />
+          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Orders</span>
+        </motion.button>
+
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('profile')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'profile' ? 'var(--ck-brand-deep)' : '#999' }}>
+          {activeTab === 'profile' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
+          <User size={22} strokeWidth={activeTab === 'profile' ? 2.5 : 2} style={{ zIndex: 1 }} />
+          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Profile</span>
+        </motion.button>
+
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setCartOpen(true); haptics.light(); }} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: '#999' }}>
+          <div style={{ position: 'relative', display: 'flex' }}>
             <ShoppingBag size={22} strokeWidth={2} />
-            {count > 0 && <motion.span key={count} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} className="mobile-cart-badge">{count}</motion.span>}
+            {count > 0 && <motion.span key={count} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} style={{ position: 'absolute', top: '-6px', right: '-10px', background: 'var(--ck-action)', color: 'white', fontSize: '10px', fontWeight: 800, minWidth: '18px', height: '18px', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white' }}>{count}</motion.span>}
           </div>
-          <span>Cart</span>
+          <span style={{ fontSize: '10px', fontWeight: 700 }}>Cart</span>
         </motion.button>
       </nav>
 

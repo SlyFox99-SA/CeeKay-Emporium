@@ -16,11 +16,21 @@ export default function PreferenceSelector({ prefs, selectedMods, onToggle }) {
             {prefs.filter(p => p.group_name === group).map(pref => {
               const isSelected = selectedMods.some(m => m.id === pref.id);
               return (
-                <button key={pref.id} onClick={() => onToggle(pref)} style={{ padding: '10px 16px', borderRadius: '99px', border: `1px solid ${isSelected ? 'var(--ck-brand-deep)' : 'var(--ck-border)'}`, background: isSelected ? 'var(--ck-brand-deep)' : 'white', color: isSelected ? 'white' : 'var(--ck-ink)', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {pref.color_hex && pref.color_hex !== 'transparent' && (
-                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: pref.color_hex, border: '1px solid rgba(0,0,0,0.1)', display: 'inline-block' }} />
-                  )}
-                  {isSelected && <Check size={14} />} {pref.name}
+                <button key={pref.id} onClick={() => onToggle(pref)} style={{ padding: '10px 16px', borderRadius: '99px', border: `1px solid ${isSelected ? 'var(--ck-brand-deep)' : 'var(--ck-border)'}`, background: isSelected ? 'var(--ck-brand-deep)' : 'white', color: isSelected ? 'white' : 'var(--ck-ink)', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'background 0.2s, border 0.2s' }}>
+                  {/* 1. The Color Dot (Always rendered, just hidden if none) */}
+                  <span style={{ 
+                    width: '12px', height: '12px', borderRadius: '50%', 
+                    backgroundColor: pref.color_hex || 'transparent', 
+                    border: pref.color_hex && pref.color_hex !== 'transparent' ? '1px solid rgba(0,0,0,0.1)' : 'none', 
+                    display: pref.color_hex && pref.color_hex !== 'transparent' ? 'inline-block' : 'none' 
+                  }} />
+                  
+                  {/* 2. The Checkmark (Reserves exactly 14px of space, invisible when not selected) */}
+                  <div style={{ width: '14px', height: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: isSelected ? 1 : 0 }}>
+                    <Check size={14} />
+                  </div>
+                  
+                  {pref.name}
                 </button>
               );
             })}

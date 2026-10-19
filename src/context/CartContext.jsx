@@ -1,114 +1,93 @@
-const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useStore } from './StoreContext';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext(null);
 const STORAGE_KEY = 'ceekay-cart';
-const STORE_KEY = 'ceekay-cart-store';
-
-/* A cart line is unique per combination of:
-   product id + removed ingredients + item note. */
-function lineKey(item) {
-  const removed = (item.removedIngredients || []).slice().sort().join('|');
-  const note = (item.itemNote || '').trim().toLowerCase();
-  return `${item.id}::${removed}::${note}`;
-}
 
 export function CartProvider({ children }) {
-  const { store } = useStore();
-
   const [cart, setCart] = useState(() => {
-  try {
-    const saved = JSON.parse(localStorage.getItem('ceekay-cart') || '[]');
-    // Strict filter: Drop any items that don't have a valid Supabase UUID
-    return saved.filter(item => isUUID(item.id));
-  } catch {
-    return [];
-  }
-});
-
-  const [cartStoreId, setCartStoreId] = useState(() => {
-    try { return localStorage.getItem(STORE_KEY) || null; }
-    catch { return null; }
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }, [cart]);
-  useEffect(() => { if (cartStoreId) localStorage.setItem(STORE_KEY, cartStoreId); }, [cartStoreId]);
-
   useEffect(() => {
-    if (cartStoreId && store?.id && cartStoreId !== store.id) {
-      setCart([]);
-      setCartStoreId(null);
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(STORE_KEY);
-    }
-  }, [store?.id, cartStoreId]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
 
-  /* Add an item with optional qty, removed ingredients, per-item note. */
-  const addToCart = (product, options = {}) => {
-    const { qty = 1, removedIngredients = [], itemNote = '' } = options;
-    if (store?.id) setCartStoreId(store.id);
-
-    const line = {
-      id: product.id,
-      name: product.name,
-      image: product.image,
-      price: product.price,
-      qty,
-      removedIngredients,
-      itemNote: itemNote.trim(),
-    };
-    const key = lineKey(line);
+  const addToCart = (item, options = {}) => {
+    const { qty = 1, modifiers = [], itemNote = '' } = options;
+    const modString = modifiers.map(m => `${m.id}-${m.qty}`).sort().join('|');
+    const lineKey = `${item.id}-${modString}-${itemNote}`;
 
     setCart(prev => {
-      const idx = prev.findIndex(i => lineKey(i) === key);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
-        return next;
+      const existing = prev.find(line => line.lineKey === lineKey);
+      if (existing) {
+        return prev.map(line => line.lineKey === lineKey ? { ...line, qty: line.qty + qty } : line);
       }
-      return [...prev, line];
+      
+      const modsTotal = modifiers.reduce((sum, m) => sum + (Number(m.sell_price) * m.qty), 0);
+      const finalPrice = Number(item.price) + modsTotal;
+
+      return [...prev, {
+        ...item,
+        price: finalPrice,
+        qty,
+        modifiers,
+        itemNote,
+        lineKey
+      }];
     });
   };
 
-  /* Adjust qty by delta (works on line key) */
-  const changeQty = (key, delta) => {
-    setCart(prev => prev
-      .map(i => lineKey(i) === key ? { ...i, qty: i.qty + delta } : i)
-      .filter(i => i.qty > 0));
-  };
-
-  /* Remove a line by key */
-  const removeItem = (key) => {
-    setCart(prev => prev.filter(i => lineKey(i) !== key));
-  };
-
-  /* Insert a line back (used for Undo) */
-  const restoreLine = (line, atIndex = null) => {
+  const updateItem = (oldLineKey, item, options) => {
     setCart(prev => {
-      if (atIndex == null) return [...prev, line];
-      const next = [...prev];
-      next.splice(atIndex, 0, line);
-      return next;
+      const withoutOld = prev.filter(line => line.lineKey !== oldLineKey);
+      
+      const { qty = 1, modifiers = [], itemNote = '' } = options;
+      const modString = modifiers.map(m => `${m.id}-${m.qty}`).sort().join('|');
+      const newLineKey = `${item.id}-${modString}-${itemNote}`;
+
+      const existingNew = withoutOld.find(line => line.lineKey === newLineKey);
+      if (existingNew) {
+        return withoutOld.map(line => line.lineKey === newLineKey ? { ...line, qty: line.qty + qty } : line);
+      }
+
+      const modsTotal = modifiers.reduce((sum, m) => sum + (Number(m.sell_price) * m.qty), 0);
+      const finalPrice = Number(item.price) + modsTotal;
+
+      return [...withoutOld, {
+        ...item,
+        price: finalPrice,
+        qty,
+        modifiers,
+        itemNote,
+        lineKey: newLineKey
+      }];
     });
   };
 
-  const clearCart = () => {
-    setCart([]);
-    setCartStoreId(null);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STORE_KEY);
+  const changeQty = (key, delta) => {
+    setCart(prev => prev.map(line => {
+      if (line.lineKey === key) {
+        return { ...line, qty: Math.max(1, line.qty + delta) };
+      }
+      return line;
+    }));
   };
 
-  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const count = cart.reduce((s, i) => s + i.qty, 0);
+  const removeItem = (key) => setCart(prev => prev.filter(line => line.lineKey !== key));
+  const clearCart = () => setCart([]);
+
+  const total = cart.reduce((sum, line) => sum + (line.price * line.qty), 0);
+  const count = cart.reduce((sum, line) => sum + line.qty, 0);
+
+  const lineKey = (line) => line.lineKey;
 
   return (
-    <CartContext.Provider value={{
-      cart, addToCart, changeQty, removeItem, restoreLine, clearCart,
-      total, count, lineKey,
-    }}>
+    <CartContext.Provider value={{ cart, addToCart, updateItem, changeQty, removeItem, clearCart, total, count, lineKey }}>
       {children}
     </CartContext.Provider>
   );

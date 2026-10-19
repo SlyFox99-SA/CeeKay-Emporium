@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 import { Minus, Plus, Check, AlertCircle } from 'lucide-react';
 import SoldOutBadge from './SoldOutBadge';
-import { useSwipeToDismiss } from '../../hooks/useSwipeToDismiss';
 import { useHaptics } from '../../hooks/useHaptics';
 import ModifierSelector from './item-modal/ModifierSelector';
 import PreferenceSelector from './item-modal/PreferenceSelector';
 
 export default function MobileItemModal({ item, onClose, onConfirm }) {
-  const swipeProps = useSwipeToDismiss(onClose);
   const haptics = useHaptics();
+  const dragControls = useDragControls();
 
   const [qty, setQty] = useState(1);
   const [note, setNote] = useState('');
@@ -49,17 +48,24 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
   const togglePref = (pref) => {
     haptics.light();
     setSelectedMods(prev => {
-      if (pref.group_name === 'Sauces') {
-        const filtered = prev.filter(m => {
+      const isAlreadySelected = prev.some(m => m.id === pref.id);
+      if (pref.name === 'No Sauce') {
+        if (isAlreadySelected) return prev.filter(m => m.id !== pref.id);
+        const withoutSauces = prev.filter(m => {
            const existingMod = item.available_modifiers.find(x => x.id === m.id);
            return !existingMod || existingMod.group_name !== 'Sauces';
         });
-        const isAlreadySelected = prev.some(m => m.id === pref.id);
-        if (isAlreadySelected) return filtered;
-        return [...filtered, { ...pref, qty: 1 }];
+        return [...withoutSauces, { ...pref, qty: 1 }];
       }
-      const existing = prev.find(m => m.id === pref.id);
-      if (existing) return prev.filter(m => m.id !== pref.id);
+      if (pref.group_name === 'Sauces') {
+        const withoutNoSauce = prev.filter(m => {
+           const existingMod = item.available_modifiers.find(x => x.id === m.id);
+           return !existingMod || existingMod.name !== 'No Sauce';
+        });
+        if (isAlreadySelected) return withoutNoSauce.filter(m => m.id !== pref.id);
+        return [...withoutNoSauce, { ...pref, qty: 1 }];
+      }
+      if (isAlreadySelected) return prev.filter(m => m.id !== pref.id);
       return [...prev, { ...pref, qty: 1 }];
     });
   };
@@ -77,14 +83,33 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
   };
 
   return (
-    <div className="m-modal-overlay" onClick={onClose}>
-      <motion.div className="m-modal-sheet" onClick={e => e.stopPropagation()} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 350 }}>
-        
-        <div className="m-modal-header" {...swipeProps} style={{ touchAction: 'none' }}>
-          <div className="m-sheet-handle" />
+    <div 
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 9998, display: 'flex', alignItems: 'flex-end' }} 
+      onClick={onClose}
+    >
+      <motion.div 
+        style={{ width: '100%', height: '90dvh', background: 'var(--ck-cream)', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}
+        onClick={e => e.stopPropagation()}
+        initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+        drag="y"
+        dragControls={dragControls}
+        dragConstraints={{ top: 0 }}
+        dragElastic={{ top: 0, bottom: 0.5 }}
+        onDragEnd={(e, info) => { if (info.offset.y > 100 || info.velocity.y > 500) onClose(); }}
+      >
+        {/* 1. ABSOLUTE HEADER (DRAG HANDLE) */}
+        <div 
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '16px', display: 'flex', justifyContent: 'center', zIndex: 50, cursor: 'grab' }}
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.8)', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
         </div>
 
-        <div className="m-modal-body">
+        {/* 2. SCROLLABLE BODY */}
+        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: 0 }}>
+          
+          {/* HERO IMAGE */}
           <div style={{ width: '100%', height: '260px', background: 'var(--ck-cream)', position: 'relative' }}>
              <img src={imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              {isSoldOut && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><SoldOutBadge /></div>}
@@ -110,19 +135,20 @@ export default function MobileItemModal({ item, onClose, onConfirm }) {
           </div>
         </div>
 
-        <div className="m-modal-foot">
+        {/* 3. FIXED FOOTER */}
+        <div style={{ flexShrink: 0, background: 'white', padding: '16px 20px calc(16px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--ck-border)', boxShadow: '0 -4px 20px rgba(0,0,0,0.05)', zIndex: 10, display: 'flex', gap: '12px', alignItems: 'center' }}>
           {isSoldOut ? (
             <div style={{ width: '100%', textAlign: 'center', padding: '12px', color: 'var(--ck-achaar-red)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               <AlertCircle size={20} /> Sold Out
             </div>
           ) : (
             <>
-              <div className="m-qty-selector">
-                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }}><Minus size={16} /></button>
-                <span className="m-qty-val">{qty}</span>
-                <button className="m-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }}><Plus size={16} /></button>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--ck-cream)', borderRadius: '99px', padding: '4px', height: '56px' }}>
+                <button onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }} style={{ background: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}><Minus size={16} /></button>
+                <span style={{ width: '32px', textAlign: 'center', fontWeight: 800, fontSize: '16px' }}>{qty}</span>
+                <button onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }} style={{ background: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}><Plus size={16} /></button>
               </div>
-              <button className={`m-add-btn ${isAdded ? 'added' : ''}`} onClick={handleConfirm}>
+              <button onClick={handleConfirm} style={{ flex: 1, height: '56px', background: isAdded ? 'var(--ck-green)' : 'var(--ck-brand-deep)', color: 'white', borderRadius: '99px', border: 'none', fontWeight: 800, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(15, 46, 74, 0.2)' }}>
                 {isAdded ? (<><Check size={20} /> Added!</>) : (`Add • R ${subtotal.toFixed(2)}`)}
               </button>
             </>

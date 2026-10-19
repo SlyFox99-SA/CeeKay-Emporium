@@ -11,7 +11,13 @@ export function AuthProvider({ children }) {
   // Fetch the profile data (loyalty points, phone, etc.)
   const fetchProfile = async (userId) => {
     if (!userId) return setProfile(null);
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    try {
+      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      setProfile(data);
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      setProfile(null);
+    }
     setProfile(data);
   };
 

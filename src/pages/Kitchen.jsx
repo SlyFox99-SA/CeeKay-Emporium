@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChefHat, Clock, CheckCircle2, Play } from 'lucide-react';
-import { updateOrderStatus, subscribeToOrders } from '../services/orderService';
+import { ChefHat, CheckCircle2, Play } from 'lucide-react';
+import { updateOrderStatus, subscribeToOrders, cancelOrder } from '../services/orderService';
 import { useNewOrderAlerts } from '../hooks/useNewOrderAlerts';
 import { useHaptics } from '../hooks/useHaptics';
 
@@ -13,6 +13,12 @@ export default function Kitchen() {
     const unsubscribe = subscribeToOrders(setOrders);
     return () => unsubscribe();
   }, []);
+
+  const handleCancel = async (id) => {
+    if (window.confirm("Cancel this order? Stock will be refunded.")) {
+      await cancelOrder(id);
+    }
+  };
 
   const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
 
@@ -66,10 +72,15 @@ export default function Kitchen() {
                       ))}
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      {order.status === 'pending' && (
-                        <button onClick={() => handleStatusChange(order.id, 'preparing')} style={{ flex: 1, padding: '12px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
-                          <Play size={16} /> Start Prep
-                        </button>
+                                            {order.status === 'pending' && (
+                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                          <button onClick={() => handleStatusChange(order.id, 'preparing')} style={{ flex: 2, padding: '12px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <Play size={16} /> Start Prep
+                          </button>
+                          <button onClick={() => handleCancel(order.id)} style={{ flex: 1, padding: '12px', background: 'var(--ck-achaar-red)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+                            Cancel
+                          </button>
+                        </div>
                       )}
                       {order.status === 'preparing' && (
                         <button onClick={() => handleStatusChange(order.id, 'ready')} style={{ flex: 1, padding: '12px', background: 'var(--ck-warm)', color: 'var(--ck-charcoal)', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>

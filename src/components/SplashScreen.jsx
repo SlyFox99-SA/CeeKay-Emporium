@@ -1,70 +1,102 @@
-
 import { motion } from 'framer-motion';
 import CKMark from './CKMark';
 
 export default function SplashScreen() {
   return (
     <motion.div 
-      className="ck-splash-screen"
       initial={{ opacity: 1 }}
-      exit={{ y: "-100%", opacity: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      style={{ 
+        position: 'fixed', inset: 0, zIndex: 999999, 
+        backgroundColor: '#0F2E4A', // Deep brand blue
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden'
+      }}
     >
-      <div className="ck-splash-bg" />
-      
-      <div className="ck-splash-content">
-        {/* Pulsing Ring + Logo */}
-        <div className="ck-splash-logo-wrap">
-          <motion.div 
-            className="ck-splash-ring"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: [1, 1.2, 1], opacity: [0, 0.2, 0] }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-          />
+      {/* 1. The Pulsating Ambient Ring */}
+      <motion.div
+        animate={{ 
+          scale: [1, 1.15, 1], 
+          opacity: [0.1, 0.3, 0.1],
+          boxShadow: [
+            "0 0 0px rgba(255, 255, 255, 0)",
+            "0 0 40px rgba(255, 255, 255, 0.2)",
+            "0 0 0px rgba(255, 255, 255, 0)"
+          ]
+        }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          position: 'absolute',
+          width: '200px', height: '200px',
+          borderRadius: '50%',
+          border: '2px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}
+      />
+
+      {/* 2. The Logo (Floating inside the ring) */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}
+      >
+        {/* Main Logo Mark */}
+        <div style={{ transform: 'scale(2.5)', marginBottom: '20px', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.2))' }}>
+          <CKMark />
+        </div>
+        
+        {/* Brand Name */}
+        <h1 style={{ 
+          fontFamily: 'var(--ck-font-serif, "Fraunces", serif)', 
+          fontSize: '28px', 
+          color: 'white', 
+          margin: 0, 
+          letterSpacing: '0.05em' 
+        }}>
+          CeeKay
+        </h1>
+        <p style={{ 
+          fontFamily: 'var(--ck-font-display, "Bricolage Grotesque", sans-serif)', 
+          fontSize: '12px', 
+          color: 'rgba(255,255,255,0.6)', 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.3em',
+          margin: 0
+        }}>
+          Emporium
+        </p>
+      </motion.div>
+
+      {/* 3. The Leading Progress Bar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        style={{ position: 'absolute', bottom: '20%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}
+      >
+        <div style={{ 
+          width: '160px', height: '4px', 
+          backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+          borderRadius: '99px', overflow: 'hidden' 
+        }}>
           <motion.div
-            initial={{ scale: 0.3, opacity: 0, rotate: -20 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-          >
-            <CKMark size={110} variant="gradient" />
-          </motion.div>
-        </div>
-
-        {/* Text Sequence */}
-        <div className="ck-splash-text-wrap">
-          <motion.h1 
-            className="ck-splash-title"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
-          >
-            CeeKay
-          </motion.h1>
-          <motion.p 
-            className="ck-splash-tagline"
-            initial={{ opacity: 0, letterSpacing: "1em" }}
-            animate={{ opacity: 1, letterSpacing: "0.3em" }}
-            transition={{ delay: 0.9, duration: 0.8, ease: "easeOut" }}
-          >
-            Emporium
-          </motion.p>
-        </div>
-
-        {/* Gold Loading Bar */}
-        <motion.div 
-          className="ck-splash-loader-track"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
-        >
-          <motion.div 
-            className="ck-splash-loader-fill"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ delay: 1.1, duration: 1.2, ease: "easeInOut" }}
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 2.2, ease: "easeInOut" }}
+            style={{ height: '100%', backgroundColor: 'var(--ck-warm, #D4AF37)', borderRadius: '99px' }}
           />
-        </motion.div>
-      </div>
+        </div>
+        <motion.span
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}
+        >
+          Preparing your order
+        </motion.span>
+      </motion.div>
     </motion.div>
   );
 }

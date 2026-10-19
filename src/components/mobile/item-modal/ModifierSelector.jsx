@@ -23,14 +23,29 @@ export default function ModifierSelector({ extras, selectedMods, onUpdate }) {
                 <div style={{ fontWeight: 700, color: 'var(--ck-ink)', fontSize: '14px' }}>{mod.name}</div>
                 <div style={{ fontWeight: 800, color: 'var(--ck-brand-deep)', fontSize: '13px', marginTop: '2px' }}>+ R{mod.sell_price}</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {currentQty > 0 && (
-                  <>
-                    <button onClick={() => onUpdate(mod, 'remove')} style={{ background: 'white', border: '1px solid var(--ck-border)', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={14} /></button>
-                    <span style={{ fontWeight: 800, width: '16px', textAlign: 'center' }}>{currentQty}</span>
-                  </>
-                )}
-                <button onClick={() => onUpdate(mod, 'add')} disabled={currentQty >= 2} style={{ background: currentQty >= 2 ? 'var(--ck-border)' : 'var(--ck-brand-deep)', border: 'none', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><Plus size={14} /></button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '96px', justifyContent: 'flex-end' }}>
+                
+                {/* Minus Button: Always rendered, invisible when qty=0 */}
+                <button 
+                  onClick={() => onUpdate(mod, 'remove')} 
+                  style={{ background: 'white', border: '1px solid var(--ck-border)', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: currentQty > 0 ? 1 : 0, pointerEvents: currentQty > 0 ? 'auto' : 'none' }}
+                >
+                  <Minus size={14} />
+                </button>
+
+                {/* Quantity Text: Always rendered, invisible when qty=0 */}
+                <span style={{ fontWeight: 800, width: '16px', textAlign: 'center', opacity: currentQty > 0 ? 1 : 0 }}>
+                  {currentQty}
+                </span>
+
+                {/* Plus Button: Never moves */}
+                <button 
+                  onClick={() => onUpdate(mod, 'add')} 
+                  disabled={currentQty >= 2} 
+                  style={{ background: currentQty >= 2 ? 'var(--ck-border)' : 'var(--ck-brand-deep)', border: 'none', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
+                >
+                  <Plus size={14} />
+                </button>
               </div>
             </div>
           );

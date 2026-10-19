@@ -22,12 +22,16 @@ export default function AdminExpenses() {
   const handleAdd = async (e) => {
     e.preventDefault();
     haptics.success();
-    await supabase.from('expenses').insert({
+    try {
+      await supabase.from('expenses').insert({
       item_name: form.item_name,
       quantity: Number(form.quantity),
       unit: form.unit,
       total_price: Number(form.total_price)
     });
+    } catch (err) {
+      console.error('Failed to add expense:', err);
+    }
     setForm({ item_name: '', quantity: '', unit: 'kg', total_price: '' });
     loadExpenses();
   };
