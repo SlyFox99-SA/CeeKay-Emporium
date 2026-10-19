@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Store } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CKMark from '../../components/CKMark';
 import { FEATURES } from '../../config/features';
@@ -35,30 +35,36 @@ export default function MobileAdminShell() {
       {/* Bottom Nav */}
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 'calc(64px + env(safe-area-inset-bottom))', background: 'white', borderTop: '1px solid var(--ck-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 100, boxShadow: '0 -4px 20px rgba(0,0,0,0.04)' }}>
         <NavLink to="/admin" end style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
-          <Home size={22} strokeWidth={2} />
+          <Home size={20} strokeWidth={2} />
           <span>Home</span>
         </NavLink>
         
-        <NavLink to="/admin/menu" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
-          <Utensils size={22} strokeWidth={2} />
+        <NavLink to="/admin/menu" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration:'none' })}>
+          <Utensils size={20} strokeWidth={2} />
           <span>Menu</span>
         </NavLink>
 
         {FEATURES.enablePOS && (
           <NavLink to="/admin/pos" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
-            <ShoppingCart size={22} strokeWidth={2} />
+            <ShoppingCart size={20} strokeWidth={2} />
             <span>POS</span>
           </NavLink>
         )}
 
         <NavLink to="/admin/orders" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
-          <Receipt size={22} strokeWidth={2} />
+          <Receipt size={20} strokeWidth={2} />
           <span>Orders</span>
+        </NavLink>
+
+        {/* NEW: Stores Link */}
+        <NavLink to="/admin/stores" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
+          <Store size={20} strokeWidth={2} />
+          <span>Stores</span>
         </NavLink>
 
         {FEATURES.enableKitchenLink && (
           <button onClick={() => navigate('/kitchen')} style={{ background: 'transparent', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#999', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
-            <Flame size={22} strokeWidth={2} />
+            <Flame size={20} strokeWidth={2} />
             <span>Kitchen</span>
           </button>
         )}

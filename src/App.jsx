@@ -30,42 +30,20 @@ function AppRoutes() {
   const location = useLocation();
   useDynamicManifest();
 
-  // Only show splash screen on the customer storefront
   const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order');
   const [isBooting, setIsBooting] = useState(!isOperational);
 
   useEffect(() => {
-    if (isOperational) {
-      setIsBooting(false);
-      return;
-    }
-
+    if (isOperational) { setIsBooting(false); return; }
     let dataReady = false;
     let minTimeElapsed = false;
     const MIN_SPLASH_TIME = 5500;
-
-    const checkAndDropSplash = () => {
-      if (dataReady && minTimeElapsed) setIsBooting(false);
-    };
-
-    const handleAppReady = () => {
-      dataReady = true;
-      checkAndDropSplash();
-    };
+    const checkAndDropSplash = () => { if (dataReady && minTimeElapsed) setIsBooting(false); };
+    const handleAppReady = () => { dataReady = true; checkAndDropSplash(); };
     window.addEventListener('app_ready', handleAppReady);
-
-    const minTimeTimer = setTimeout(() => {
-      minTimeElapsed = true;
-      checkAndDropSplash();
-    }, MIN_SPLASH_TIME);
-
+    const minTimeTimer = setTimeout(() => { minTimeElapsed = true; checkAndDropSplash(); }, MIN_SPLASH_TIME);
     const fallbackTimer = setTimeout(() => setIsBooting(false), 10000);
-
-    return () => {
-      window.removeEventListener('app_ready', handleAppReady);
-      clearTimeout(minTimeTimer);
-      clearTimeout(fallbackTimer);
-    };
+    return () => { window.removeEventListener('app_ready', handleAppReady); clearTimeout(minTimeTimer); clearTimeout(fallbackTimer); };
   }, [isOperational]);
 
   return (
@@ -73,13 +51,9 @@ function AppRoutes() {
       <PreferencesProvider>
         <StoreProvider>
           <CartProvider>
-            
             <motion.div
               initial={isOperational ? { opacity: 1 } : { scale: 1.05, opacity:0 }}
-              animate={{ 
-                scale: isBooting ? 1.05 : 1, 
-                opacity: isBooting ? 0 : 1 
-              }}
+              animate={{ scale: isBooting ? 1.05 : 1, opacity: isBooting ? 0 : 1 }}
               transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: isBooting ? 0 : 0.2 }}
               style={{ height: '100dvh', width: '100vw', overflow: 'hidden', willChange: 'transform, opacity' }}
             >
@@ -94,16 +68,9 @@ function AppRoutes() {
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
                   </Route>
-
                   <Route path="/kitchen" element={<Kitchen />} />
                   <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
-                  
-                  <Route
-                    path="/*"
-                    element={
-                      isMobile ? <MobileStorefront /> : <Storefront />
-                    }
-                  />
+                  <Route path="/*" element={isMobile ? <MobileStorefront /> : <Storefront />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AnimatePresence>
@@ -113,14 +80,12 @@ function AppRoutes() {
               {isBooting && !isOperational && <SplashScreen key="splash" />}
             </AnimatePresence>
 
-            {/* PWA Install Tile - Only on customer-facing routes */}
-            {!isOperational && <InstallPWA />}
-
+            {/* PWA Install Tile - Strictly isolated to mobile customer-facing routes */}
+            {!isOperational && isMobile && <InstallPWA />}
           </CartProvider>
         </StoreProvider>
       </PreferencesProvider>
     </AuthProvider>
   );
 }
-
 export default AppRoutes;

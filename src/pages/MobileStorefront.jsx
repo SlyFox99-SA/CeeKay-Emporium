@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Home, ReceiptText, User, Plus, Share2 } from 'lucide-react';
+import { ShoppingBag, Home, ReceiptText, User, Plus, Share2, MapPin } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useStore } from '../context/StoreContext'; // IMPORTED
 import { useHaptics } from '../hooks/useHaptics';
 import { getMenu, subscribeToMenu } from '../services/menuService';
 import { useSilentPolling } from '../hooks/useSilentPolling';
 import { flyToCart } from '../lib/flyToCart';
 import { playPop } from '../lib/chime'; 
 import { usePrefs } from '../context/PreferencesContext';
+import { openGoogleMaps } from '../lib/mapsUtils'; // IMPORTED
 
 import ItemImage from '../components/ItemImage';
 import MobileCartSidebar from '../components/mobile/MobileCartSidebar';
 import MobileItemModal from '../components/mobile/MobileItemModal';
-import StoreSelector from '../components/StoreSelector';
 import MobileOrders from '../components/MobileOrders';
 import MobileProfile from '../components/MobileProfile';
 import MobileSkeleton from '../components/MobileSkeleton';
@@ -41,18 +42,12 @@ const slideVariants = {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.1 }
-  }
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } }
 };
 
 const cardVariants = {
   hidden: { opacity: 0, y: 60, scale: 0.9, rotateX: 15 },
-  show: {
-    opacity: 1, y: 0, scale: 1, rotateX: 0,
-    transition: { type: "spring", stiffness: 150, damping: 20, mass: 1.2 }
-  }
+  show: { opacity: 1, y: 0, scale: 1, rotateX: 0, transition: { type: "spring", stiffness: 150, damping: 20, mass: 1.2 } }
 };
 
 export default function MobileStorefront() {
@@ -68,6 +63,7 @@ export default function MobileStorefront() {
   const [menu, setMenu] = useState({});
 
   const { addToCart, count } = useCart();
+  const { store } = useStore(); // GET ACTIVE STORE
   const { prefs } = usePrefs();
   const haptics = useHaptics();
 
@@ -135,18 +131,40 @@ export default function MobileStorefront() {
   };
 
   return (
-    <div className="mobile-app-shell" style={{ overflow: 'hidden' }}>
+    <div className="mobile-app-shell" style={{ overflow: 'hidden', position: 'relative' }}>
+      
+      {/* MOBILE 3D BACKGROUND */}
+      <motion.div 
+        animate={{ y: [0, -15, 0], scale: [1, 1.05, 1], rotate: [0, 2, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="ck-m-3d-bg"
+        style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 0 }}
+      >
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800&auto=format&fit=crop" alt="3D Background" />
+      </motion.div>
+
       <NetworkStatus />
       
-      <header className="mobile-topbar">
-        <div className="mobile-brand"><CKMark size={26} /><span>CeeKay</span></div>
+      <header className="mobile-topbar" style={{ position: 'relative', zIndex: 10 }}>
+        <div className="mobile-brand">
+          <CKMark size={26} />
+          <span>CeeKay</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <StoreSelector />
+          
+          {/* SMART LOCATION PILL */}
+          <button 
+            onClick={() => { haptics.light(); openGoogleMaps(store); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--ck-cream)', padding: '6px 12px', borderRadius: '99px', fontSize: '12px', fontWeight: 700, color: 'var(--ck-brand-deep)', border: 'none', cursor: 'pointer' }}
+          >
+            <MapPin size={12} /> {store?.branch || 'Locate Us'}
+          </button>
+          
           <button onClick={handleShare} style={{ background: 'transparent', border: 'none', color: 'var(--ck-brand-deep)', padding: 8 }}><Share2 size={20} /></button>
         </div>
       </header>
 
-      <div className="m-main-content" style={{ position: 'relative' }}>
+      <div className="m-main-content" style={{ position: 'relative', zIndex: 10 }}>
         <PullToRefresh onRefresh={reloadData}>
           <AnimatePresence initial={false} custom={direction} mode="wait">
             {activeTab === 'menu' && (
@@ -170,7 +188,7 @@ export default function MobileStorefront() {
                           <motion.div className="premium-food-grid" variants={containerVariants} initial="hidden" animate="show">
                             {items.map((item) => {
                               const isSoldOut = item.available === false;
-                              const imageUrl = (item.image && item.image.length > 5) ? item.image : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop";
+                              const imageUrl = item.image;
                               return (
                                 <motion.div 
                                   key={item.id} variants={cardVariants} whileHover={{ scale: 1.02, rotateY: 2 }} whileTap={!isSoldOut ? { scale: 0.95 } : {}}
@@ -178,10 +196,8 @@ export default function MobileStorefront() {
                                   onClick={() => { if (!isSoldOut) { haptics.medium(); setModalItem(item); } }}
                                   style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
                                 >
-                                  <div className="premium-food-img" style={{ overflow: 'hidden', position: 'relative' }}>
-                                    <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} style={{ width: '100%', height: '100%' }}>
-                                      <ItemImage src={imageUrl} alt={item.name}/>
-                                    </motion.div>
+                                  <div className="premium-food-img">
+                                    <ItemImage src={imageUrl} alt={item.name}/>
                                     
                                     <motion.div 
                                       animate={{ opacity: [0.1, 0.3, 0.1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -241,7 +257,7 @@ export default function MobileStorefront() {
 
       <ActiveOrderBar />
 
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav" style={{ position: 'relative', zIndex: 10 }}>
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('menu')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'menu' ? 'var(--ck-brand-deep)' : '#999' }}>
           {activeTab === 'menu' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} style={{zIndex: 1 }} />

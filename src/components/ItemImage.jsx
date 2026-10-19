@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import CKMark from './CKMark';
 
 export default function ItemImage({ src, alt, className, style }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  const FALLBACK_IMG = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop";
-  const finalSrc = hasError || !src || src.length < 5 ? FALLBACK_IMG : src;
+  // If no image exists, render a premium branded placeholder
+  const isMissing = !src || src.length < 5 || hasError;
+
+  if (isMissing) {
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--ck-cream) 0%, #e8ddc5 100%)', ...style }}>
+        <div style={{ opacity: 0.2, transform: 'scale(2)' }}>
+          <CKMark size={48} variant="gradient" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: 'var(--ck-cream)', ...style }}>
@@ -20,7 +31,7 @@ export default function ItemImage({ src, alt, className, style }) {
       )}
 
       <motion.img
-        src={finalSrc}
+        src={src}
         alt={alt}
         onLoad={() => setIsLoaded(true)}
         onError={() => { setHasError(true); setIsLoaded(true); }}

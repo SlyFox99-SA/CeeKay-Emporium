@@ -1,7 +1,7 @@
-
 import { useState, useRef } from 'react';
-import { Camera, X, Loader2, UploadCloud } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { uploadImage } from '../../lib/storage';
+import { compressImage } from '../../lib/imageUtils';
 
 export default function MobileImageUploader({ value, onChange }) {
   const [loading, setLoading] = useState(false);
@@ -13,43 +13,39 @@ export default function MobileImageUploader({ value, onChange }) {
 
     setLoading(true);
     try {
-      const url = await uploadImage(file);
+      // 1. Compress the image
+      const compressedFile = await compressImage(file);
+      // 2. Upload
+      const url = await uploadImage(compressedFile);
       onChange(url);
     } catch (err) {
       console.error('Upload failed', err);
-      console.error('Failed to upload image. Make sure you are an admin.');
+      alert('Failed to upload image.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="m-image-uploader">
-      <input 
-        type="file" 
-        accept="image/*" 
-        capture="environment" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        style={{ display: 'none' }} 
-      />
+    <div style={{ marginTop: '8px' }}>
+      <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
       
       {value ? (
-        <div className="m-image-preview">
-          <img src={value} alt="Preview" />
-          <button className="m-image-remove" onClick={() => onChange('')} type="button">
+        <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--ck-border)' }}>
+          <img src={value} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <button onClick={() => onChange('')} type="button" style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer', color: 'white' }}>
             <X size={16} />
           </button>
         </div>
       ) : (
         <button 
-          className="m-image-upload-btn" 
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
           type="button"
+          style={{ width: '100%', height: '120px', border: '2px dashed var(--ck-border)', borderRadius: '16px', background: 'var(--ck-cream)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--ck-brand-deep)', cursor: loading ? 'wait' : 'pointer' }}
         >
           {loading ? <Loader2 size={24} className="spin" /> : <Camera size={24} />}
-          <span>{loading ? 'Uploading...' : 'Take Photo or Upload'}</span>
+          <span style={{ fontSize: '14px', fontWeight: 700 }}>{loading ? 'Compressing & Uploading...' : 'Take Photo'}</span>
         </button>
       )}
     </div>

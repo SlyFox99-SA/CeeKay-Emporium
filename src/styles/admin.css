@@ -1,0 +1,10 @@
+/* =========================================
+   STRICTLY ISOLATED ADMIN SHELL (.ck-adm-)
+   Never mix this with mobile or desktop.
+   ========================================= */
+.ck-adm-shell { display: flex; min-height: 100vh; background: var(--ck-cream); }
+.ck-adm-sidebar { width: 280px; background: white; border-right: 1px solid var(--ck-border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+.ck-adm-nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.2s ease; color: var(--ck-ink-soft); margin-bottom: 4px; }
+.ck-adm-nav-item:hover { background: var(--ck-cream); color: var(--ck-brand-deep); }
+.ck-adm-nav-item.active { background: var(--ck-brand-deep); color: white; box-shadow: 0 8px 20px rgba(15, 46, 74, 0.2); }
+.ck-adm-content { flex: 1; padding: 40px; }

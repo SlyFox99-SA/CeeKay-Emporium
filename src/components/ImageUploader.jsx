@@ -1,6 +1,7 @@
-﻿import { useRef, useState } from 'react';
-import { UploadCloud, Image as ImageIcon, X, RefreshCw, Loader2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { UploadCloud, X, RefreshCw, Loader2 } from 'lucide-react';
 import { uploadImage, deleteImageByUrl, validateImage } from '../lib/storage';
+import { compressImage } from '../lib/imageUtils';
 
 export default function ImageUploader({ value, onChange, folder = 'menu' }) {
   const [dragging, setDragging] = useState(false);
@@ -18,7 +19,10 @@ export default function ImageUploader({ value, onChange, folder = 'menu' }) {
     setError('');
     setBusy(true);
     try {
-      const url = await uploadImage(file, folder);
+      // 1. Compress the image
+      const compressedFile = await compressImage(file);
+      // 2. Upload the compressed version
+      const url = await uploadImage(compressedFile, folder);
       onChange(url);
     } catch (e) {
       setError(e.message || 'Upload failed');
@@ -62,53 +66,46 @@ export default function ImageUploader({ value, onChange, folder = 'menu' }) {
   };
 
   return (
-    <div className="image-uploader">
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/svg+xml"
-        onChange={onInput}
-        hidden
-      />
+    <div className="image-uploader" style={{ marginTop: '8px' }}>
+      <input ref={inputRef} type="file" accept="image/*" onChange={onInput} hidden />
 
       {value ? (
-        <div className="image-uploader-preview">
-          <div className="image-uploader-preview-img">
-            <img src={value} alt="Preview" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--ck-cream)', padding: '12px', borderRadius: '16px', border: '1px solid var(--ck-border)' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={value} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div className="image-uploader-preview-actions">
-            <button type="button" className="image-uploader-action" onClick={openPicker} disabled={busy}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+            <button type="button" onClick={openPicker} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: 'white', border: '1px solid var(--ck-border)', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
               <RefreshCw size={14} /> Replace
             </button>
-            <button type="button" className="image-uploader-action image-uploader-action-danger" onClick={remove} disabled={busy}>
+            <button type="button" onClick={remove} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: 'rgba(229, 57, 53, 0.1)', color: 'var(--ck-achaar-red)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
               <X size={14} /> Remove
             </button>
           </div>
         </div>
       ) : (
         <div
-          className={`image-uploader-drop ${dragging ? 'dragging' : ''} ${busy ? 'busy' : ''}`}
           onClick={busy ? undefined : openPicker}
           onDrop={onDrop}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
+          style={{ border: `2px dashed ${dragging ? 'var(--ck-brand-deep)' : 'var(--ck-border)'}`, borderRadius: '16px', padding: '32px 20px', textAlign: 'center', cursor: busy ? 'wait' : 'pointer', background: dragging ? 'var(--ck-cream)' : 'white', transition: 'all 0.2s' }}
         >
           {busy ? (
-            <>
-              <Loader2 size={28} className="image-uploader-spin" />
-              <div className="image-uploader-title">UpLoading...</div>
-            </>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--ck-brand-deep)' }}>
+              <Loader2 size={28} className="spin" />
+              <div style={{ fontSize: '14px', fontWeight: 600 }}>Compressing & Uploading...</div>
+            </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--ck-ink-soft)' }}>
               <UploadCloud size={28} />
-              <div className="image-uploader-title">Drop an image here</div>
-              <div className="image-uploader-sub">or <span className="image-uploader-link">browse</span> Â· JPG, PNG, WEBP, SVG Â· max 3 MB</div>
-            </>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ck-ink)' }}>Drop an image here</div>
+              <div style={{ fontSize: '12px' }}>or browse · JPG, PNG · max 10 MB</div>
+            </div>
           )}
         </div>
       )}
-
-      {error && <div className="image-uploader-error">{error}</div>}
+      {error && <div style={{ color: 'var(--ck-achaar-red)', fontSize: '13px', marginTop: '8px' }}>{error}</div>}
     </div>
   );
 }
