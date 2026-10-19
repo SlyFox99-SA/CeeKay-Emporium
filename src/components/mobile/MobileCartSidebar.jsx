@@ -90,7 +90,7 @@ export default function MobileCartSidebar({ open, onClose, onToast = () => {} })
         style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--ck-cream)', borderRadius: '24px 24px 0 0', zIndex: 9999, height: '90dvh', display: 'flex', flexDirection: 'column', boxShadow: '0 -10px 40px rgba(0,0,0,0.2)', overflow: 'hidden' }}
         initial={{ y: "100%" }} 
         animate={{ y: open ? 0 : "100%" }} 
-        transition={{ type: "spring", damping: 28, stiffness: 350 }}
+        transition={{ type: "spring", damping: 22, stiffness: 250, bounce: 0.2 }}
         drag="y"
         dragControls={dragControls}
         dragConstraints={{ top: 0 }}

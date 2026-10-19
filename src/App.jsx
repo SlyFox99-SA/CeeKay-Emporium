@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { CartProvider } from './context/CartContext';
@@ -48,9 +48,7 @@ function AppRoutes() {
         <Route
           path="/*"
           element={
-            <CartProvider>
-              {isMobile ? <MobileStorefront /> : <Storefront />}
-            </CartProvider>
+            isMobile ? <MobileStorefront /> : <Storefront />
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -63,19 +61,65 @@ export default function App() {
   const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsBooting(false), 2500);
-    return () => clearTimeout(timer);
+    let dataReady = false;
+    let minTimeElapsed = false;
+    const MIN_SPLASH_TIME = 5500;
+
+    const checkAndDropSplash = () => {
+      if (dataReady && minTimeElapsed) {
+        setIsBooting(false);
+      }
+    };
+
+    const handleAppReady = () => {
+      dataReady = true;
+      checkAndDropSplash();
+    };
+    window.addEventListener('app_ready', handleAppReady);
+
+    const minTimeTimer = setTimeout(() => {
+      minTimeElapsed = true;
+      checkAndDropSplash();
+    }, MIN_SPLASH_TIME);
+
+    const fallbackTimer = setTimeout(() => {
+      setIsBooting(false);
+    }, 10000);
+
+    return () => {
+      window.removeEventListener('app_ready', handleAppReady);
+      clearTimeout(minTimeTimer);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return (
     <AuthProvider>
       <PreferencesProvider>
         <StoreProvider>
-          <AppRoutes />
+          <CartProvider>
+            
+            <motion.div
+              initial={{ scale: 1.05, opacity: 0 }}
+              animate={{ 
+                scale: isBooting ? 1.05 : 1, 
+                opacity: isBooting ? 0 : 1 
+              }}
+              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: isBooting ? 0 : 0.2 }}
+              style={{ 
+                height: '100dvh', width: '100vw', overflow: 'hidden',
+                willChange: 'transform, opacity'
+              }}
+            >
+              <AppRoutes />
+            </motion.div>
+
+            <AnimatePresence>
+              {isBooting && <SplashScreen key="splash" />}
+            </AnimatePresence>
+
+          </CartProvider>
         </StoreProvider>
-        <AnimatePresence>
-          {isBooting && <SplashScreen key="splash" />}
-        </AnimatePresence>
       </PreferencesProvider>
     </AuthProvider>
   );

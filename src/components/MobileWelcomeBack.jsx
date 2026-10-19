@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getLastOrder } from '../services/customerService';
 import { useCart } from '../context/CartContext';
 import { usePrefs } from '../context/PreferencesContext';
@@ -8,18 +8,30 @@ import { playPop } from '../lib/chime';
 import ItemImage from './ItemImage';
 
 export default function MobileWelcomeBack() {
-  const [last, setLast] = useState(null);
+  const [last, setLast] = useState(undefined); // undefined = loading
   const { addToCart } = useCart();
   const { prefs } = usePrefs();
 
   useEffect(() => {
     (async () => {
-      const order = await getLastOrder();
-      if (order) setLast(order);
+      try {
+        const order = await getLastOrder();
+        setLast(order || null);
+      } catch {
+        setLast(null);
+      }
     })();
   }, []);
 
-  if (!last) return null;
+  // 1. SKELETON STATE: Perfectly matches the height of the real banner
+  if (last === undefined) {
+    return (
+      <div style={{ height: '104px', borderRadius: '20px', background: 'rgba(0,0,0,0.04)', marginBottom: '24px', animation: 'pulse 1.5s infinite' }} />
+    );
+  }
+
+  // 2. EMPTY STATE: Safe to return null because we only render this if there IS history
+  if (last === null) return null;
 
   const itemCount = last.items.reduce((s, i) => s + i.qty, 0);
 
@@ -31,7 +43,13 @@ export default function MobileWelcomeBack() {
   };
 
   return (
-    <div className="mobile-welcome-back">
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="mobile-welcome-back"
+    >
       <div className="mwb-content">
         <div className="mwb-eyebrow">
           <Sparkles size={12} /> Welcome back
@@ -53,6 +71,6 @@ export default function MobileWelcomeBack() {
       <button className="mwb-btn" onClick={handleReorder}>
         <RotateCcw size={14} /> Reorder
       </button>
-    </div>
+    </motion.div>
   );
 }

@@ -31,19 +31,46 @@ const CATEGORY_TITLES = {
   desserts: 'Desserts'
 };
 
-// Stagger animation variants for the menu grid
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+const TABS = ['menu', 'orders', 'profile'];
+
+const slideVariants = {
+  enter: (direction) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { zIndex: 1, x: 0, opacity: 1 },
+  exit: (direction) => ({ zIndex: 0, x: direction < 0 ? '100%' : '-100%', opacity: 0 })
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+// HEAVY SPRING PHYSICS FOR CARDS
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.1,
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 60, scale: 0.9, rotateX: 15 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotateX: 0,
+    transition: {
+      type: "spring",
+      stiffness: 150, 
+      damping: 20,
+      mass: 1.2
+    }
+  }
 };
 
 export default function MobileStorefront() {
   const [activeTab, setActiveTab] = useState('menu');
+  const [[pageIndex, direction], setPageIndex] = useState([0, 0]);
+  
   const [cartOpen, setCartOpen] = useState(false);
   const [modalItem, setModalItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +100,7 @@ export default function MobileStorefront() {
       setError(err);
     } finally {
       setLoading(false);
+      window.dispatchEvent(new Event('app_ready'));
     }
   };
 
@@ -85,6 +113,10 @@ export default function MobileStorefront() {
 
   const handleTabChange = (tab) => {
     if (activeTab === tab) return;
+    const newIndex = TABS.indexOf(tab);
+    const currentIndex = TABS.indexOf(activeTab);
+    const dir = newIndex > currentIndex ? 1 : -1;
+    setPageIndex([newIndex, dir]);
     haptics.light();
     setActiveTab(tab);
   };
@@ -103,7 +135,7 @@ export default function MobileStorefront() {
   };
 
   return (
-    <div className="mobile-app-shell">
+    <div className="mobile-app-shell" style={{ overflow: 'hidden' }}>
       <NetworkStatus />
       
       <header className="mobile-topbar">
@@ -114,11 +146,19 @@ export default function MobileStorefront() {
         </div>
       </header>
 
-      <div className="m-main-content">
+      <div className="m-main-content" style={{ position: 'relative' }}>
         <PullToRefresh onRefresh={reloadData}>
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false} custom={direction} mode="wait">
             {activeTab === 'menu' && (
-              <motion.div key="menu" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
+              <motion.div 
+                key="menu"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
+              >
                 {loading ? <MobileSkeleton /> : error ? <ErrorState onRetry={reloadData} /> : (
                   <div className="mobile-menu-view">
                     <MobileWelcomeBack />
@@ -127,12 +167,11 @@ export default function MobileStorefront() {
                       if (!items || items.length === 0) return null;
                       const title = CATEGORY_TITLES[categoryKey] || (categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1));
                       return (
-                        <div key={categoryKey} style={{ marginBottom: '32px' }}>
+                        <div key={categoryKey} style={{ marginBottom: '40px' }}>
                           <div className="mobile-category-header">
                             <h2 className="mobile-section-title">{title}</h2>
                           </div>
                           
-                          {/* LIQUID STAGGER GRID */}
                           <motion.div 
                             className="premium-food-grid"
                             variants={containerVariants}
@@ -145,13 +184,29 @@ export default function MobileStorefront() {
                               return (
                                 <motion.div 
                                   key={item.id} 
-                                  variants={itemVariants}
+                                  variants={cardVariants}
+                                  whileHover={{ scale: 1.02, rotateY: 2 }}
                                   whileTap={!isSoldOut ? { scale: 0.95 } : {}}
                                   className={`premium-food-card ${isSoldOut ? 'sold-out' : ''}`} 
                                   onClick={() => { if (!isSoldOut) { haptics.medium(); setModalItem(item); } }}
+                                  style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
                                 >
-                                  <div className="premium-food-img">
-                                    <img src={imageUrl} alt={item.name} />
+                                  <div className="premium-food-img" style={{ overflow: 'hidden', position: 'relative' }}>
+                                    <motion.div 
+                                      whileHover={{ scale: 1.1 }} 
+                                      transition={{ type: 'spring', stiffness: 200, damping: 20 }} 
+                                      style={{ width: '100%', height: '100%' }}
+                                    >
+                                      <ItemImage src={imageUrl} alt={item.name} />
+                                    </motion.div>
+                                    
+                                    {/* HEAT SHIMMER OVERLAY */}
+                                    <motion.div 
+                                      animate={{ opacity: [0.1, 0.3, 0.1] }}
+                                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                      style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,165,0,0.1) 100%)', pointerEvents: 'none' }}
+                                    />
+
                                     {isSoldOut && <div className="sold-out-overlay">Sold Out</div>}
                                     {item.popular && <div className="premium-food-badge">Popular</div>}
                                   </div>
@@ -166,12 +221,12 @@ export default function MobileStorefront() {
 
                                   {!isSoldOut && (
                                     <motion.button 
-                                      whileTap={{ scale: 0.7 }} 
+                                      whileTap={{ scale: 0.6 }} 
                                       className="premium-add-btn" 
                                       onClick={(e) => {
                                         e.stopPropagation(); 
                                         addToCart(item, { qty: 1 }); 
-                                        haptics.light(); 
+                                        haptics.heavy(); 
                                         if (prefs.sound) playPop(); 
                                         flyToCart(e, item.image);
                                       }}
@@ -190,8 +245,18 @@ export default function MobileStorefront() {
                 )}
               </motion.div>
             )}
-            {activeTab === 'orders' && <motion.div key="orders" initial={{ opacity: 0, scale: 0.98, x: 20 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.98, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 35 }}><MobileOrders /></motion.div>}
-            {activeTab === 'profile' && <motion.div key="profile" initial={{ opacity: 0, scale: 0.98, x: 20 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.98, x: -20 }} transition={{ type: "spring", stiffness: 400, damping: 35 }}><MobileProfile /></motion.div>}
+
+            {activeTab === 'orders' && (
+              <motion.div key="orders" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}>
+                <MobileOrders />
+              </motion.div>
+            )}
+
+            {activeTab === 'profile' && (
+              <motion.div key="profile" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}>
+                <MobileProfile />
+              </motion.div>
+            )}
           </AnimatePresence>
         </PullToRefresh>
       </div>
@@ -199,9 +264,7 @@ export default function MobileStorefront() {
       <ActiveOrderBar />
       <PwaInstallBanner />
 
-      {/* LIQUID BOTTOM NAVIGATION */}
-      <nav className="mobile-bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 'calc(64px + env(safe-area-inset-bottom))', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', borderTop: '1px solid var(--ck-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-around', paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 100, boxShadow: '0 -4px 20px rgba(0,0,0,0.04)' }}>
-        
+      <nav className="mobile-bottom-nav">
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('menu')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'menu' ? 'var(--ck-brand-deep)' : '#999' }}>
           {activeTab === 'menu' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
           <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} style={{ zIndex: 1 }} />
