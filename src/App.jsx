@@ -29,46 +29,22 @@ function AppRoutes() {
   const location = useLocation();
   useDynamicManifest();
 
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="menu" element={<AdminMenu />} />
-          <Route path="pos" element={<AdminPOS />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="stores" element={<AdminStores />} />
-          <Route path="staff" element={<AdminStaff />} />
-        </Route>
-
-        <Route path="/kitchen" element={<Kitchen />} />
-        <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
-        
-        <Route
-          path="/*"
-          element={
-            isMobile ? <MobileStorefront /> : <Storefront />
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AnimatePresence>
-  );
-}
-
-export default function App() {
-  const [isBooting, setIsBooting] = useState(true);
+  // Only show splash screen on the customer storefront
+  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order');
+  const [isBooting, setIsBooting] = useState(!isOperational);
 
   useEffect(() => {
+    if (isOperational) {
+      setIsBooting(false);
+      return;
+    }
+
     let dataReady = false;
     let minTimeElapsed = false;
     const MIN_SPLASH_TIME = 5500;
 
     const checkAndDropSplash = () => {
-      if (dataReady && minTimeElapsed) {
-        setIsBooting(false);
-      }
+      if (dataReady && minTimeElapsed) setIsBooting(false);
     };
 
     const handleAppReady = () => {
@@ -82,16 +58,14 @@ export default function App() {
       checkAndDropSplash();
     }, MIN_SPLASH_TIME);
 
-    const fallbackTimer = setTimeout(() => {
-      setIsBooting(false);
-    }, 10000);
+    const fallbackTimer = setTimeout(() => setIsBooting(false), 10000);
 
     return () => {
       window.removeEventListener('app_ready', handleAppReady);
       clearTimeout(minTimeTimer);
       clearTimeout(fallbackTimer);
     };
-  }, []);
+  }, [isOperational]);
 
   return (
     <AuthProvider>
@@ -100,22 +74,42 @@ export default function App() {
           <CartProvider>
             
             <motion.div
-              initial={{ scale: 1.05, opacity: 0 }}
+              initial={isOperational ? { opacity: 1 } : { scale: 1.05, opacity: 0 }}
               animate={{ 
                 scale: isBooting ? 1.05 : 1, 
                 opacity: isBooting ? 0 : 1 
               }}
               transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: isBooting ? 0 : 0.2 }}
-              style={{ 
-                height: '100dvh', width: '100vw', overflow: 'hidden',
-                willChange: 'transform, opacity'
-              }}
+              style={{ height: '100dvh', width: '100vw', overflow: 'hidden', willChange: 'transform, opacity' }}
             >
-              <AppRoutes />
+              <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin" element={isMobile ? <MobileAdminShell /> : <AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="menu" element={<AdminMenu />} />
+                    <Route path="pos" element={<AdminPOS />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="stores" element={<AdminStores />} />
+                    <Route path="staff" element={<AdminStaff />} />
+                  </Route>
+
+                  <Route path="/kitchen" element={<Kitchen />} />
+                  <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
+                  
+                  <Route
+                    path="/*"
+                    element={
+                      isMobile ? <MobileStorefront /> : <Storefront />
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </AnimatePresence>
             </motion.div>
 
             <AnimatePresence>
-              {isBooting && <SplashScreen key="splash" />}
+              {isBooting && !isOperational && <SplashScreen key="splash" />}
             </AnimatePresence>
 
           </CartProvider>
@@ -124,3 +118,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+export default AppRoutes;

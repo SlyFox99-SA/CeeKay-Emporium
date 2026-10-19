@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
+import { X, Check, ScanLine } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getMenu } from '../../services/menuService';
 import { useHaptics } from '../../hooks/useHaptics';
 import { playSuccess, playError } from '../../lib/chime';
+import QrScannerModal from '../../components/admin/QrScannerModal';
+import ScannedOrderModal from '../../components/admin/ScannedOrderModal';
 
 export default function AdminPOS() {
   const [menu, setMenu] = useState({ kotas: [], drinks: [] });
@@ -13,6 +15,11 @@ export default function AdminPOS() {
   const [selectedMods, setSelectedMods] = useState([]);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  
+  // Scanner State
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedOrder, setScannedOrder] = useState(null);
+  
   const haptics = useHaptics();
 
   useEffect(() => { getMenu().then(setMenu); }, []);
@@ -50,11 +57,26 @@ export default function AdminPOS() {
     }
   };
 
-  return (<div style={{ padding: '24px 20px', paddingBottom: '140px' }}>
+  return (
+    <div style={{ padding: '24px 20px', paddingBottom: '120px' }}>
       <header style={{ marginBottom: '24px' }}>
         <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ck-brand-deep)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Terminal</div>
         <h1 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '28px', margin: 0, color: 'var(--ck-ink)' }}>Cashier POS</h1>
       </header>
+
+      {/* SCAN COLLECTION BUTTON */}
+      <button 
+        onClick={() => { haptics.light(); setShowScanner(true); }}
+        style={{ 
+          width: '100%', padding: '16px', marginBottom: '24px', 
+          background: 'var(--ck-brand-deep)', color: 'white', 
+          border: 'none', borderRadius: '16px', fontWeight: 800, fontSize: '16px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+          boxShadow: '0 6px 16px rgba(15, 46, 74, 0.2)', cursor: 'pointer'
+        }}
+      >
+        <ScanLine size={20} /> Scan Collection QR
+      </button>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         {menu.kotas.map(item => (
@@ -65,6 +87,7 @@ export default function AdminPOS() {
         ))}
       </div>
 
+      {/* STICKY CART */}
       {cart.length > 0 && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', padding: '16px 20px', borderTop: '1px solid var(--ck-border)', zIndex: 100 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -83,6 +106,7 @@ export default function AdminPOS() {
         </div>
       )}
 
+      {/* MODIFIER MODAL */}
       <AnimatePresence>
         {selectedItem && (
           <>
@@ -108,6 +132,23 @@ export default function AdminPOS() {
               </button>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* SCANNER MODALS */}
+      <AnimatePresence>
+        {showScanner && (
+          <QrScannerModal 
+            onClose={() => setShowScanner(false)} 
+            onOrderFound={(order) => { setScannedOrder(order); setShowScanner(false); }} 
+          />
+        )}
+        {scannedOrder && (
+          <ScannedOrderModal 
+            order={scannedOrder} 
+            onClose={() => setScannedOrder(null)} 
+            onSuccess={() => { setScannedOrder(null); }} 
+          />
         )}
       </AnimatePresence>
     </div>

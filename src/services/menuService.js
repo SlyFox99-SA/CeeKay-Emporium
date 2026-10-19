@@ -71,3 +71,13 @@ export async function updateItemModifiers(itemId, modifierIds) {
     }
   } catch (err) { throw err; }
 }
+export function subscribeToMenu(callback) {
+  const channel = supabase
+    .channel('menu-stream')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, () => {
+      getMenu().then(callback);
+    })
+    .subscribe();
+
+  return () => { supabase.removeChannel(channel); };
+}

@@ -2,38 +2,42 @@ import { useEffect, useState } from 'react';
 import { Receipt, DollarSign, TrendingUp, Utensils, Trophy } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../../lib/supabase';
-import { FEATURES } from '../../config/features';
+import { useSilentPolling } from '../../hooks/useSilentPolling';
 
 export default function AdminDashboard() {
-  const [selectedStore, setSelectedStore] = useState('all');
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, menuCount: 0, activeOrders: 0 });
   const [chartData, setChartData] = useState([]);
   const [topItems, setTopItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      setLoading(true);
+  const fetchDashboardData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+
+    try {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
-      let ordersQuery = supabase.from('orders').select('*').gte('created_at', sevenDaysAgo.toISOString());
-      if (selectedStore !== 'all') ordersQuery = ordersQuery.eq('store_id', selectedStore);
-      let menuQuery = supabase.from('menu_items').select('id', { count: 'exact', head: true });
+      const ordersQuery = supabase.from('orders').select('*').gte('created_at', sevenDaysAgo.toISOString());
+      const menuQuery = supabase.from('menu_items').select('id', { count: 'exact', head: true });
 
       const [ordersRes, menuRes] = await Promise.all([ordersQuery, menuQuery]);
-      if (!isMounted) return;
-
       const orders = ordersRes.data || [];
+      
+      // 1. KPI Calculations
       const startOfToday = new Date();
       startOfToday.setHours(0, 0, 0, 0);
       const todayOrders = orders.filter(o => new Date(o.created_at) >= startOfToday);
       const todayRevenue = todayOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + Number(o.total), 0);
-      const activeOrders = orders.filter(o => ['placed', 'preparing', 'ready'].includes(o.status));
+      const activeOrders = orders.filter(o => ['placed', 'pending', 'preparing', 'ready'].includes(o.status));
 
-      setStats({ todayOrders: todayOrders.length, todayRevenue, menuCount: menuRes.count || 0, activeOrders: activeOrders.length });
+      setStats({
+        todayOrders: todayOrders.length,
+        todayRevenue,
+        menuCount: menuRes.count || 0,
+        activeOrders: activeOrders.length
+      });
 
+      // 2. Chart Data
       const dailyData = {};
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -48,24 +52,42 @@ export default function AdminDashboard() {
       });
       setChartData(Object.values(dailyData));
 
+      // 3. Top Selling Items Logic
       const itemCounts = {};
       orders.filter(o => o.status !== 'cancelled').forEach(order => {
         (order.items || []).forEach(item => {
-          if (!itemCounts[item.name]) itemCounts[item.name] = { name: item.name, qty: 0, image: item.image };
+          if (!itemCounts[item.name]) {
+            itemCounts[item.name] = { name: item.name, qty: 0, image: item.image };
+          }
           itemCounts[item.name].qty += item.qty;
         });
       });
-      setTopItems(Object.values(itemCounts).sort((a, b) => b.qty - a.qty).slice(0, 4));
-      setLoading(false);
-    })();
-    return () => { isMounted = false; };
-  }, [selectedStore]);
+
+      const sortedItems = Object.values(itemCounts).sort((a, b) => b.qty - a.qty).slice(0, 4);
+      setTopItems(sortedItems);
+
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData(false);
+  }, []);
+
+  useSilentPolling(() => {
+    fetchDashboardData(true);
+  }, 30000);
 
   return (
     <div style={{ padding: '24px 20px' }}>
-      <header style={{ marginBottom: '24px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ck-brand-deep)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Overview</div>
-        <h1 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '28px', margin: 0, color: 'var(--ck-ink)' }}>Dashboard</h1>
+      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ck-brand-deep)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Overview</div>
+          <h1 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '28px', margin: 0, color: 'var(--ck-ink)' }}>Dashboard</h1>
+        </div>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
-import App from './App.jsx';
+import AppRoutes from './App.jsx';
 import AudioWrapper from './components/AudioWrapper.jsx';
 import './main.css';
 
@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HashRouter>
       <AudioWrapper>
-        <App />
+        <AppRoutes />
       </AudioWrapper>
     </HashRouter>
   </React.StrictMode>

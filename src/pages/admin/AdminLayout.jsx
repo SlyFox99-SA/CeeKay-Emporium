@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame } from 'lucide-react';
+import { Home, Utensils, Receipt, Store, Users, LogOut, ShoppingCart, Flame } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FEATURES } from '../../config/features';
 

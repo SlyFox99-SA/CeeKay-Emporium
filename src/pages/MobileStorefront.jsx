@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Home, ReceiptText, User, Plus, Share2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useHaptics } from '../hooks/useHaptics';
-import { getMenu } from '../services/menuService';
+import { getMenu, subscribeToMenu } from '../services/menuService';
+import { useSilentPolling } from '../hooks/useSilentPolling';
 import { flyToCart } from '../lib/flyToCart';
 import { playPop } from '../lib/chime'; 
 import { usePrefs } from '../context/PreferencesContext';
@@ -105,6 +106,23 @@ export default function MobileStorefront() {
   };
 
   useEffect(() => { reloadData(); }, []);
+  // Silent Sync: Realtime + Polling Fallback
+  useEffect(() => {
+    const unsubscribe = subscribeToMenu((newMenu) => {
+      setMenu(newMenu);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Poll every 45 seconds as a fallback (no loading spinners)
+  useSilentPolling(async () => {
+    try {
+      const data = await getMenu();
+      setMenu(data);
+    } catch (err) {
+      // Silent fail
+    }
+  }, 45000);
 
   const handleModalConfirm = (item, options) => {
     addToCart(item, options);
