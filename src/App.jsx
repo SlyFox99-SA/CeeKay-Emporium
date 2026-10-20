@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { CartProvider } from './context/CartContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { useIsMobile } from './hooks/useIsMobile';
 import { useDynamicManifest } from './hooks/useDynamicManifest';
 
+// Pages
 import Storefront from './pages/Storefront';
 import MobileStorefront from './pages/MobileStorefront';
 import Kitchen from './pages/Kitchen';
@@ -20,19 +21,35 @@ import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
 import AdminCOS from './pages/admin/AdminCOS';
-
+import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
-
+import AdminPOS from './pages/admin/AdminPOS';
 import SplashScreen from './components/SplashScreen';
 import InstallPWA from './components/mobile/InstallPWA';
+
+// Protected Route Wrapper
+function ProtectedRoute({ children, allowedRoles }) {
+  const { user, profile, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ck-cream)' }}>Loading...</div>;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  
+  // If the user's role is not in the allowed list, kick them out
+  if (allowedRoles && !allowedRoles.includes(profile?.role) && profile?.role !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 function AppRoutes() {
   const isMobile = useIsMobile();
   const location = useLocation();
   useDynamicManifest();
 
-  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order');
+  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order') || location.pathname.startsWith('/pos') || location.pathname.startsWith('/login');
   const [isBooting, setIsBooting] = useState(!isOperational);
 
   useEffect(() => {
@@ -61,20 +78,41 @@ function AppRoutes() {
             >
               <AnimatePresence mode="wait">
                 <Routes location={location} key={location.pathname}>
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/reset-password" element={<AdminResetPassword />} />
                   
-                  <Route path="/admin" element={isMobile ? <MobileAdminShell />: <AdminLayout />}>
+                  {/* Auth Routes */}
+                  <Route path="/login" element={<AdminLogin />} />
+                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+                  <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+
+                  {/* POS ROUTE (Isolated) */}
+                  <Route path="/pos" element={
+                    <ProtectedRoute allowedRoles={['pos', 'admin']}>
+                      <AdminPOS />
+                    </ProtectedRoute>
+                  } />
+
+                  {/* KITCHEN ROUTE (Isolated) */}
+                  <Route path="/kitchen" element={
+                    <ProtectedRoute allowedRoles={['kitchen', 'admin']}>
+                      <Kitchen />
+                    </ProtectedRoute>
+                  } />
+
+                  {/* ADMIN ROUTES (Super Admin) */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      {isMobile ? <MobileAdminShell /> : <AdminLayout />}
+                    </ProtectedRoute>
+                  }>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
                     <Route path="cos" element={<AdminCOS />} />
-                    
-                    
+                    <Route path="orders" element={<AdminOrders />} />
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
                   </Route>
-                  
-                  <Route path="/kitchen" element={<Kitchen />} />
+
+                  {/* Customer Routes */}
                   <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
                   <Route path="/*" element={isMobile ? <MobileStorefront /> : <Storefront />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
