@@ -4,25 +4,34 @@ export async function getAllStores() {
   const { data, error } = await supabase
     .from('stores')
     .select('*')
-    .order('name');
+    .order('created_at');
   if (error) throw error;
   return data || [];
 }
 
 export async function saveStore(store) {
-  const { error } = await supabase.rpc('save_store', {
-    p_id: store.id || 'new',
-    p_name: store.name || 'CeeKay Emporium',
-    p_branch: store.branch || '',
-    p_address: store.address || '',
-    p_whatsapp: store.whatsapp || '',
-    p_email: store.email || '',
-    p_hours_label: store.hours_label || '',
-    p_coming_soon: !!store.coming_soon,
-    p_latitude: store.latitude ? String(store.latitude) : '',
-    p_longitude: store.longitude ? String(store.longitude) : ''
-  });
-  if (error) throw error;
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(store.id);
+  
+  const payload = {
+    name: store.name || 'CeeKay Emporium',
+    branch: store.branch || '',
+    address: store.address || '',
+    whatsapp: store.whatsapp || '',
+    email: store.email || '',
+    hours_label: store.hours_label || '',
+    coming_soon: !!store.coming_soon,
+    latitude: store.latitude ? Number(store.latitude) : null,
+    longitude: store.longitude ? Number(store.longitude) : null,
+    maps_link: store.maps_link || null, // ADDED
+  };
+
+  if (isUUID) {
+    const { error } = await supabase.from('stores').update(payload).eq('id', store.id);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from('stores').insert([payload]);
+    if (error) throw error;
+  }
   return true;
 }
 
@@ -35,7 +44,8 @@ export async function createStore(store) {
 }
 
 export async function deleteStore(id) {
-  const { error } = await supabase.rpc('force_delete_store', { p_store_id: id });
+  await supabase.from('orders').delete().eq('store_id', id);
+  const { error } = await supabase.from('stores').delete().eq('id', id);
   if (error) throw error;
   return true;
 }

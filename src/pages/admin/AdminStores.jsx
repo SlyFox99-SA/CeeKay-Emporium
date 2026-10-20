@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Save, MapPin, Phone, Mail, X, Trash2, Navigation, AlertCircle } from 'lucide-react';
+import { Plus, Save, MapPin, Phone, Mail, X, Trash2, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllStores, updateStore, createStore, deleteStore } from '../../services/storesService';
 import { useHaptics } from '../../hooks/useHaptics';
@@ -14,8 +14,7 @@ const EMPTY_STORE = {
   email: '',
   hours_label: 'Mon-Sun | 10:00 - 21:00', 
   coming_soon: false,
-  latitude: '',
-  longitude: ''
+  maps_link: ''
 };
 
 export default function AdminStores() {
@@ -87,29 +86,6 @@ export default function AdminStores() {
     }
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.');
-      return;
-    }
-    haptics.light();
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setEditing(prev => ({
-          ...prev,
-          latitude: position.coords.latitude.toFixed(6),
-          longitude: position.coords.longitude.toFixed(6)
-        }));
-        haptics.success();
-      },
-      (err) => {
-        setError('Could not get location. Please check permissions.');
-        haptics.error();
-      },
-      { enableHighAccuracy: true }
-    );
-  };
-
   return (
     <div className="admin-page" style={{ padding: '24px 20px', minHeight: '100dvh', background: 'var(--ck-cream)', overflowX: 'hidden' }}>
       <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -153,14 +129,14 @@ export default function AdminStores() {
               <div style={{ background: 'var(--ck-cream)', padding: '16px', borderRadius: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--ck-ink-soft)' }}><Phone size={14} /> {s.whatsapp}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--ck-ink-soft)' }}><Mail size={14} /> {s.email}</div>
-                {(s.latitude && s.longitude) || s.address ? (
+                {(s.maps_link || s.address) && (
                   <button 
                     onClick={() => openGoogleMaps(s)}
                     style={{ width: '100%', padding: '10px', marginTop: '4px', background: 'rgba(66, 133, 244, 0.1)', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#4285F4', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
-                    <Navigation size={16} /> View on Google Maps
+                    <MapPin size={16} /> View on Google Maps
                   </button>
-                ) : null}
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -183,54 +159,54 @@ export default function AdminStores() {
         </div>
       )}
 
-      {/* EDIT / CREATE MODAL (MOBILE FIRST BOTTOM SHEET) */}
+      {/* EDIT / CREATE MODAL */}
       <AnimatePresence>
         {editing && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9998 }} />
             <motion.div 
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, width: '100vw', maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', zIndex: 9999, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', zIndex: 9999, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--ck-border)' }}>
                 <h2 style={{ margin: 0, fontFamily: 'var(--ck-font-serif)', fontSize: '22px', color: 'var(--ck-ink)' }}>{editing.isNew ? 'New Branch' : 'Edit Branch'}</h2>
                 <button onClick={() => setEditing(null)} style={{ background: 'var(--ck-cream)', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer' }}><X size={20} /></button>
               </div>
 
-              <div style={{ padding: '24px', overflowY: 'auto', overflowX: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-                
+              <div style={{ padding: '24px', overflowY: 'auto' }}>
                 <label style={{ display: 'block', marginBottom: '16px' }}>
                   <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Branch Name</span>
-                  <input value={editing.branch || ''} onChange={e => setEditing({...editing, branch: e.target.value})} placeholder="e.g. Springs" style={{ width: '100%', boxSizing: 'border-box', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
+                  <input value={editing.branch || ''} onChange={e => setEditing({...editing, branch: e.target.value})} placeholder="e.g. Springs" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
                 </label>
 
                 <label style={{ display: 'block', marginBottom: '16px' }}>
                   <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Address</span>
-                  <input value={editing.address || ''} onChange={e => setEditing({...editing, address: e.target.value})} placeholder="Full address" style={{ width: '100%', boxSizing: 'border-box', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
+                  <input value={editing.address || ''} onChange={e => setEditing({...editing, address: e.target.value})} placeholder="Full address" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
                 </label>
 
-                <div style={{ background: 'var(--ck-cream)', padding: '16px', borderRadius: '12px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ck-ink)' }}>Coordinates</span>
-                    <button onClick={getCurrentLocation} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
-                      <Navigation size={12} /> Get Location
-                    </button>
+                {/* GOOGLE MAPS LINK FIELD */}
+                <label style={{ display: 'block', marginBottom: '16px' }}>
+                  <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Google Maps Link</span>
+                  <div style={{ position: 'relative' }}>
+                    <LinkIcon size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ck-ink-soft)' }} />
+                    <input 
+                      value={editing.maps_link || ''} 
+                      onChange={e => setEditing({...editing, maps_link: e.target.value})} 
+                      placeholder="https://maps.app.goo.gl/..." 
+                      style={{ width: '100%', padding: '14px 14px 14px 42px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} 
+                    />
                   </div>
-                  {/* FIX: Added minWidth: 0 so inputs shrink instead of overflowing */}
-                  <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                    <input type="number" step="any" value={editing.latitude || ''} onChange={e => setEditing({...editing, latitude: e.target.value})} placeholder="Latitude" style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '14px' }} />
-                    <input type="number" step="any" value={editing.longitude || ''} onChange={e => setEditing({...editing, longitude: e.target.value})} placeholder="Longitude" style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '14px' }} />
-                  </div>
-                </div>
+                  <div style={{ fontSize: '11px', color: 'var(--ck-ink-soft)', marginTop: '6px' }}>Open Google Maps, find your store, click Share, and paste the link here.</div>
+                </label>
 
                 <label style={{ display: 'block', marginBottom: '16px' }}>
                   <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>WhatsApp Number</span>
-                  <input value={editing.whatsapp || ''} onChange={e => setEditing({...editing, whatsapp: e.target.value})} placeholder="27780000000" style={{ width: '100%', boxSizing: 'border-box', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
+                  <input value={editing.whatsapp || ''} onChange={e => setEditing({...editing, whatsapp: e.target.value})} placeholder="27780000000" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
                 </label>
 
                 <label style={{ display: 'block', marginBottom: '16px' }}>
                   <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Email</span>
-                  <input value={editing.email || ''} onChange={e => setEditing({...editing, email: e.target.value})} placeholder="branch@ceekay.com" style={{ width: '100%', boxSizing: 'border-box', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
+                  <input value={editing.email || ''} onChange={e => setEditing({...editing, email: e.target.value})} placeholder="branch@ceekay.com" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '24px', cursor: 'pointer' }}>
@@ -239,7 +215,7 @@ export default function AdminStores() {
                 </label>
               </div>
 
-              <div style={{ padding: '20px 24px', borderTop: '1px solid var(--ck-border)', display: 'flex', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ padding: '20px 24px', borderTop: '1px solid var(--ck-border)', display: 'flex', gap: '12px' }}>
                 <button onClick={() => setEditing(null)} style={{ flex: 1, padding: '16px', background: 'var(--ck-cream)', color: 'var(--ck-ink)', border: 'none', borderRadius: '99px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}>Cancel</button>
                 <button onClick={save} disabled={saving} style={{ flex: 2, padding: '16px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '99px', fontWeight: 700, fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', cursor: saving ? 'not-allowed' : 'pointer' }}>
                   <Save size={18} /> {saving ? 'Saving...' : 'Save Branch'}
@@ -254,7 +230,7 @@ export default function AdminStores() {
       <AnimatePresence>
         {deleteTarget && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ background: 'white', borderRadius: '24px', padding: '24px', width: '100%', maxWidth: '340px', boxSizing: 'border-box', textAlign: 'center' }}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ background: 'white', borderRadius: '24px', padding: '24px', width: '100%', maxWidth: '340px', textAlign: 'center' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(229, 57, 53, 0.1)', color: '#E53935', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Trash2 size={28} />
               </div>
