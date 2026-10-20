@@ -10,8 +10,6 @@ if (localStorage.getItem('ceekay-store') === 'benoni') {
   localStorage.removeItem('ceekay-store');
 }
 
-
-
 // Auto-purge legacy cart once
 const CART_VERSION = 'v3-hard-reset';
 if (localStorage.getItem('ceekay-cart-version') !== CART_VERSION) {
