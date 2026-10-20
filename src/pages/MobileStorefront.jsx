@@ -165,7 +165,6 @@ export default function MobileStorefront() {
         </div>
       </header>
 
-      {/* GUEST MODE BANNER - Placed cleanly below the header */}
       <GuestModeBanner />
 
       <div className="m-main-content" style={{ position: 'relative', zIndex: 10}}>
@@ -261,38 +260,77 @@ export default function MobileStorefront() {
 
       <ActiveOrderBar />
 
-      <nav className="mobile-bottom-nav" style={{ position: 'relative', zIndex:10 }}>
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('menu')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'menu' ? 'var(--ck-brand-deep)' : '#999' }}>
-          {activeTab === 'menu' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
-          <Home size={22} strokeWidth={activeTab === 'menu' ? 2.5 : 2} style={{zIndex: 1 }} />
-          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Menu</span>
-        </motion.button>
+      {/* PERFECTED BOTTOM NAVIGATION */}
+      <nav style={{ 
+        position: 'fixed', bottom: 0, left: 0, right: 0, 
+        height: 'calc(72px + env(safe-area-inset-bottom))', 
+        background: 'rgba(255, 255, 255, 0.90)', 
+        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+        borderTop: '1px solid rgba(0,0,0,0.06)', 
+        display: 'flex', alignItems: 'center', justifyContent: 'space-around', 
+        paddingBottom: 'env(safe-area-inset-bottom)', 
+        zIndex: 100, 
+        boxShadow: '0 -10px 40px rgba(0,0,0,0.05)' 
+      }}>
+        {[
+          { id: 'menu', label: 'Menu', icon: Home },
+          { id: 'orders', label: 'Orders', icon: ReceiptText },
+          { id: 'profile', label: 'Profile', icon: User }
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
+          return (
+            <motion.button 
+              key={tab.id}
+              whileTap={{ scale: 0.9 }} 
+              onClick={() => handleTabChange(tab.id)} 
+              style={{ 
+                position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                justifyContent: 'center', background: 'transparent', border: 'none', flex: 1, height: '100%', 
+                cursor: 'pointer', color: isActive ? 'var(--ck-brand-deep)' : '#999',
+                transition: 'color 0.2s ease', paddingTop: '12px' // Pushed down slightly
+              }}
+            >
+              {/* The active pill perfectly envelopes the icon */}
+              {isActive && (
+                <motion.div 
+                  layoutId="nav-pill" 
+                  style={{ position: 'absolute', top: '12px', width: '52px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} 
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} style={{zIndex: 1 }} />
+              <span style={{ fontSize: '10px', fontWeight: isActive ? 800 : 600, zIndex: 1, marginTop: '4px' }}>{tab.label}</span>
+            </motion.button>
+          );
+        })}
 
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('orders')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'orders' ? 'var(--ck-brand-deep)' : '#999' }}>
-          {activeTab === 'orders' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
-          <ReceiptText size={22} strokeWidth={activeTab === 'orders' ? 2.5 : 2}style={{ zIndex: 1 }} />
-          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Orders</span>
-        </motion.button>
-
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleTabChange('profile')} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: activeTab === 'profile' ? 'var(--ck-brand-deep)' : '#999' }}>
-          {activeTab === 'profile' && <motion.div layoutId="nav-pill" style={{ position: 'absolute', top: '6px', width: '48px', height: '32px', background: 'var(--ck-cream)', borderRadius: '16px', zIndex: -1 }} />}
-          <User size={22} strokeWidth={activeTab === 'profile' ? 2.5 : 2} style={{ zIndex: 1 }} />
-          <span style={{ fontSize: '10px', fontWeight: 700, zIndex: 1 }}>Profile</span>
-        </motion.button>
-
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setCartOpen(true); haptics.light(); }} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', flex: 1, height: '100%', cursor: 'pointer', color: '#999' }}>
+        {/* Cart Button */}
+        <motion.button 
+          whileTap={{ scale: 0.9 }} 
+          onClick={() => { setCartOpen(true); haptics.light(); }} 
+          style={{ 
+            position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', 
+            justifyContent: 'center', background: 'transparent', border: 'none', flex: 1, height: '100%', 
+            cursor: 'pointer', color: '#999', paddingTop: '12px'
+          }}
+        >
           <div style={{ position: 'relative', display: 'flex' }}>
             <ShoppingBag size={22} strokeWidth={2} />
             {count > 0 && (
               <motion.span 
                 key={count} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }} 
-                style={{ position: 'absolute', top: '-6px', right: '-10px', background: 'var(--ck-action)', color: 'white', fontSize: '10px', fontWeight: 800, minWidth: '18px', height: '18px', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white' }}
+                style={{ 
+                  position: 'absolute', top: '-6px', right: '-10px', background: 'var(--ck-action)', color: 'white', 
+                  fontSize: '10px', fontWeight: 800, minWidth: '18px', height: '18px', borderRadius: '9px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white' 
+                }}
               >
                 {count}
               </motion.span>
             )}
           </div>
-          <span style={{ fontSize: '10px', fontWeight: 700 }}>Cart</span>
+          <span style={{ fontSize: '10px', fontWeight: 600, marginTop: '4px' }}>Cart</span>
         </motion.button>
       </nav>
 
