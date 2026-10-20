@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -11,9 +11,14 @@ if (!url || !key) {
 
 export const supabase = createClient(url || 'http://localhost', key || 'noop', {
   realtime: { params: { eventsPerSecond: 5 } },
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
 });
 
-/* Anonymous device identity — used to retrieve a customer's own orders
+/* Anonymous device identity - used to retrieve a customer's own orders
    without requiring them to sign up. */
 const DEVICE_KEY = 'ceekay-device-id';
 

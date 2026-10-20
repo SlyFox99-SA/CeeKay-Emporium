@@ -14,6 +14,7 @@ import Kitchen from './pages/Kitchen';
 import OrderStatus from './pages/OrderStatus';
 import MobileOrderStatus from './pages/MobileOrderStatus';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminResetPassword from './pages/admin/AdminResetPassword';
 import AdminLayout from './pages/admin/AdminLayout';
 import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -59,7 +60,7 @@ function AppRoutes() {
             >
               <AnimatePresence mode="wait">
                 <Routes location={location} key={location.pathname}>
-                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />`n                  <Route path="/admin/reset-password" element={<AdminResetPassword />} />
                   <Route path="/admin" element={isMobile ? <MobileAdminShell />: <AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />

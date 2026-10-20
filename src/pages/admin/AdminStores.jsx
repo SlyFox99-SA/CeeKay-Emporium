@@ -71,17 +71,28 @@ export default function AdminStores() {
     setIsDeleting(true);
     setError('');
     haptics.medium();
+    
+    // Safety timeout: If Supabase hangs, force clear the UI after 5 seconds
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Database timeout. Forcing local delete.')), 5000)
+    );
+
     try {
-      await deleteStore(deleteTarget.id);
+      // Race the real delete against the timeout
+      await Promise.race([deleteStore(deleteTarget.id), timeout]);
       haptics.success();
+    } catch (e) {
+      console.warn(e.message);
+      if (e.message.includes('timeout')) {
+         setError('Database hung, but store was removed from UI. Please refresh later.');
+      } else {
+         setError(e.message || 'Failed to delete store.');
+         haptics.error();
+      }
+    } finally {
+      // ALWAYS remove from UI and close modal, regardless of database success/hang
       setDeleteTarget(null);
       setStores(prev => prev.filter(s => s.id !== deleteTarget.id));
-      load();
-    } catch (e) {
-      setError(e.message || 'Failed to delete store.');
-      haptics.error();
-      setDeleteTarget(null);
-    } finally {
       setIsDeleting(false);
     }
   };

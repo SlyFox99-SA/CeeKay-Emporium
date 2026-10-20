@@ -10,6 +10,12 @@ export async function getAllStores() {
 }
 
 export async function saveStore(store) {
+  // Strict Auth Check before attempting to save
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('Session expired. Please sign out and log back in.');
+  }
+
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(store.id);
   
   const payload = {
@@ -22,7 +28,7 @@ export async function saveStore(store) {
     coming_soon: !!store.coming_soon,
     latitude: store.latitude ? Number(store.latitude) : null,
     longitude: store.longitude ? Number(store.longitude) : null,
-    maps_link: store.maps_link || null, // ADDED
+    maps_link: store.maps_link || null,
   };
 
   if (isUUID) {
@@ -44,8 +50,7 @@ export async function createStore(store) {
 }
 
 export async function deleteStore(id) {
-  await supabase.from('orders').delete().eq('store_id', id);
-  const { error } = await supabase.from('stores').delete().eq('id', id);
+  const { error } = await supabase.rpc('force_delete_store', { p_store_id: id });
   if (error) throw error;
   return true;
 }
