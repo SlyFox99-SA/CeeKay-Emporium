@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Store } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Store, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CKMark from '../../components/CKMark';
 import { FEATURES } from '../../config/features';
@@ -56,7 +56,11 @@ export default function MobileAdminShell() {
           <span>Orders</span>
         </NavLink>
 
-        {/* NEW: Stores Link */}
+        <NavLink to="/admin/cos" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
+          <Calculator size={20} strokeWidth={2} />
+          <span>Costing</span>
+        </NavLink>
+
         <NavLink to="/admin/stores" style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: isActive ? 'var(--ck-brand-deep)' : '#999', fontSize: '10px', fontWeight: 700, textDecoration: 'none' })}>
           <Store size={20} strokeWidth={2} />
           <span>Stores</span>

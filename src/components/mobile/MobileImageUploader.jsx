@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Camera, X, Loader2 } from 'lucide-react';
 import { uploadImage } from '../../lib/storage';
 import { compressImage } from '../../lib/imageUtils';
+import { supabase } from '../../lib/supabase';
 
 export default function MobileImageUploader({ value, onChange }) {
   const [loading, setLoading] = useState(false);
@@ -13,12 +14,22 @@ export default function MobileImageUploader({ value, onChange }) {
 
     setLoading(true);
     try {
+      // 1. Check Auth strictly before doing anything
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('You are not logged in. Please refresh the page and log in again.');
+      }
+
+      // 2. Compress
       const compressedFile = await compressImage(file);
+      
+      // 3. Upload
       const url = await uploadImage(compressedFile);
       onChange(url);
     } catch (err) {
       console.error('Upload failed', err);
-      alert('Failed to upload image.');
+      // ALERT EXACT ERROR MESSAGE
+      alert(`Upload Error:\n${err.message || JSON.stringify(err)}`);
     } finally {
       setLoading(false);
     }
@@ -26,7 +37,6 @@ export default function MobileImageUploader({ value, onChange }) {
 
   return (
     <div style={{ marginTop: '8px' }}>
-      {/* REMOVED capture="environment" so users can choose from gallery */}
       <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
       
       {value ? (

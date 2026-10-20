@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Plus, Check, AlertTriangle } from 'lucide-react';
-import { getAllMenu, deleteMenuItem, getModifiers, updateItemModifiers } from '../../services/menuService';
+import { Plus, AlertTriangle } from 'lucide-react';
+import { getAllMenu, deleteMenuItem, getModifiers, createMenuItem, updateMenuItem } from '../../services/menuService';
 import MobileMenuModal from '../../components/mobile/MobileMenuModal';
+import AdminModifierModal from '../../components/mobile/AdminModifierModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // HARDCODED SVGS to guarantee rendering
@@ -24,13 +25,16 @@ const SkeletonRow = () => (
   <motion.div 
     animate={{ opacity: [0.5, 1, 0.5] }} 
     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-    style={{ background: 'white', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--ck-border)', marginBottom: '12px' }}
+    style={{ background: 'white', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', border: '1px solid var(--ck-border)', marginBottom: '16px' }}
   >
-    <div>
-      <div style={{ width: '120px', height: '16px', background: 'var(--ck-cream)', borderRadius: '4px', marginBottom: '8px' }} />
-      <div style={{ width: '80px', height: '12px', background: 'var(--ck-cream)', borderRadius: '4px' }} />
+    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <div style={{ width: '64px', height: '64px', background: 'var(--ck-cream)', borderRadius: '12px' }} />
+      <div style={{ flex: 1 }}>
+        <div style={{ width: '60%', height: '18px', background: 'var(--ck-cream)', borderRadius: '4px', marginBottom: '8px' }} />
+        <div style={{ width: '40%', height: '14px', background: 'var(--ck-cream)', borderRadius: '4px' }} />
+      </div>
     </div>
-    <div style={{ width: '80px', height: '32px', background: 'var(--ck-cream)', borderRadius: '8px' }} />
+    <div style={{ width: '100%', height: '40px', background: 'var(--ck-cream)', borderRadius: '8px' }} />
   </motion.div>
 );
 
@@ -41,7 +45,6 @@ export default function AdminMenu() {
   const [modalItem, setModalItem] = useState(null);
   
   const [editingModsFor, setEditingModsFor] = useState(null);
-  const [selectedModIds, setSelectedModIds] = useState([]);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -55,29 +58,27 @@ export default function AdminMenu() {
 
   useEffect(() => { loadData(); }, []);
 
+  const handleSave = async (payload) => {
+    try {
+      if (payload.id) {
+        await updateMenuItem(payload.id, payload);
+      } else {
+        await createMenuItem(payload);
+      }
+      await loadData();
+      setModalItem(null);
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert(`Failed to save item:\n${err.message}`);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
     await deleteMenuItem(deleteTarget.id);
     setDeleteTarget(null);
     setIsDeleting(false);
-    loadData();
-  };
-
-  const openModEditor = (item) => {
-    setEditingModsFor(item);
-    setSelectedModIds([]); 
-  };
-
-  const toggleModSelection = (id) => {
-    setSelectedModIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
-  };
-
-  const saveMods = async () => {
-    await updateItemModifiers(editingModsFor.id, selectedModIds);
-    setEditingModsFor(null);
     loadData();
   };
 
@@ -103,35 +104,69 @@ export default function AdminMenu() {
           <SkeletonRow />
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {items.map(item => (
             <div 
               key={item.id} 
-              style={{ background: 'white', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid var(--ck-border)' }}
+              style={{ background: 'white', borderRadius: '20px', padding: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid var(--ck-border)', display: 'flex', flexDirection: 'column', gap: '16px' }}
             >
-              <div>
-                <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, color: 'var(--ck-ink)' }}>{item.name}</h4>
-                <p style={{ margin: 0, fontSize: '13px', color: 'var(--ck-ink-soft)', fontWeight: 600 }}>{item.category} • R {Number(item.price).toFixed(2)}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '72px', height: '72px', borderRadius: '16px', overflow: 'hidden', background: 'var(--ck-cream)', flexShrink: 0 }}>
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--ck-ink-soft)', textAlign: 'center' }}>No<br/>Image</div>
+                  )}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <h4 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--ck-ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.name}
+                    </h4>
+                    {/* MARGIN WARNING BADGE */}
+                    {(() => {
+                      if (!item.cost_price || item.cost_price <= 0) return null;
+                      const margin = ((item.price - item.cost_price) / item.price) * 100;
+                      if (margin < (item.min_profit_margin || 50)) {
+                        return (
+                          <span style={{ background: 'rgba(229, 57, 53, 0.1)', color: '#E53935', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                            LOW MARGIN
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '14px', color: 'var(--ck-brand-deep)', fontWeight: 800 }}>
+                    R {Number(item.price).toFixed(2)}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--ck-ink-soft)', textTransform: 'capitalize' }}>
+                    {item.category}
+                  </p>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              
+              <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--ck-border)', paddingTop: '16px' }}>
                 {item.category === 'kota' && (
-                  <button onClick={() => openModEditor(item)} style={{ padding: '8px 12px', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '8px', cursor: 'pointer', color: 'var(--ck-brand-deep)', fontWeight: 700, fontSize: '12px' }}>
+                  <button 
+                    onClick={() => setEditingModsFor(item)} 
+                    style={{ flex: 1, padding: '12px', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '12px', cursor: 'pointer', color: 'var(--ck-brand-deep)', fontWeight: 700, fontSize: '13px' }}
+                  >
                     Add-ons
                   </button>
                 )}
                 
-                {/* EDIT BUTTON WITH HARDCODED SVG */}
                 <button 
                   onClick={() => setModalItem(item)} 
-                  style={{ width: '36px', height: '36px', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-brand-deep)' }}
+                  style={{ flex: item.category === 'kota' ? 0 : 1, padding: '12px', background: 'var(--ck-cream)', border: '1px solid var(--ck-border)', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-brand-deep)' }}
                 >
                   <EditIcon />
                 </button>
 
-                {/* DELETE BUTTON WITH HARDCODED SVG */}
                 <button 
                   onClick={() => setDeleteTarget(item)} 
-                  style={{ width: '36px', height: '36px', background: 'rgba(229, 57, 53, 0.1)', border: '1px solid rgba(229, 57, 53, 0.2)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-achaar-red)' }}
+                  style={{ flex: item.category === 'kota' ? 0 : 1, padding: '12px', background: 'rgba(229, 57, 53, 0.1)', border: '1px solid rgba(229, 57, 53, 0.2)', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ck-achaar-red)' }}
                 >
                   <TrashIcon />
                 </button>
@@ -141,9 +176,22 @@ export default function AdminMenu() {
         </div>
       )}
 
+      {/* EDIT ITEM MODAL */}
       {modalItem !== null && (
-        <MobileMenuModal item={modalItem} onClose={() => setModalItem(null)} onSave={() => { loadData(); setModalItem(null); }} />
+        <MobileMenuModal item={modalItem} onClose={() => setModalItem(null)} onSave={handleSave} />
       )}
+
+      {/* ADD-ONS MODIFIER MODAL */}
+      <AnimatePresence>
+        {editingModsFor && (
+          <AdminModifierModal 
+            item={editingModsFor} 
+            modifiers={modifiers} 
+            onClose={() => setEditingModsFor(null)} 
+            onSave={() => { setEditingModsFor(null); loadData(); }} 
+          />
+        )}
+      </AnimatePresence>
 
       {/* DELETE MODAL */}
       <AnimatePresence>

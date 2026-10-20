@@ -11,13 +11,15 @@ export default function AdminResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Supabase handles the token in the URL automatically thanks to detectSessionInUrl: true
-    // We just need to check if we have an active session (which means the link is valid)
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Wait a moment for Supabase to process the token from the URL
+    const checkSession = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setError('Invalid or expired reset link. Please request a new one.');
       }
-    });
+    }, 500);
+
+    return () => clearTimeout(checkSession);
   }, []);
 
   const handleUpdate = async (e) => {

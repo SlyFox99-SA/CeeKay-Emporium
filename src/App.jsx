@@ -19,6 +19,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
+import AdminCOS from './pages/admin/AdminCOS';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
@@ -60,15 +61,19 @@ function AppRoutes() {
             >
               <AnimatePresence mode="wait">
                 <Routes location={location} key={location.pathname}>
-                  <Route path="/admin/login" element={<AdminLogin />} />`n                  <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+                  
                   <Route path="/admin" element={isMobile ? <MobileAdminShell />: <AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
+                    <Route path="cos" element={<AdminCOS />} />
                     <Route path="pos" element={<AdminPOS />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
                   </Route>
+                  
                   <Route path="/kitchen" element={<Kitchen />} />
                   <Route path="/order/:id" element={isMobile ? <MobileOrderStatus /> : <OrderStatus />} />
                   <Route path="/*" element={isMobile ? <MobileStorefront /> : <Storefront />} />

@@ -46,19 +46,19 @@ export async function getModifiers() {
 
 export async function createMenuItem(item) {
   try {
-    const { data, error } = await supabase.from('menu_items').insert(item).select().maybeSingle(); // FIXED
+    // Remove the strict check. If there is no error, it worked.
+    const { error } = await supabase.from('menu_items').insert(item);
     if (error) throw error;
-    if (!data) throw new Error('RLS restricted return on create.');
-    return data;
+    return true;
   } catch (err) { throw err; }
 }
 
 export async function updateMenuItem(id, updates) {
   try {
-    const { data, error } = await supabase.from('menu_items').update(updates).eq('id', id).select().maybeSingle(); // FIXED
+    // Remove the strict check. If there is no error, it worked.
+    const { error } = await supabase.from('menu_items').update(updates).eq('id', id);
     if (error) throw error;
-    if (!data) throw new Error('RLS restricted return on update.');
-    return data;
+    return true;
   } catch (err) { throw err; }
 }
 

@@ -8,21 +8,17 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch the profile data gracefully
   const fetchProfile = async (userId) => {
     if (!userId) {
       setProfile(null);
       return;
     }
-    
     try {
-      // FIXED: Changed .single() to .maybeSingle() to handle 0 rows gracefully
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-
       if (error) throw error;
       setProfile(data);
     } catch (err) {
@@ -32,7 +28,6 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -42,21 +37,25 @@ export function AuthProvider({ children }) {
       }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         fetchProfile(session.user.id).then(() => setLoading(false));
       } else {
         setProfile(null);
         setLoading(false);
       }
+
+      // FIXED: Removed the extra # to prevent double-hash bug
+      if (event === 'PASSWORD_RECOVERY') {
+        window.location.hash = '/admin/reset-password';
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Set loading to false once the initial profile fetch is done
   useEffect(() => {
     if (user && profile !== null) setLoading(false);
   }, [user, profile]);

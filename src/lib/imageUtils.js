@@ -1,7 +1,3 @@
-/**
- * Compresses an image file using the HTML5 Canvas API.
- * Resizes to max 1200px and compresses to 70% quality JPEG.
- */
 export const compressImage = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -16,7 +12,6 @@ export const compressImage = (file) => {
         let width = img.width;
         let height = img.height;
 
-        // Calculate new dimensions while maintaining aspect ratio
         if (width > height) {
           if (width > MAX_WIDTH) {
             height *= MAX_WIDTH / width;
@@ -34,15 +29,14 @@ export const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to Blob (JPEG for best compression)
         canvas.toBlob(
           (blob) => {
             if (!blob) {
               reject(new Error('Canvas to Blob failed'));
               return;
             }
-            // Create a new File object from the compressed blob
-            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+            // Force a clean .jpg file with the correct MIME type
+            const compressedFile = new File([blob], `image-${Date.now()}.jpg`, {
               type: 'image/jpeg',
               lastModified: Date.now(),
             });

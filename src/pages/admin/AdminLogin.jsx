@@ -30,9 +30,9 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true); setError(''); setMessage('');
 
-    // This tells Supabase to send an email with a link back to our app
+    // Redirect to the ROOT. Supabase will append #access_token=...
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/#/admin/reset-password`,
+      redirectTo: `${window.location.origin}`,
     });
 
     if (error) {

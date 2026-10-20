@@ -1,28 +1,25 @@
 import { supabase } from './supabase';
 
+const BUCKET_NAME = 'menu-images';
+
 export async function uploadImage(file, folder = 'menu') {
   try {
-    // 1. Create a safe, unique filename
-    const fileExt = file.name.split('.').pop();
-    const safeName = file.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const fileName = `${Date.now()}-${safeName}.${fileExt}`;
-    const filePath = `${fileName}`; // Supabase 'from' already scopes to the bucket
+    // Generate a safe, unique path
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
 
-    // 2. Upload with explicit parameters to avoid 400 errors
     const { data, error } = await supabase.storage
-      .from('menu') // Ensure this matches your bucket name exactly
-      .upload(filePath, file, {
-        cacheControl: '3600',       // Must be a string
-        contentType: file.type,     // e.g., 'image/jpeg'
-        upsert: true                // Prevents 'Asset Already Exists' 400 errors
+      .from(BUCKET_NAME)
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        contentType: file.type || 'image/jpeg',
+        upsert: true // ALLOW OVERWRITE to prevent 400 errors
       });
 
     if (error) throw error;
 
-    // 3. Get the public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('menu')
-      .getPublicUrl(filePath);
+      .from(BUCKET_NAME)
+      .getPublicUrl(fileName);
 
     return publicUrl;
   } catch (err) {
@@ -33,8 +30,8 @@ export async function uploadImage(file, folder = 'menu') {
 
 export async function deleteImageByUrl(url) {
   try {
-    const path = url.split('/').pop(); 
-    const { error } = await supabase.storage.from('menu').remove([path]);
+    const path = url.split(`${BUCKET_NAME}/`).pop(); 
+    const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
     if (error) throw error;
   } catch (err) {
     console.error('Delete failed:', err);
@@ -43,7 +40,7 @@ export async function deleteImageByUrl(url) {
 }
 
 export function validateImage(file) {
-  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_SIZE = 5 * 1024 * 1024;
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
   if (file.size > MAX_SIZE) return 'Image must be smaller than 5MB.';

@@ -8,9 +8,65 @@
 @import './styles/cart.css';
 
 /* =========================================
-   CEEKY DESKTOP SHELL
+   ADMIN LAYOUT (DESKTOP)
    ========================================= */
+.admin-shell { 
+  display: flex; 
+  height: 100dvh; 
+  background: var(--ck-cream); 
+  overflow: hidden; 
+}
 
+.admin-sidebar { 
+  width: 280px; 
+  background: white; 
+  border-right: 1px solid var(--ck-border); 
+  display: flex; 
+  flex-direction: column; 
+  height: 100dvh; 
+  flex-shrink: 0; 
+}
+
+.admin-nav-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  padding: 16px 20px; 
+  border-radius: 12px; 
+  text-decoration: none; 
+  font-weight: 700; 
+  font-size: 14px; 
+  transition: all 0.2s ease; 
+  color: var(--ck-ink-soft); 
+  margin-bottom: 4px; 
+  border: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.admin-nav-item:hover { 
+  background: var(--ck-cream); 
+  color: var(--ck-brand-deep); 
+}
+
+.admin-nav-item.active { 
+  background: var(--ck-brand-deep); 
+  color: white; 
+  box-shadow: 0 8px 20px rgba(15, 46, 74, 0.2); 
+}
+
+.admin-content { 
+  flex: 1; 
+  padding: 40px; 
+  height: 100dvh; 
+  overflow-y: auto; 
+}
+
+/* =========================================
+   CEEKY DESKTOP SHELL (CUSTOMER)
+   ========================================= */
 .ck-dk-shell {
   height: 100dvh;
   overflow-y: auto;
@@ -23,7 +79,6 @@
   position: relative;
 }
 
-/* Top Marquee Ticker */
 .ck-dk-marquee {
   background-color: var(--ck-brand-deep);
   color: var(--ck-cream);
@@ -47,7 +102,6 @@
   100% { transform: translateX(-50%); }
 }
 
-/* Header */
 .ck-dk-header {
   position: sticky;
   top: 0;
@@ -65,7 +119,6 @@
 .ck-dk-brand-sub { font-size: 12px; color: var(--ck-ink-soft); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
 .ck-dk-header-actions { display: flex; align-items: center; gap: 20px; }
 
-/* Pill Buttons */
 .ck-dk-store-pill {
   background: white;
   padding: 10px 18px;
@@ -111,7 +164,6 @@
   font-weight: 900;
 }
 
-/* Hero */
 .ck-dk-hero {
   display: flex;
   flex-direction: column;
@@ -146,7 +198,6 @@
 .ck-dk-hero-title span { color: var(--ck-brand-deep); font-style: italic; }
 .ck-dk-hero-subtitle { font-family: var(--ck-font-serif); font-size: 22px; color: var(--ck-ink-soft); max-width: 600px; margin: 0 auto 48px; line-height: 1.5; font-weight: 500; }
 
-/* Perfectly Centered Buttons */
 .ck-dk-hero-ctas {
   display: flex;
   justify-content: center;
@@ -173,7 +224,6 @@
 .ck-dk-btn-secondary { background: transparent; color: var(--ck-brand-deep); border: 2px solid var(--ck-brand-deep); }
 .ck-dk-btn-secondary:hover { background: var(--ck-brand-deep); color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 46, 74, 0.2); }
 
-/* Features Grid */
 .ck-dk-features-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -187,7 +237,6 @@
 .ck-dk-feature-title { font-size: 14px; font-weight: 800; color: var(--ck-ink); margin-bottom: 4px; }
 .ck-dk-feature-desc { font-size: 13px; color: var(--ck-ink-soft); font-weight: 600; }
 
-/* Menu Grid */
 .ck-dk-main { padding: 60px 40px 100px; max-width: 1280px; margin: 0 auto; width: 100%; }
 .ck-dk-category-title { font-family: var(--ck-font-serif); font-size: 36px; margin: 0 0 32px; color: var(--ck-ink); }
 .ck-dk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px; margin-bottom: 60px; }
@@ -201,7 +250,6 @@
 .ck-dk-card-price { font-size: 22px; font-weight: 900; color: var(--ck-brand-deep); }
 .ck-dk-add-btn { position: absolute; bottom: 16px; right: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--ck-brand-deep); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 46, 74, 0.2); }
 
-/* 3D Background */
 .ck-dk-3d-bg { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 1200px; height: 1200px; pointer-events: none; z-index: 0; background: radial-gradient(circle, rgba(30, 95, 156, 0.15) 0%, rgba(245, 236, 217, 0) 70%); filter: blur(40px); -webkit-mask-image: radial-gradient(circle, black 40%, transparent 70%); mask-image: radial-gradient(circle, black 40%, transparent 70%); }
 
 /* =========================================
