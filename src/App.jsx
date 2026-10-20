@@ -20,10 +20,10 @@ import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
 import AdminCOS from './pages/admin/AdminCOS';
-import AdminOrders from './pages/admin/AdminOrders';
+
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
-import AdminPOS from './pages/admin/AdminPOS';
+
 import SplashScreen from './components/SplashScreen';
 import InstallPWA from './components/mobile/InstallPWA';
 
@@ -68,8 +68,8 @@ function AppRoutes() {
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
                     <Route path="cos" element={<AdminCOS />} />
-                    <Route path="pos" element={<AdminPOS />} />
-                    <Route path="orders" element={<AdminOrders />} />
+                    
+                    
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
                   </Route>

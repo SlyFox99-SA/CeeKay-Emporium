@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, ArrowLeft, AlertTriangle, TrendingUp, Plus, Trash2, ChefHat } from 'lucide-react';
+import { Save, ArrowLeft, AlertTriangle, TrendingUp, Plus, Trash2, ChefHat, CheckCircle } from 'lucide-react';
 import MobileImageUploader from './MobileImageUploader';
 import { useHaptics } from '../../hooks/useHaptics';
 import { getIngredients } from '../../services/cosService';
@@ -15,7 +15,8 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
     stock_quantity: item.stock_quantity ?? '',
     manually_sold_out: item.manually_sold_out ?? false,
     available: item.available ?? true,
-    recipe: item.recipe || [] // Array of { ingredient_id, qty }
+    recipe: item.recipe || [],
+    min_profit_amount: item.min_profit_amount || 15
   });
   
   const [selectedIngId, setSelectedIngId] = useState('');
@@ -30,27 +31,42 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
     });
   }, []);
 
-  // Calculate cost from recipe
   const calculateRecipeCost = () => {
     return form.recipe.reduce((total, r) => {
       const ing = allIngredients.find(i => i.id === r.ingredient_id);
       if (!ing) return total;
-      const costPerUnit = ing.purchase_price / ing.yield_amount;
-      return total + (costPerUnit * r.qty);
+      return total + ((ing.purchase_price / ing.yield_amount) * r.qty);
     }, 0);
   };
 
   const autoCost = calculateRecipeCost();
   
-  // Profit Calcs
   const sellingPrice = Number(form.price) || 0;
-  // Use autoCost if recipe exists, otherwise fallback to manual cost_price
   const costPrice = form.recipe.length > 0 ? autoCost : (Number(form.cost_price) || 0);
   const targetMargin = Number(form.min_profit_margin) || 50;
+  const targetProfit = Number(form.min_profit_amount) || 15;
   
   const profitAmount = sellingPrice - costPrice;
   const actualMargin = sellingPrice > 0 ? (profitAmount / sellingPrice) * 100 : 0;
-  const isBelowTarget = actualMargin < targetMargin;
+  
+  const isBelowMargin = actualMargin < targetMargin;
+  const isBelowProfit = profitAmount < targetProfit;
+  const isUnprofitable = sellingPrice <= costPrice;
+
+  // Determine status color
+  let statusColor = 'var(--ck-green)';
+  let StatusIcon = CheckCircle;
+  let statusText = 'Excellent Profit';
+
+  if (isUnprofitable) {
+    statusColor = '#E53935';
+    StatusIcon = AlertTriangle;
+    statusText = 'LOSS! Selling below cost.';
+  } else if (isBelowMargin || isBelowProfit) {
+    statusColor = '#FFA000'; // Amber
+    StatusIcon = AlertTriangle;
+    statusText = 'Low Profit Warning';
+  }
 
   const addIngredient = () => {
     if (!selectedIngId || Number(selectedQty) <= 0) return;
@@ -87,6 +103,7 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
       available: !!form.available,
       cost_price: Number(costPrice.toFixed(2)),
       min_profit_margin: Number(form.min_profit_margin),
+      min_profit_amount: Number(form.min_profit_amount),
       recipe: form.recipe
     };
 
@@ -118,6 +135,17 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px', paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}>
           
+          {/* PROFIT GUARD VISUAL BANNER (Top Priority) */}
+          <div style={{ padding: '20px', borderRadius: '20px', background: statusColor, color: 'white', marginBottom: '24px', boxShadow: '0 8px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '50%' }}>
+              <StatusIcon size={28} />
+            </div>
+            <div>
+              <div style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'var(--ck-font-serif)' }}>{statusText}</div>
+              <div style={{ fontSize: '13px', opacity: 0.9, marginTop: '4px' }}>Profit per item: <strong>R {profitAmount.toFixed(2)}</strong></div>
+            </div>
+          </div>
+
           {/* BASIC INFO */}
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '1px solid var(--ck-border)' }}>
             <label style={{ display: 'block', marginBottom: '16px' }}>
@@ -126,49 +154,40 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
             </label>
             
             <label style={{ display: 'block', marginBottom: '16px' }}>
-              <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Category</span>
-              <select style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none', background: 'white' }} value={form.category || 'kota'} onChange={e => setForm({ ...form, category: e.target.value })}>
-                <option value="kota">Kota</option>
-                <option value="drink">Drink</option>
-              </select>
+              <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Selling Price (R)</span>
+              <input type="number" step="0.01" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '18px', fontWeight: 800, outline: 'none', color: 'var(--ck-brand-deep)' }} value={form.price || ''} onChange={e => setForm({ ...form, price: e.target.value })} />
             </label>
             
             <label style={{ display: 'block' }}>
               <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Description</span>
-              <textarea style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none', minHeight: '80px', resize: 'vertical' }} value={form.desc || ''} onChange={e => setForm({ ...form, desc: e.target.value })} />
+              <textarea style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none', minHeight: '60px', resize: 'vertical' }} value={form.desc || ''} onChange={e => setForm({ ...form, desc: e.target.value })} />
             </label>
           </div>
 
           {/* RECIPE BUILDER */}
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '1px solid var(--ck-border)' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px', fontSize: '15px', fontWeight: 800, color: 'var(--ck-brand-deep)' }}>
-              <ChefHat size={18} /> Recipe (Cost to Make)
+              <ChefHat size={18} /> Recipe Cost
             </h3>
             
             {loadingIngredients ? (
-              <div style={{ textAlign: 'center', fontSize: '13px', color: 'var(--ck-ink-soft)' }}>Loading ingredients...</div>
+              <div style={{ textAlign: 'center', fontSize: '13px', color: 'var(--ck-ink-soft)' }}>Loading...</div>
             ) : allIngredients.length === 0 ? (
-              <div style={{ background: '#FFF4E5', padding: '12px', borderRadius: '8px', fontSize: '12px', color: 'var(--ck-charcoal)', marginBottom: '16px' }}>
-                No ingredients found. Go to <b>Cost of Sales</b> first to add bulk items.
-              </div>
+              <div style={{ background: '#FFF4E5', padding: '12px', borderRadius: '8px', fontSize: '12px', color: 'var(--ck-charcoal)', marginBottom: '16px' }}>No ingredients found.</div>
             ) : (
               <>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'flex-end' }}>
                   <label style={{ flex: 2 }}>
-                    <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '4px' }}>Ingredient</span>
                     <select value={selectedIngId} onChange={e => setSelectedIngId(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px', outline: 'none' }}>
                       {allIngredients.map(ing => (
-                        <option key={ing.id} value={ing.id}>{ing.name} (R{(ing.purchase_price/ing.yield_amount).toFixed(2)}/{ing.unit})</option>
+                        <option key={ing.id} value={ing.id}>{ing.name} (R{(ing.purchase_price/ing.yield_amount).toFixed(2)})</option>
                       ))}
                     </select>
                   </label>
                   <label style={{ flex: 1 }}>
-                    <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '4px' }}>Qty</span>
                     <input type="number" min="1" value={selectedQty} onChange={e => setSelectedQty(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px', outline: 'none' }} />
                   </label>
-                  <button onClick={addIngredient} style={{ padding: '12px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    <Plus size={18} />
-                  </button>
+                  <button onClick={addIngredient} style={{ padding: '12px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><Plus size={18} /></button>
                 </div>
 
                 {form.recipe.length > 0 && (
@@ -194,67 +213,32 @@ export default function MobileMenuModal({ item, onClose, onSave }) {
             )}
           </div>
 
-          {/* PROFIT GUARD */}
+          {/* TARGETS */}
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '1px solid var(--ck-border)' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px', fontSize: '15px', fontWeight: 800, color: 'var(--ck-brand-deep)' }}>
-              <TrendingUp size={18} /> Profit Guard
+              <TrendingUp size={18} /> Profit Targets
             </h3>
             
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
               <label style={{ flex: 1, display: 'block' }}>
-                <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '6px' }}>Selling Price (R)</span>
-                <input type="number" step="0.01" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} value={form.price || ''} onChange={e => setForm({ ...form, price: e.target.value })} />
-              </label>
-              <label style={{ flex: 1, display: 'block' }}>
                 <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '6px' }}>Cost to Make (R)</span>
                 <input type="number" step="0.01" disabled={form.recipe.length > 0} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none', background: form.recipe.length > 0 ? 'var(--ck-cream)' : 'white' }} value={costPrice.toFixed(2)} onChange={e => setForm({ ...form, cost_price: e.target.value })} />
-                {form.recipe.length > 0 && <div style={{ fontSize: '10px', color: 'var(--ck-ink-soft)', marginTop: '4px' }}>Auto-calculated from recipe</div>}
+              </label>
+              <label style={{ flex: 1, display: 'block' }}>
+                <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '6px' }}>Min Profit (R)</span>
+                <input type="number" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} value={form.min_profit_amount} onChange={e => setForm({ ...form, min_profit_amount: e.target.value })} />
               </label>
             </div>
 
             <label style={{ display: 'block', marginBottom: '16px' }}>
-              <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '6px' }}>Minimum Target Margin (%)</span>
+              <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '6px' }}>Min Margin (%)</span>
               <input type="number" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} value={form.min_profit_margin} onChange={e => setForm({ ...form, min_profit_margin: e.target.value })} />
             </label>
-
-            {/* LIVE CALCULATION */}
-            <div style={{ padding: '16px', borderRadius: '12px', background: isBelowTarget ? 'rgba(229, 57, 53, 0.1)' : 'rgba(76, 175, 80, 0.1)', border: `1px solid ${isBelowTarget ? '#E53935' : 'var(--ck-green)'}` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink)' }}>Actual Margin:</span>
-                <span style={{ fontSize: '15px', fontWeight: 900, color: isBelowTarget ? '#E53935' : 'var(--ck-green)' }}>{actualMargin.toFixed(1)}%</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink)' }}>Profit per item:</span>
-                <span style={{ fontSize: '15px', fontWeight: 900, color: isBelowTarget ? '#E53935' : 'var(--ck-green)' }}>R {profitAmount.toFixed(2)}</span>
-              </div>
-              
-              {isBelowTarget && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '12px', color: '#E53935', fontSize: '12px', fontWeight: 700 }}>
-                  <AlertTriangle size={14} /> Below your {targetMargin}% target margin!
-                </div>
-              )}
-            </div>
           </div>
 
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '1px solid var(--ck-border)' }}>
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '12px' }}>Image</div>
             <MobileImageUploader value={form.image} onChange={url => setForm({ ...form, image: url })} />
-          </div>
-
-          <div style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid var(--ck-border)' }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '12px' }}>Inventory & Status</div>
-            <label style={{ display: 'block', marginBottom: '16px' }}>
-              <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--ck-ink-soft)', marginBottom: '8px' }}>Stock Quantity (blank = unlimited)</span>
-              <input type="number" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} value={form.stock_quantity} onChange={e => setForm({ ...form, stock_quantity: e.target.value })} placeholder="e.g. 50" />
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', cursor: 'pointer' }}>
-              <input type="checkbox" checked={form.manually_sold_out} onChange={e => setForm({ ...form, manually_sold_out: e.target.checked })} style={{ width: '20px', height: '20px', accentColor: 'var(--ck-brand-deep)' }} />
-              <span style={{ fontSize: '15px', fontWeight: 600 }}>Manually mark as Sold Out</span>
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-              <input type="checkbox" checked={form.available} onChange={e => setForm({ ...form, available: e.target.checked })} style={{ width: '20px', height: '20px', accentColor: 'var(--ck-brand-deep)' }} />
-              <span style={{ fontSize: '15px', fontWeight: 600 }}>Visible on Menu</span>
-            </label>
           </div>
 
         </div>
