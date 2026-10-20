@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Calculator } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Calculator, Wallet } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FEATURES } from '../../config/features';
 
@@ -17,7 +17,7 @@ export default function AdminLayout() {
     { to: "/admin/menu", icon: Utensils, label: "Menu" },
     { to: "/admin/pos", icon: ShoppingCart, label: "Cashier POS", show: FEATURES.enablePOS },
     { to: "/admin/orders", icon: Receipt, label: "Orders" },
-    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" }
+    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" },`n    { to: "/admin/finance", icon: Wallet, label: "Finance Ledger" }
   ];
 
   return (

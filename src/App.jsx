@@ -21,6 +21,7 @@ import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
 import AdminCOS from './pages/admin/AdminCOS';
+import AdminFinance from './pages/admin/AdminFinance';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
@@ -107,7 +108,7 @@ function AppRoutes() {
                   }>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
-                    <Route path="cos" element={<AdminCOS />} />
+                    <Route path="cos" element={<AdminCOS />} />`n                    <Route path="finance" element={<AdminFinance />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
