@@ -80,7 +80,6 @@ function AppRoutes() {
               {isBooting && !isOperational && <SplashScreen key="splash" />}
             </AnimatePresence>
 
-            {/* PWA Install Tile - Strictly isolated to mobile customer-facing routes */}
             {!isOperational && isMobile && <InstallPWA />}
           </CartProvider>
         </StoreProvider>

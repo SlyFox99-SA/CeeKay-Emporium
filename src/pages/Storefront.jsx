@@ -34,7 +34,11 @@ export default function Storefront() {
   const scrollToMenu = () => { menuRef.current?.scrollIntoView({ behavior: 'smooth' }); };
 
   return (
-    <div className="ck-dk-shell">`n      <GuestModeBanner />
+    <div className="ck-dk-shell">
+      
+      {/* GUEST BANNER - Cleanly placed at the top */}
+      <GuestModeBanner />
+
       <div className="ck-dk-marquee">
         <div className="ck-dk-marquee-content">
           <span>HAAR DAILY</span><span>|</span><span>EST. 2021 - BENONI, GAUTENG</span><span>|</span><span>KOTAS FROM R20</span><span>|</span><span>MADE LIKE WE'RE FEEDING FAMILY</span><span>|</span><span>ORDER ONLINE - READY IN 15 MIN</span><span>|</span><span>REAL FLAVOUR. REAL VALUE.</span><span>|</span>
@@ -51,8 +55,6 @@ export default function Storefront() {
           </div>
         </div>
         <div className="ck-dk-header-actions">
-          
-          {/* SMART LOCATION PILL */}
           <button 
             onClick={() => { haptics.light(); openGoogleMaps(store); }} 
             className="ck-dk-store-pill" 
