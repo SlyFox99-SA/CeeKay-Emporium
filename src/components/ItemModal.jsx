@@ -1,24 +1,18 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, X, Check } from 'lucide-react';
 import ItemImage from './ItemImage';
-import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss';
 import { useHaptics } from '../hooks/useHaptics';
 
 export default function ItemModal({ item, onClose, onConfirm }) {
-  const isKota = Array.isArray(item?.ingredients);
-  const swipeProps = useSwipeToDismiss(onClose);
   const haptics = useHaptics();
-
   const [qty, setQty] = useState(1);
-  const [removed, setRemoved] = useState([]);
   const [note, setNote] = useState('');
+  const [selectedMods, setSelectedMods] = useState([]);
 
   useEffect(() => {
     if (!item) return;
-    setQty(1);
-    setRemoved([]);
-    setNote('');
+    setQty(1); setNote(''); setSelectedMods([]);
   }, [item?.id]);
 
   useEffect(() => {
@@ -29,101 +23,127 @@ export default function ItemModal({ item, onClose, onConfirm }) {
 
   if (!item) return null;
 
-  const toggleIngredient = (name) => {
+  const extras = item.available_modifiers?.filter(m => m.category === 'extra') || [];
+  const prefs = item.available_modifiers?.filter(m => m.category === 'preference') || [];
+
+  const toggleMod = (mod) => {
     haptics.light();
-    setRemoved(prev =>
-      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
-    );
+    setSelectedMods(prev => {
+      const exists = prev.find(m => m.id === mod.id);
+      if (exists) return prev.filter(m => m.id !== mod.id);
+      return [...prev, { ...mod, qty: 1 }];
+    });
   };
 
-  const subtotal = item.price * qty;
+  const basePrice = Number(item.price) || 0;
+  const modsTotal = selectedMods.reduce((sum, mod) => sum + (Number(mod.sell_price || 0) * (mod.qty || 1)), 0);
+  const subtotal = (basePrice + modsTotal) * (qty || 1);
 
   const handleConfirm = () => {
     haptics.success();
-    onConfirm(item, { qty, removedIngredients: removed, itemNote: note });
+    onConfirm(item, { qty, modifiers: selectedMods, itemNote: note });
     onClose();
   };
 
   return (
-    <div className="mobile-modal-overlay" onClick={onClose}>
+    <div className="ck-dk-modal-overlay" onClick={onClose}>
       <motion.div 
-        className="mobile-modal-sheet" 
+        className="ck-dk-modal-container" 
         onClick={e => e.stopPropagation()}
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
-        
-        <div className="mobile-modal-header" {...swipeProps} style={{ touchAction: 'none' }}>
-          <div className="mobile-sheet-handle" />
-          <button className="mobile-modal-close" onClick={onClose} aria-label="Close">
-            <X size={18} />
-          </button>
+        {/* LEFT SIDE: IMAGE */}
+        <div className="ck-dk-modal-left">
+          <ItemImage src={item.image} alt={item.name} />
+          <button className="ck-dk-modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
-        <div className="mobile-modal-body">
-          <div className="mobile-modal-hero">
-            <div className="mobile-modal-photo">
-              <ItemImage src={item.image} alt={item.name} />
-            </div>
-            <div className="mobile-modal-meta">
-              <div className="mobile-modal-name">{item.name}</div>
-              <div className="mobile-modal-price">R {item.price.toFixed(2)}</div>
-              {item.desc && <div className="mobile-modal-desc">{item.desc}</div>}
-            </div>
+        {/* RIGHT SIDE: DETAILS */}
+        <div className="ck-dk-modal-right">
+          <div className="ck-dk-modal-header">
+            <h2 className="ck-dk-modal-title">{item.name}</h2>
+            <div className="ck-dk-modal-price">R {basePrice.toFixed(2)}</div>
           </div>
+          
+          {item.desc && <p className="ck-dk-modal-desc">{item.desc}</p>}
 
-          {isKota && item.ingredients.length > 0 && (
-            <div className="mobile-modal-section">
-              <div className="mobile-modal-label">What's on it</div>
-              <div className="mobile-modal-ingredients">
-                {item.ingredients.map((ing, i) => {
-                  const isRemoved = removed.includes(ing);
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={`mobile-ingredient-toggle ${isRemoved ? 'removed' : 'kept'}`}
-                      onClick={() => toggleIngredient(ing)}
-                    >
-                      {isRemoved ? <X size={14} /> : <Check size={14} />}
-                      <span>{ing}</span>
-                    </button>
-                  );
-                })}
+          <div className="ck-dk-modal-scroll">
+            {extras.length > 0 && (
+              <div className="ck-dk-modal-section">
+                <h3 className="ck-dk-modal-section-title">Make it a Beast</h3>
+                <div className="ck-dk-modal-options">
+                  {extras.map(mod => {
+                    const isSelected = selectedMods.some(m => m.id === mod.id);
+                    return (
+                      <button 
+                        key={mod.id} 
+                        onClick={() => toggleMod(mod)} 
+                        className={`ck-dk-modal-option ${isSelected ? 'selected' : ''}`}
+                      >
+                        <div className="ck-dk-option-info">
+                          <span className="ck-dk-option-name">{mod.name}</span>
+                          <span className="ck-dk-option-price">+ R{mod.sell_price}</span>
+                        </div>
+                        <div className={`ck-dk-option-check ${isSelected ? 'active' : ''}`}>
+                          {isSelected && <Check size={14} />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="mobile-modal-section">
-            <div className="mobile-modal-label">Add a note (optional)</div>
-            <div className="mobile-textarea-wrapper">
+            {prefs.length > 0 && (
+              <div className="ck-dk-modal-section">
+                <h3 className="ck-dk-modal-section-title">Customize</h3>
+                <div className="ck-dk-modal-options">
+                  {prefs.map(pref => {
+                    const isSelected = selectedMods.some(m => m.id === pref.id);
+                    return (
+                      <button 
+                        key={pref.id} 
+                        onClick={() => toggleMod(pref)} 
+                        className={`ck-dk-modal-option ${isSelected ? 'selected' : ''}`}
+                      >
+                        <div className="ck-dk-option-info">
+                          <span className="ck-dk-option-name">{pref.name}</span>
+                        </div>
+                        <div className={`ck-dk-option-check ${isSelected ? 'active' : ''}`}>
+                          {isSelected && <Check size={14} />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="ck-dk-modal-section">
+              <h3 className="ck-dk-modal-section-title">Add a note (optional)</h3>
               <textarea
-                className="mobile-modal-note"
+                className="ck-dk-modal-note"
                 placeholder="e.g. extra crispy, sauce on the side"
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                rows={3}
+                rows={2}
               />
             </div>
           </div>
-        </div>
 
-        <div className="mobile-modal-foot">
-          <div className="mobile-modal-qty">
-            <button className="mobile-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }} disabled={qty <= 1}>
-              <Minus size={16} />
-            </button>
-            <span className="mobile-qty-val">{qty}</span>
-            <button className="mobile-qty-btn" onClick={() => { haptics.light(); setQty(q => Math.min(20, q + 1)); }}>
-              <Plus size={16} />
+          <div className="ck-dk-modal-footer">
+            <div className="ck-dk-modal-qty">
+              <button onClick={() => { haptics.light(); setQty(q => Math.max(1, q - 1)); }}><Minus size={16} /></button>
+              <span>{qty}</span>
+              <button onClick={() => { haptics.light(); setQty(q => q + 1); }}><Plus size={16} /></button>
+            </div>
+            <button className="ck-dk-modal-add-btn" onClick={handleConfirm}>
+              Add • R {subtotal.toFixed(2)}
             </button>
           </div>
-          <button className="mobile-modal-add-btn" onClick={handleConfirm}>
-            <span className="mobile-add-text">Add to Order</span>
-            <span className="mobile-add-price">R {subtotal.toFixed(2)}</span>
-          </button>
         </div>
       </motion.div>
     </div>

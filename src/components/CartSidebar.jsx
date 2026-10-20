@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin, ArrowLeft, User, Phone, Clock, Check, Package, ShoppingBag, X, Minus, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ShoppingBag, Minus, Plus, Check, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { usePrefs } from '../context/PreferencesContext';
@@ -9,251 +9,173 @@ import { recordOrder, saveProfile } from '../services/customerService';
 import { burstConfetti } from '../lib/confetti';
 import { playSuccess, playError } from '../lib/chime';
 import ItemImage from './ItemImage';
-import { useSwipeToDismiss } from '../hooks/useSwipeToDismiss';
 
-const CUSTOMER_KEY = 'ceekay-customer';
 const PICKUP_OPTIONS = ['As soon as possible', 'In 15 minutes', 'In 30 minutes', 'In 1 hour'];
 
-export default function CartSidebar({ open, onClose, onToast, onToastAction }) {
-  const swipeProps = useSwipeToDismiss(onClose);
+export default function CartSidebar({ open, onClose, onToast }) {
   const [step, setStep] = useState('cart');
-  const [note, setNote] = useState('');
-  const [lastOrder, setLastOrder] = useState(null);
+  const [customer, setCustomer] = useState({ name: '', phone: '', pickupTime: PICKUP_OPTIONS[0] });
   const [isPlacing, setIsPlacing] = useState(false);
-  
-  const [customer, setCustomer] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(CUSTOMER_KEY)) || { name: '', phone: '', pickupTime: PICKUP_OPTIONS[0] };
-    } catch {
-      return { name: '', phone: '', pickupTime: PICKUP_OPTIONS[0] };
-    }
-  });
+  const [lastOrder, setLastOrder] = useState(null);
+  const [note, setNote] = useState('');
 
   const { cart, changeQty, removeItem, clearCart, total, count, lineKey } = useCart();
   const { store } = useStore();
   const { prefs } = usePrefs();
 
-  useEffect(() => {
-    localStorage.setItem(CUSTOMER_KEY, JSON.stringify(customer));
-  }, [customer]);
-
-  useEffect(() => {
-    if (!open) setStep('cart');
-  }, [open]);
-
-  const updateCustomer = (field, value) => setCustomer(prev => ({ ...prev, [field]: value }));
-
   const validate = () => {
-    if (!customer.name.trim()) { if (prefs.sound) playError(); onToast('Please enter your name'); return false; }
-    if (!customer.phone.trim()) { if (prefs.sound) playError(); onToast('Please enter your phone number'); return false; }
+    if (!customer.name.trim()) { if (prefs.sound) playError(); onToast?.('Please enter your name'); return false; }
+    if (!customer.phone.trim()) { if (prefs.sound) playError(); onToast?.('Please enter your phone number'); return false; }
     return true;
   };
 
   const handlePlaceOrder = async () => {
     if (!store || !cart.length || !validate()) return;
-    
     setIsPlacing(true);
     try {
-      const order = await createOrder({ 
-        store, 
-        cart, 
-        customer, 
-        note, 
-        channel: 'app', 
-        total 
-      });
-
-      recordOrder(order); 
+      const order = await createOrder({ store, cart, customer, note, channel: 'app', total });
+      recordOrder(order);
       saveProfile({ name: customer.name, phone: customer.phone });
-      
       setLastOrder(order);
       setStep('success');
       if (prefs.sound) playSuccess();
       if (prefs.confetti) burstConfetti();
-      
       clearCart();
       setNote('');
     } catch (err) {
-      onToast('Failed to place order.');
-      console.error(err);
+      onToast?.('Failed to place order.');
     } finally {
       setIsPlacing(false);
     }
   };
 
   return (
-    <>
-      <div className={`cart-overlay ${open ? 'open' : ''}`} onClick={onClose} />
-      <aside className={`cart-side ${open ? 'open' : ''}`}>
-        
-        <div className="cart-head" {...swipeProps} style={{ touchAction: 'none' }}>
-          <h3>
-            {step === 'cart' && <>Your Order {count > 0 && <span>({count})</span>}</>}
-            {step === 'details' && <>Checkout</>}
-            {step === 'success' && <>Order placed</>}
-          </h3>
-          <button className="cart-close" onClick={onClose} aria-label="Close cart">
-            <X size={18} />
-          </button>
-        </div>
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="ck-dk-cart-overlay"
+            onClick={onClose}
+          />
+          <motion.aside
+            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="ck-dk-cart-panel"
+          >
+            <header className="ck-dk-cart-header">
+              <h2>
+                {step === 'cart' && `Your Order (${count})`}
+                {step === 'details' && 'Checkout'}
+                {step === 'success' && 'Success'}
+              </h2>
+              <button className="ck-dk-cart-close" onClick={onClose}>
+                <X size={20} />
+              </button>
+            </header>
 
-        {store && step !== 'success' && (
-          <div className="cart-store-banner">
-            <MapPin size={13} strokeWidth={2.4} /> Ordering from <strong>{store.branch}</strong>
-          </div>
-        )}
-
-        {step === 'cart' && (
-          <>
-            <div className="cart-items">
-              {cart.length === 0 ? (
-                <div className="cart-empty">
-                  <div className="cart-empty-emoji"><ShoppingBag size={44} strokeWidth={1.5} color="var(--ck-brand)" /></div>
-                  <div className="cart-empty-title">Your cart is empty</div>
-                  <div className="cart-empty-sub">Add a kota to get started.</div>
-                </div>
-              ) : cart.map(item => {
-                const key = lineKey(item);
-                return (
-                  <div key={key} className="cart-item">
-                    <span className="c-thumb">
-                      <ItemImage src={item.image} alt={item.name} />
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="c-name">{item.name}</div>
-                      {item.removedIngredients?.length > 0 && (
-                        <div className="c-custom">No {item.removedIngredients.join(', ')}</div>
-                      )}
-                      {item.itemNote && <div className="c-custom">"{item.itemNote}"</div>}
-                      <div className="c-unit-price">R {item.price.toFixed(2)} each</div>
-                      
-                      <div className="c-qty-row">
-                        <button className="qty-btn" onClick={() => changeQty(key, -1)}><Minus size={14} /></button>
-                        <span className="qty-val">{item.qty}</span>
-                        <button className="qty-btn" onClick={() => changeQty(key, 1)}><Plus size={14} /></button>
+            <div className="ck-dk-cart-body">
+              {step === 'cart' && (
+                <>
+                  {cart.length === 0 ? (
+                    <div className="ck-dk-cart-empty">
+                      <ShoppingBag size={48} strokeWidth={1} />
+                      <div style={{ textAlign: 'center' }}>
+                        <h3 style={{ margin: '0 0 4px', color: 'var(--ck-ink)' }}>Your cart is empty</h3>
+                        <p style={{ margin: 0, fontSize: '14px' }}>Add a kota to get started.</p>
                       </div>
                     </div>
-                    
-                    <div className="c-line-total">R {(item.price * item.qty).toFixed(2)}</div>
-                    <button className="c-remove" onClick={() => removeItem(key)} aria-label="Remove">
-                      <X size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                  ) : (
+                    cart.map(item => (
+                      <div key={lineKey(item)} className="ck-dk-cart-item">
+                        <div className="ck-dk-cart-item-img">
+                          <ItemImage src={item.image} alt={item.name} />
+                        </div>
+                        <div className="ck-dk-cart-item-info">
+                          <div>
+                            <div className="ck-dk-cart-item-title">{item.name}</div>
+                            {item.modifiers?.length > 0 && (
+                              <div style={{ fontSize: '12px', color: 'var(--ck-ink-soft)', marginTop: '2px' }}>
+                                {item.modifiers.map(m => m.name).join(', ')}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div className="ck-dk-cart-item-qty">
+                              <button className="ck-dk-cart-qty-btn" onClick={() => changeQty(lineKey(item), -1)}><Minus size={14} /></button>
+                              <span style={{ fontWeight: 700, fontSize: '14px', width: '16px', textAlign: 'center' }}>{item.qty}</span>
+                              <button className="ck-dk-cart-qty-btn" onClick={() => changeQty(lineKey(item), 1)}><Plus size={14} /></button>
+                            </div>
+                            <span className="ck-dk-cart-item-price">R {(item.price * item.qty).toFixed(2)}</span>
+                          </div>
+                        </div>
+                        <button className="ck-dk-cart-item-remove" onClick={() => removeItem(lineKey(item))}><X size={16} /></button>
+                      </div>
+                    ))
+                  )}
+                </>
+              )}
 
-            {cart.length > 0 && (
-              <div className="cart-foot">
-                <div className="price-breakdown">
-                  <div className="price-row">
-                    <span>Subtotal ({count} item{count > 1 ? 's' : ''})</span>
-                    <span>R {total.toFixed(2)}</span>
+              {step === 'details' && (
+                <div className="ck-dk-cart-form">
+                  <button onClick={() => setStep('cart')} style={{ background: 'transparent', border: 'none', color: 'var(--ck-ink-soft)', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 0 16px 0', cursor: 'pointer', fontWeight: 600 }}>
+                    <ArrowLeft size={16} /> Back to cart
+                  </button>
+                  <div className="ck-dk-cart-field">
+                    <label>Your Name</label>
+                    <input value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} placeholder="e.g. Bongani" />
                   </div>
-                  <div className="price-row price-row-total">
-                    <span>Total</span>
-                    <strong>R {total.toFixed(2)}</strong>
+                  <div className="ck-dk-cart-field">
+                    <label>Phone Number</label>
+                    <input type="tel" value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} placeholder="082 123 4567" />
                   </div>
-                  <div className="price-note">Pay on collection. No card needed.</div>
+                  <div className="ck-dk-cart-field">
+                    <label>When do you want it?</label>
+                    <select value={customer.pickupTime} onChange={e => setCustomer({...customer, pickupTime: e.target.value})}>
+                      {PICKUP_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                  <div className="ck-dk-cart-field">
+                    <label>Notes (optional)</label>
+                    <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. extra achaar, no cheese" rows={3} />
+                  </div>
                 </div>
-                <button className="order-btn primary" onClick={() => setStep('details')}>
-                  Continue to checkout
-                </button>
-              </div>
-            )}
-          </>
-        )}
+              )}
 
-        {step === 'details' && (
-          <>
-            <div className="cart-items">
-              <button className="cart-back" onClick={() => setStep('cart')}>
-                <ArrowLeft size={16} /> Back to cart
-              </button>
-
-              <div className="details-intro">
-                <h4>Almost done.</h4>
-                <p>We need a name and number so we can let you know when it's ready.</p>
-              </div>
-
-              <div className="mobile-form-group">
-                <label className="field">
-                  <span className="field-label"><User size={12} /> Your name</span>
-                  <input type="text" placeholder="Bongani" value={customer.name} onChange={e => updateCustomer('name', e.target.value)} />
-                </label>
-                <label className="field">
-                  <span className="field-label"><Phone size={12} /> Phone number</span>
-                  <input type="tel" placeholder="082 123 4567" value={customer.phone} onChange={e => updateCustomer('phone', e.target.value)} />
-                </label>
-                <label className="field">
-                  <span className="field-label"><Clock size={12} /> When do you want it?</span>
-                  <select value={customer.pickupTime} onChange={e => updateCustomer('pickupTime', e.target.value)}>
-                    {PICKUP_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                </label>
-                <label className="field">
-                  <span className="field-label">Notes (optional)</span>
-                  <textarea placeholder="e.g. extra achaar, no cheese" value={note} onChange={e => setNote(e.target.value)} />
-                </label>
-              </div>
+              {step === 'success' && lastOrder && (
+                <div className="ck-dk-cart-empty" style={{ padding: '40px 0' }}>
+                  <div style={{ width: '64px', height: '64px', background: 'var(--ck-green)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Check size={32} />
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <h3 style={{ margin: '0 0 8px', fontFamily: 'var(--ck-font-serif)', fontSize: '24px', color: 'var(--ck-ink)' }}>Order placed!</h3>
+                    <p style={{ margin: 0, fontSize: '14px' }}>We are preparing it now.</p>
+                  </div>
+                  <button onClick={onClose} className="ck-dk-cart-checkout" style={{ marginTop: '20px' }}>Done</button>
+                </div>
+              )}
             </div>
 
-            <div className="cart-foot">
-              <div className="price-breakdown">
-                <div className="price-row">
-                  <span>Subtotal ({count} item{count > 1 ? 's' : ''})</span>
+            {step !== 'success' && cart.length > 0 && (
+              <footer className="ck-dk-cart-footer">
+                <div className="ck-dk-cart-totals">
+                  <span>Total</span>
                   <span>R {total.toFixed(2)}</span>
                 </div>
-                <div className="price-row price-row-total">
-                  <span>Total to pay</span>
-                  <strong>R {total.toFixed(2)}</strong>
-                </div>
-                <div className="price-note">Pay on collection. No card needed.</div>
-              </div>
-              <button className="order-btn primary" onClick={handlePlaceOrder} disabled={isPlacing}>
-                {isPlacing ? 'Placing Order...' : 'Place Order'}
-              </button>
-            </div>
-          </>
-        )}
-
-        {step === 'success' && lastOrder && (
-          <div className="order-success">
-            <div className="success-badge"><Check size={44} strokeWidth={3} /></div>
-            <h2 className="success-title">Order placed!</h2>
-            <p className="success-sub">We've received your order and we're preparing it now.</p>
-
-            <div className="success-ticket">
-              <div className="ticket-row">
-                <span className="ticket-label">Order</span>
-                <span className="ticket-value">#{lastOrder.id}</span>
-              </div>
-              <div className="ticket-row">
-                <span className="ticket-label">Name</span>
-                <span className="ticket-value">{lastOrder.customer.name}</span>
-              </div>
-              <div className="ticket-row">
-                <span className="ticket-label">Pickup</span>
-                <span className="ticket-value">{lastOrder.customer.pickupTime}</span>
-              </div>
-              <div className="ticket-row ticket-row-total">
-                <span className="ticket-label">Total</span>
-                <span className="ticket-value">R {lastOrder.total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="success-actions">
-              <button className="success-btn-primary" onClick={onClose}>
-                <Package size={15} /> Done
-              </button>
-            </div>
-
-            <Link to={`/order/${lastOrder.id}`} className="success-track-link" onClick={onClose}>
-              Track this order →
-            </Link>
-          </div>
-        )}
-      </aside>
-    </>
+                {step === 'cart' ? (
+                  <button className="ck-dk-cart-checkout" onClick={() => setStep('details')}>
+                    Continue to Checkout
+                  </button>
+                ) : (
+                  <button className="ck-dk-cart-checkout" onClick={handlePlaceOrder} disabled={isPlacing}>
+                    {isPlacing ? 'Processing...' : 'Place Order'}
+                  </button>
+                )}
+              </footer>
+            )}
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

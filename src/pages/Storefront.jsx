@@ -53,12 +53,11 @@ export default function Storefront() {
           </div>
         </div>
         <div className="ck-dk-header-actions">
-          <button onClick={() => { haptics.light(); openGoogleMaps(store); }} className="ck-dk-location-btn">
-            <MapPin size={18} /> {store?.branch || 'Benoni'}
+          <button onClick={() => { haptics.light(); openGoogleMaps(store); }} className="ck-dk-store-pill">
+            <MapPin size={16} /> {store?.branch || 'Locate Us'}
           </button>
-          <button className="ck-dk-cart-btn" onClick={() => setCartOpen(true)} aria-label="Open Cart">
-            <ShoppingCart size={20} />
-            {count > 0 && <span className="ck-dk-cart-count">{count}</span>}
+          <button className="ck-dk-cart-btn" onClick={() => setCartOpen(true)}>
+            <ShoppingCart size={18} /> <span className="ck-dk-cart-count">{count}</span>
           </button>
         </div>
       </header>
