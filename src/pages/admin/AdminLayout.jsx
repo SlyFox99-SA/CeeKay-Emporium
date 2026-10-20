@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Calculator, Wallet } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Wallet } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FEATURES } from '../../config/features';
 
@@ -17,7 +17,8 @@ export default function AdminLayout() {
     { to: "/admin/menu", icon: Utensils, label: "Menu" },
     { to: "/admin/pos", icon: ShoppingCart, label: "Cashier POS", show: FEATURES.enablePOS },
     { to: "/admin/orders", icon: Receipt, label: "Orders" },
-    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" },`n    { to: "/admin/finance", icon: Wallet, label: "Finance Ledger" }
+    
+    { to: "/admin/finance", icon: Wallet, label: "Finance Ledger" }
   ];
 
   return (
@@ -32,7 +33,12 @@ export default function AdminLayout() {
           {navLinks.map((link) => {
             if (link.show === false) return null;
             return (
-              <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
+              <NavLink 
+                key={link.to} 
+                to={link.to} 
+                end={link.end} 
+                className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+              >
                 <link.icon size={18} /> {link.label}
               </NavLink>
             );

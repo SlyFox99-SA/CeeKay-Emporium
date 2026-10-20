@@ -20,7 +20,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import MobileAdminShell from './pages/admin/MobileAdminShell';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
-import AdminCOS from './pages/admin/AdminCOS';
+
 import AdminFinance from './pages/admin/AdminFinance';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
@@ -51,7 +51,7 @@ function AppRoutes() {
   const location = useLocation();
   useDynamicManifest();
 
-  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order') || location.pathname.startsWith('/pos') || location.pathname.startsWith('/login');
+  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order') || location.pathname.startsWith('/pos') || location.pathname.startsWith('/login') || location.pathname.startsWith('/log');
   const [isBooting, setIsBooting] = useState(!isOperational);
 
   useEffect(() => {
@@ -83,7 +83,8 @@ function AppRoutes() {
                   
                   {/* Auth Routes */}
                   <Route path="/login" element={<AdminLogin />} />
-                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />`n                  <Route path="/log" element={<FamilyLog />} />
+                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+                  <Route path="/log" element={<FamilyLog />} />
                   <Route path="/admin/reset-password" element={<AdminResetPassword />} />
 
                   {/* POS ROUTE (Isolated) */}
@@ -108,7 +109,8 @@ function AppRoutes() {
                   }>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
-                    <Route path="cos" element={<AdminCOS />} />`n                    <Route path="finance" element={<AdminFinance />} />
+                    
+                    <Route path="finance" element={<AdminFinance />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />
