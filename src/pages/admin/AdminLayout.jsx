@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, Calculator, Settings, Store } from 'lucide-react';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { FEATURES } from '../../config/features';
 
 export default function AdminLayout() {
   const { signOut } = useAuth();
@@ -8,15 +9,15 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     signOut();
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   const navLinks = [
     { to: "/admin", icon: Home, label: "Dashboard", end: true },
     { to: "/admin/menu", icon: Utensils, label: "Menu" },
-    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" },
-    { to: "/admin/stores", icon: Store, label: "Stores" },
-    { to: "/admin/staff", icon: Settings, label: "Super Admin" } // Renamed Staff to Super Admin
+    { to: "/admin/pos", icon: ShoppingCart, label: "Cashier POS", show: FEATURES.enablePOS },
+    { to: "/admin/orders", icon: Receipt, label: "Orders" },
+    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" }
   ];
 
   return (
@@ -24,24 +25,24 @@ export default function AdminLayout() {
       <aside className="admin-sidebar">
         <div style={{ padding: '32px 24px' }}>
           <h1 style={{ margin: 0, fontSize: '28px', fontFamily: 'var(--ck-font-serif)', color: 'var(--ck-brand-deep)', letterSpacing: '-0.02em' }}>CeeKay</h1>
-          <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 800, color: 'var(--ck-warm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Management</p>
+          <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 800, color: 'var(--ck-warm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Console</p>
         </div>
         
         <nav style={{ flex: 1, padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {navLinks.map((link) => (
-            <NavLink 
-              key={link.to} 
-              to={link.to} 
-              end={link.end} 
-              className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-            >
-              <link.icon size={18} /> {link.label}
-            </NavLink>
-          ))}
+          {navLinks.map((link) => {
+            if (link.show === false) return null;
+            return (
+              <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
+                <link.icon size={18} /> {link.label}
+              </NavLink>
+            );
+          })}
 
-          <button onClick={() => navigate('/kitchen')} className="admin-nav-item" style={{ background: 'transparent', border: 'none', cursor: 'pointer', width: '100%', marginTop: '20px', borderTop: '1px solid var(--ck-border)', paddingTop: '20px' }}>
-            <Receipt size={18} color="var(--ck-warm)" /> Go to Kitchen
-          </button>
+          {FEATURES.enableKitchenLink && (
+            <button onClick={() => navigate('/kitchen')} className="admin-nav-item" style={{ background: 'transparent', border: 'none', cursor: 'pointer', width: '100%' }}>
+              <Flame size={18} /> Kitchen Display
+            </button>
+          )}
         </nav>
 
         <div style={{ padding: '24px 16px' }}>

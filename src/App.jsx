@@ -25,6 +25,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminPOS from './pages/admin/AdminPOS';
+import FamilyLog from './pages/FamilyLog';
 import SplashScreen from './components/SplashScreen';
 import InstallPWA from './components/mobile/InstallPWA';
 
@@ -81,7 +82,7 @@ function AppRoutes() {
                   
                   {/* Auth Routes */}
                   <Route path="/login" element={<AdminLogin />} />
-                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />`n                  <Route path="/log" element={<FamilyLog />} />
                   <Route path="/admin/reset-password" element={<AdminResetPassword />} />
 
                   {/* POS ROUTE (Isolated) */}

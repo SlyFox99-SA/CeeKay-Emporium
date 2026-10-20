@@ -12,12 +12,15 @@ export default function AdminLogin() {
   const [isResetting, setIsResetting] = useState(false);
   const navigate = useNavigate();
 
+  const OWNER_ID = '44a5f64c-e4bb-4668-b4da-c2ae23a61140';
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true); setError(''); setMessage('');
 
-    // 1. Sign in
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
 
     if (authError) {
       setError(authError.message);
@@ -25,16 +28,34 @@ export default function AdminLogin() {
       return;
     }
 
-    // 2. Fetch role to redirect smartly
     if (authData.user) {
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', authData.user.id).single();
+      // HARD BYPASS: If the logged-in user's ID matches yours, force admin access
+      if (authData.user.id === OWNER_ID) {
+        navigate('/admin');
+        return;
+      }
+
+      // Fallback for any other staff member
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .maybeSingle();
       
       const role = profile?.role || 'customer';
       
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'kitchen') navigate('/kitchen');
-      else if (role === 'pos') navigate('/pos');
-      else navigate('/'); // fallback to storefront
+      if (role === 'admin') {
+        navigate('/admin');
+      } else if (role === 'kitchen') {
+        navigate('/kitchen');
+      } else if (role === 'pos') {
+        navigate('/pos');
+      } else if (role === 'staff') {
+        navigate('/log');
+      } else {
+        setError(`Access Denied. Role: "${role}".`);
+        setLoading(false);
+      }
     }
   };
 

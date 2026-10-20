@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Receipt, DollarSign, TrendingUp, Utensils, Trophy } from 'lucide-react';
+import { Receipt, DollarSign, TrendingUp, Utensils, Trophy, MonitorSmartphone, ChefHat } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { useSilentPolling } from '../../hooks/useSilentPolling';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ todayOrders: 0, todayRevenue: 0, menuCount: 0, activeOrders: 0 });
   const [chartData, setChartData] = useState([]);
   const [topItems, setTopItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchDashboardData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -23,7 +25,6 @@ export default function AdminDashboard() {
       const [ordersRes, menuRes] = await Promise.all([ordersQuery, menuQuery]);
       const orders = ordersRes.data || [];
       
-      // 1. KPI Calculations
       const startOfToday = new Date();
       startOfToday.setHours(0, 0, 0, 0);
       const todayOrders = orders.filter(o => new Date(o.created_at) >= startOfToday);
@@ -37,7 +38,6 @@ export default function AdminDashboard() {
         activeOrders: activeOrders.length
       });
 
-      // 2. Chart Data
       const dailyData = {};
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -52,13 +52,10 @@ export default function AdminDashboard() {
       });
       setChartData(Object.values(dailyData));
 
-      // 3. Top Selling Items Logic
       const itemCounts = {};
       orders.filter(o => o.status !== 'cancelled').forEach(order => {
         (order.items || []).forEach(item => {
-          if (!itemCounts[item.name]) {
-            itemCounts[item.name] = { name: item.name, qty: 0, image: item.image };
-          }
+          if (!itemCounts[item.name]) itemCounts[item.name] = { name: item.name, qty: 0, image: item.image };
           itemCounts[item.name].qty += item.qty;
         });
       });
@@ -73,16 +70,36 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData(false);
-  }, []);
-
-  useSilentPolling(() => {
-    fetchDashboardData(true);
-  }, 30000);
+  useEffect(() => { fetchDashboardData(false); }, []);
+  useSilentPolling(() => { fetchDashboardData(true); }, 30000);
 
   return (
     <div style={{ padding: '24px 20px' }}>
+      
+      {/* QUICK LAUNCH PORTAL */}
+      <div style={{ marginBottom: '32px' }}>
+        <h2 style={{ fontFamily: 'var(--ck-font-serif)', fontSize: '24px', margin: '0 0 16px', color: 'var(--ck-ink)' }}>Quick Launch</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          
+          <button onClick={() => navigate('/pos')} style={{ background: 'var(--ck-brand-deep)', color: 'white', padding: '24px', borderRadius: '20px', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 8px 20px rgba(15,46,74,0.2)' }}>
+            <MonitorSmartphone size={32} />
+            <div>
+              <div style={{ fontSize: '18px', fontWeight: 800 }}>Cashier POS</div>
+              <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>Take walk-in orders</div>
+            </div>
+          </button>
+
+          <button onClick={() => navigate('/kitchen')} style={{ background: 'var(--ck-warm)', color: 'var(--ck-charcoal)', padding: '24px', borderRadius: '20px', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 8px 20px rgba(212,149,43,0.2)' }}>
+            <ChefHat size={32} />
+            <div>
+              <div style={{ fontSize: '18px', fontWeight: 800 }}>Kitchen Display</div>
+              <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>Start shift & cook</div>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
       <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ck-brand-deep)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Overview</div>
@@ -143,7 +160,7 @@ export default function AdminDashboard() {
             {topItems.map((item, index) => (
               <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--ck-cream)', padding: '12px', borderRadius: '12px' }}>
                 <div style={{ fontWeight: 800, color: 'var(--ck-brand-deep)' }}>#{index + 1}</div>
-                <img src={item.image} alt={item.name} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                <img src={item.image || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop"} alt={item.name} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
                 <div style={{ flex: 1, fontWeight: 600, fontSize: '14px' }}>{item.name}</div>
                 <div style={{ fontSize: '13px', color: 'var(--ck-ink-soft)', fontWeight: 700 }}>{item.qty} sold</div>
               </div>
