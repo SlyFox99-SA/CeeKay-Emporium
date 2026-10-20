@@ -8,38 +8,60 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch the profile data (loyalty points, phone, etc.)
+  // Fetch the profile data gracefully
   const fetchProfile = async (userId) => {
-    if (!userId) return setProfile(null);
+    if (!userId) {
+      setProfile(null);
+      return;
+    }
+    
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      // FIXED: Changed .single() to .maybeSingle() to handle 0 rows gracefully
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
       setProfile(data);
     } catch (err) {
       console.error('Failed to fetch profile:', err);
       setProfile(null);
     }
-    setProfile(data);
   };
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-      setLoading(false);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
     });
 
-    // Listen for auth changes (login/logout)
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-      else setProfile(null);
+      if (session?.user) {
+        fetchProfile(session.user.id).then(() => setLoading(false));
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-    const signInWithGoogle = async () => {
+  // Set loading to false once the initial profile fetch is done
+  useEffect(() => {
+    if (user && profile !== null) setLoading(false);
+  }, [user, profile]);
+
+  const signInWithGoogle = async () => {
     return await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin }
@@ -56,6 +78,8 @@ export function AuthProvider({ children }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
   };
 
   return (
