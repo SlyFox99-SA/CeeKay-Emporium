@@ -13,9 +13,7 @@ export default function MobileImageUploader({ value, onChange }) {
 
     setLoading(true);
     try {
-      // 1. Compress the image
       const compressedFile = await compressImage(file);
-      // 2. Upload
       const url = await uploadImage(compressedFile);
       onChange(url);
     } catch (err) {
@@ -28,7 +26,8 @@ export default function MobileImageUploader({ value, onChange }) {
 
   return (
     <div style={{ marginTop: '8px' }}>
-      <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+      {/* REMOVED capture="environment" so users can choose from gallery */}
+      <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
       
       {value ? (
         <div style={{ position: 'relative', width: '100%', height: '180px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--ck-border)' }}>
@@ -45,7 +44,7 @@ export default function MobileImageUploader({ value, onChange }) {
           style={{ width: '100%', height: '120px', border: '2px dashed var(--ck-border)', borderRadius: '16px', background: 'var(--ck-cream)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--ck-brand-deep)', cursor: loading ? 'wait' : 'pointer' }}
         >
           {loading ? <Loader2 size={24} className="spin" /> : <Camera size={24} />}
-          <span style={{ fontSize: '14px', fontWeight: 700 }}>{loading ? 'Compressing & Uploading...' : 'Take Photo'}</span>
+          <span style={{ fontSize: '14px', fontWeight: 700 }}>{loading ? 'Compressing & Uploading...' : 'Upload Photo'}</span>
         </button>
       )}
     </div>

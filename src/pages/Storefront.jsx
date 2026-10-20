@@ -64,13 +64,13 @@ export default function Storefront() {
       </header>
 
       <main style={{ position: 'relative', overflow: 'hidden' }}>
+        
+        {/* DESKTOP 3D BACKGROUND - Pure CSS Gradient */}
         <motion.div 
           animate={{ y: [0, -20, 0], scale: [1, 1.02, 1], rotate: [0, 1, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           className="ck-dk-3d-bg"
-        >
-          <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1200&auto=format&fit=crop" alt="3D Background" />
-        </motion.div>
+        />
 
         <section className="ck-dk-hero" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
