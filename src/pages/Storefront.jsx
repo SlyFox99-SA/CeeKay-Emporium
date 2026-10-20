@@ -35,8 +35,6 @@ export default function Storefront() {
 
   return (
     <div className="ck-dk-shell">
-      
-      {/* GUEST BANNER - Cleanly placed at the top */}
       <GuestModeBanner />
 
       <div className="ck-dk-marquee">
@@ -55,16 +53,12 @@ export default function Storefront() {
           </div>
         </div>
         <div className="ck-dk-header-actions">
-          <button 
-            onClick={() => { haptics.light(); openGoogleMaps(store); }} 
-            className="ck-dk-store-pill" 
-            style={{ cursor: 'pointer' }}
-          >
-            <MapPin size={16} /> {store?.branch || 'Locate Us'}
+          <button onClick={() => { haptics.light(); openGoogleMaps(store); }} className="ck-dk-location-btn">
+            <MapPin size={18} /> {store?.branch || 'Benoni'}
           </button>
-          
-          <button className="ck-dk-cart-btn" onClick={() => setCartOpen(true)}>
-            <ShoppingCart size={18} /> <span className="ck-dk-cart-count">{count}</span>
+          <button className="ck-dk-cart-btn" onClick={() => setCartOpen(true)} aria-label="Open Cart">
+            <ShoppingCart size={20} />
+            {count > 0 && <span className="ck-dk-cart-count">{count}</span>}
           </button>
         </div>
       </header>
@@ -79,10 +73,12 @@ export default function Storefront() {
         </motion.div>
 
         <section className="ck-dk-hero" style={{ position: 'relative', zIndex: 1 }}>
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            
             <div className="ck-dk-hero-label">EST. 2021 | BENONI, GAUTENG</div>
             <h1 className="ck-dk-hero-title">Benoni's <br/> <span>Kota Spot</span></h1>
             <p className="ck-dk-hero-subtitle">Handcrafted, packed with achaar, and made like we're feeding our own family. From R20.</p>
+            
             <div className="ck-dk-hero-ctas">
               <button className="ck-dk-btn-primary" onClick={scrollToMenu}>SEE THE MENU</button>
               <button className="ck-dk-btn-secondary" onClick={() => setCartOpen(true)}>START AN ORDER</button>
