@@ -2,18 +2,19 @@ import { supabase } from './supabase';
 
 export async function uploadImage(file, folder = 'menu') {
   try {
-    // 1. Generate a unique file name
+    // 1. Create a safe, unique filename
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+    const safeName = file.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const fileName = `${Date.now()}-${safeName}.${fileExt}`;
+    const filePath = `${fileName}`; // Supabase 'from' already scopes to the bucket
 
-    // 2. Upload with explicit contentType and cacheControl
+    // 2. Upload with explicit parameters to avoid 400 errors
     const { data, error } = await supabase.storage
-      .from('menu') // Ensure this matches your bucket name
+      .from('menu') // Ensure this matches your bucket name exactly
       .upload(filePath, file, {
         cacheControl: '3600',       // Must be a string
         contentType: file.type,     // e.g., 'image/jpeg'
-        upsert: false               // Prevents 'Asset Already Exists' 400 errors
+        upsert: true                // Prevents 'Asset Already Exists' 400 errors
       });
 
     if (error) throw error;
@@ -32,8 +33,7 @@ export async function uploadImage(file, folder = 'menu') {
 
 export async function deleteImageByUrl(url) {
   try {
-    // Extract the file path from the URL
-    const path = url.split('/').slice(-2).join('/'); 
+    const path = url.split('/').pop(); 
     const { error } = await supabase.storage.from('menu').remove([path]);
     if (error) throw error;
   } catch (err) {
