@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect, react-refresh/only-export-components */
+/* eslint-disable react-hooks/set-state-in-effect */
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
