@@ -1,7 +1,8 @@
-﻿/* A small inline SVG of the CK mark.
+import { useId } from 'react';
+/* A small inline SVG of the CK mark.
    Accepts a `variant` prop: 'gradient' (default) or 'solid' */
 export default function CKMark({ size = 32, variant = 'gradient' }) {
-  const gradientId = `ckg-${Math.random().toString(36).slice(2, 8)}`;
+  const gradientId = `ckg-${useId()}`;
   const strokeValue = variant === 'gradient' ? `url(#${gradientId})` : 'currentColor';
 
   return (
@@ -45,3 +46,4 @@ export default function CKMark({ size = 32, variant = 'gradient' }) {
     </svg>
   );
 }
+

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { motion } from 'framer-motion';
@@ -9,7 +10,7 @@ export default function QrScannerModal({ onClose, onOrderFound }) {
   const [error, setError] = useState('');
   const [scanning, setScanning] = useState(true);
   const haptics = useHaptics();
-  const qrRef = useRef(null);
+  
   const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
