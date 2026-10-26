@@ -92,3 +92,4 @@ export function subscribeToMenu(callback) {
   return () => { supabase.removeChannel(channel); };
 }
 
+

@@ -49,3 +49,4 @@ export function validateImage(file) {
   return null;
 }
 
+
