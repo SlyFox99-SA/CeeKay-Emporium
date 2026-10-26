@@ -1,4 +1,5 @@
-﻿import { useCart } from '../context/CartContext';
+ 
+import { useCart } from '../context/CartContext';
 import { usePrefs } from '../context/PreferencesContext';
 import { flyToCart } from '../lib/flyToCart';
 import { playPop } from '../lib/chime';
@@ -31,11 +32,12 @@ export default function DrinkCard({ item, onAdd, onOpenModal }) {
   return (
     <div className="drink-card">
       <button className="drink-photo" onClick={openModal} aria-label={`Customize ${item.name}`}>
-        <ItemImage src={item.image} alt={item.name} />`r`n        {item.popular && <span className="popular-pill">★ Popular</span>}
+        <ItemImage src={item.image} alt={item.name} />`r`n        {item.popular && <span className="popular-pill">? Popular</span>}
       </button>
       <div className="drink-name">{item.name}</div>
       <div className="drink-desc">{item.desc}</div>
-      <button className="drink-add" onClick={quickAdd}>+ Add — R{item.price}</button>
+      <button className="drink-add" onClick={quickAdd}>+ Add � R{item.price}</button>
     </div>
   );
 }
+

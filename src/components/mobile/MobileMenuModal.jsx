@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, ArrowLeft, AlertTriangle, TrendingUp, Plus, Trash2, ChefHat, CheckCircle, Wand2, Sparkles } from 'lucide-react';

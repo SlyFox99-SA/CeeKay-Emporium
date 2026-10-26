@@ -1,3 +1,4 @@
+ 
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Wallet, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

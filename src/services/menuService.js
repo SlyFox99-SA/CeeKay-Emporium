@@ -1,3 +1,4 @@
+ 
 import { supabase } from '../lib/supabase';
 
 export async function getMenu() {
@@ -18,7 +19,7 @@ export async function getMenu() {
       kotas: itemsWithMods.filter(item => item.category === 'kota'),
       drinks: itemsWithMods.filter(item => item.category === 'drink')
     };
-  } catch (err) {
+  } catch {
     console.error('getMenu failed:', err);
     return { kotas: [], drinks: [] };
   }
@@ -29,7 +30,7 @@ export async function getAllMenu() {
     const { data, error } = await supabase.from('menu_items').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     return data || [];
-  } catch (err) {
+  } catch {
     console.error('getAllMenu failed:', err);
     return [];
   }
@@ -41,7 +42,7 @@ export async function getModifiers() {
   try {
     const { data } = await supabase.from('modifiers').select('*').eq('is_available', true);
     return data || [];
-  } catch (err) { return []; }
+  } catch { return []; }
 }
 
 export async function createMenuItem(item) {
@@ -50,7 +51,7 @@ export async function createMenuItem(item) {
     const { error } = await supabase.from('menu_items').insert(item);
     if (error) throw error;
     return true;
-  } catch (err) { throw err; }
+  } catch { throw err; }
 }
 
 export async function updateMenuItem(id, updates) {
@@ -59,14 +60,14 @@ export async function updateMenuItem(id, updates) {
     const { error } = await supabase.from('menu_items').update(updates).eq('id', id);
     if (error) throw error;
     return true;
-  } catch (err) { throw err; }
+  } catch { throw err; }
 }
 
 export async function deleteMenuItem(id) {
   try {
     const { error } = await supabase.from('menu_items').delete().eq('id', id);
     if (error) throw error;
-  } catch (err) { throw err; }
+  } catch { throw err; }
 }
 
 export async function updateItemModifiers(itemId, modifierIds) {
@@ -77,7 +78,7 @@ export async function updateItemModifiers(itemId, modifierIds) {
       const { error } = await supabase.from('menu_item_modifiers').insert(inserts);
       if (error) throw error;
     }
-  } catch (err) { throw err; }
+  } catch { throw err; }
 }
 
 export function subscribeToMenu(callback) {
@@ -90,3 +91,4 @@ export function subscribeToMenu(callback) {
 
   return () => { supabase.removeChannel(channel); };
 }
+

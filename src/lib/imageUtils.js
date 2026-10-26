@@ -1,3 +1,4 @@
+ 
 export const compressImage = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

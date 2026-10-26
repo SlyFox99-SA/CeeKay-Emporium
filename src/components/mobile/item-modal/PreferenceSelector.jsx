@@ -1,3 +1,4 @@
+ 
 import { Check } from 'lucide-react';
 
 export default function PreferenceSelector({ prefs, selectedMods, onToggle }) {

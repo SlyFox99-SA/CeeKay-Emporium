@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+ 
+import { useEffect, useState } from 'react';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import { getLastOrder, getProfile } from '../services/customerService';
 import { useCart } from '../context/CartContext';
@@ -46,7 +47,7 @@ export default function WelcomeBack() {
           </div>
           <div className="welcome-back-title">Your usual?</div>
           <div className="welcome-back-sub">
-            {itemCount} item{itemCount > 1 ? 's' : ''} · R {last.total.toFixed(2)} · last ordered{' '}
+            {itemCount} item{itemCount > 1 ? 's' : ''} � R {last.total.toFixed(2)} � last ordered{' '}
             {new Date(last.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
           </div>
         </div>
@@ -66,3 +67,4 @@ export default function WelcomeBack() {
     </section>
   );
 }
+

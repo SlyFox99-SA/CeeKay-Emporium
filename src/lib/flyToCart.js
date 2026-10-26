@@ -1,3 +1,4 @@
+ 
 
 export function flyToCart(e, imageUrl) {
   if (!e || !imageUrl) return;
@@ -37,3 +38,4 @@ export function flyToCart(e, imageUrl) {
     setTimeout(() => cartBtn.classList.remove('cart-bounce'), 600);
   }, 600);
 }
+

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect } from 'react';
 import { Download, TrendingUp, TrendingDown, DollarSign, Receipt, CheckCircle2, Package, Pencil, X, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

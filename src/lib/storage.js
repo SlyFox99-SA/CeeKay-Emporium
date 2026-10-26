@@ -1,3 +1,4 @@
+ 
 import { supabase } from './supabase';
 
 const BUCKET_NAME = 'menu-images';
@@ -22,7 +23,7 @@ export async function uploadImage(file, folder = 'menu') {
       .getPublicUrl(fileName);
 
     return publicUrl;
-  } catch (err) {
+  } catch {
     console.error('Upload failed:', err);
     throw new Error(err.message || 'Failed to upload image.');
   }
@@ -33,7 +34,7 @@ export async function deleteImageByUrl(url) {
     const path = url.split(`${BUCKET_NAME}/`).pop(); 
     const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
     if (error) throw error;
-  } catch (err) {
+  } catch {
     console.error('Delete failed:', err);
     throw new Error(err.message || 'Failed to delete image.');
   }
@@ -47,3 +48,4 @@ export function validateImage(file) {
   if (!ALLOWED_TYPES.includes(file.type)) return 'Only JPG, PNG, and WEBP are allowed.';
   return null;
 }
+

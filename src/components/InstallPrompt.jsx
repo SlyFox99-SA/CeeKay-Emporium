@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+ 
+import { useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
 
 export default function InstallPrompt() {
@@ -41,7 +42,7 @@ export default function InstallPrompt() {
       <button className="install-close" onClick={dismiss} aria-label="Dismiss">
         <X size={14} />
       </button>
-      <div className="install-icon">🍔</div>
+      <div className="install-icon">??</div>
       <div className="install-text">
         <div className="install-title">Install CeeKay</div>
         <div className="install-sub">Add to your home screen for one-tap ordering</div>
@@ -52,3 +53,4 @@ export default function InstallPrompt() {
     </div>
   );
 }
+

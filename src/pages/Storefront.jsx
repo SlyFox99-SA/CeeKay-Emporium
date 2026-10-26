@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, Plus, Leaf, Flame, Clock, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

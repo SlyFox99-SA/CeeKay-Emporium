@@ -1,4 +1,5 @@
-﻿import { useCart } from '../context/CartContext';
+ 
+import { useCart } from '../context/CartContext';
 import { usePrefs } from '../context/PreferencesContext';
 import { flyToCart } from '../lib/flyToCart';
 import { playPop } from '../lib/chime';
@@ -33,7 +34,7 @@ export default function KotaCard({ item, onAdd, onOpenModal }) {
       {item.ribbon && <div className="ribbon">{item.ribbon}</div>}
 
       <button className="dish-photo" onClick={openModal} aria-label={`Customize ${item.name}`}>
-        <ItemImage src={item.image} alt={item.name} />`r`n        {item.popular && <span className="popular-pill">★ Popular</span>}
+        <ItemImage src={item.image} alt={item.name} />`r`n        {item.popular && <span className="popular-pill">? Popular</span>}
         <span className={`dish-tag dish-tag-overlay ${item.tagClass}`}>{item.tag}</span>
         <span className="dish-customize-hint">Tap to customize</span>
       </button>
@@ -52,3 +53,4 @@ export default function KotaCard({ item, onAdd, onOpenModal }) {
     </div>
   );
 }
+

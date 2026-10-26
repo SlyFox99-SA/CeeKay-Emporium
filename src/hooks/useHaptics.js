@@ -1,3 +1,4 @@
+ 
 export function useHaptics() {
   const vibrate = (pattern) => {
     try {

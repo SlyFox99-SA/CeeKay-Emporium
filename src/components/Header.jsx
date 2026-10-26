@@ -1,4 +1,5 @@
-﻿import { ShoppingCart, MapPin } from 'lucide-react';
+ 
+import { ShoppingCart, MapPin } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import CKMark from './CKMark';
@@ -17,7 +18,7 @@ export default function Header({ onCartClick }) {
           <div className="brand-name">CeeKay Emporium</div>
           <div className="brand-sub">
             {store
-              ? `${store.branch}${store.status === 'closed' ? ' · Closed' : ''}`
+              ? `${store.branch}${store.status === 'closed' ? ' � Closed' : ''}`
               : 'Kota, made properly'}
           </div>
         </div>
@@ -45,3 +46,4 @@ export default function Header({ onCartClick }) {
     </header>
   );
 }
+

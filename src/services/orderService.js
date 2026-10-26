@@ -1,3 +1,4 @@
+ 
 import { supabase, getDeviceId } from '../lib/supabase';
 
 function fromDb(row) {

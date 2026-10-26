@@ -1,3 +1,4 @@
+ 
 
 export default function MobileSkeleton() {
   return (
@@ -17,3 +18,4 @@ export default function MobileSkeleton() {
     </div>
   );
 }
+

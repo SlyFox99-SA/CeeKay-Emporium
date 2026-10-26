@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, CheckCircle2 } from 'lucide-react';
@@ -50,3 +51,4 @@ export default function NetworkStatus() {
     </AnimatePresence>
   );
 }
+

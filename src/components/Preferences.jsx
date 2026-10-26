@@ -1,3 +1,4 @@
+ 
 import { useEffect, useState } from 'react';
 import { Settings2, X, Volume2, VolumeX, Sparkles, Zap } from 'lucide-react';
 import { usePrefs } from '../context/PreferencesContext';

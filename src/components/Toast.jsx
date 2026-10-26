@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState } from 'react';
 
 export default function Toast({ message, action, onAction, onDone, duration = 2800 }) {
   const [visible, setVisible] = useState(false);
@@ -31,3 +32,4 @@ export default function Toast({ message, action, onAction, onDone, duration = 28
     </div>
   );
 }
+

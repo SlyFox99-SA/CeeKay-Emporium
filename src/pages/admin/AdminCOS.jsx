@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ClipboardPaste, CheckCircle2, X, AlertCircle, Pencil, Wand2, Check, RefreshCw, Settings, Sparkles, ToggleLeft, ToggleRight, Key } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

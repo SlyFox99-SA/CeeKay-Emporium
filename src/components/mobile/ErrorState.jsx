@@ -1,3 +1,4 @@
+ 
 
 import { motion } from 'framer-motion';
 import { ChefHat, RefreshCcw } from 'lucide-react';
@@ -44,3 +45,4 @@ export default function ErrorState({ onRetry }) {
     </div>
   );
 }
+

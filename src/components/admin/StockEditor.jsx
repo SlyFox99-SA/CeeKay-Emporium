@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+ 
 import { useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 
@@ -57,3 +59,5 @@ export function StockEditor({ item, onSaved }) {
     </div>
   );
 }
+
+

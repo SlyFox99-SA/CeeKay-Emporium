@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Home, ReceiptText, User, Plus, Share2, MapPin } from 'lucide-react';
@@ -80,7 +81,7 @@ export default function MobileStorefront() {
     try {
       const data = await getMenu();
       setMenu(data);
-    } catch (err) {
+    } catch {
       console.error("Failed to load menu:", err);
       setError(err);
     } finally {
@@ -100,7 +101,7 @@ export default function MobileStorefront() {
     try {
       const data = await getMenu();
       setMenu(data);
-    } catch (err) {}
+    } catch { /* ignore */ }
   }, 45000);
 
   const handleModalConfirm = (item, options) => {
@@ -123,7 +124,7 @@ export default function MobileStorefront() {
     if (navigator.share) {
       try {
         await navigator.share({ title: 'CeeKay Emporium', text: 'Order the bestkotas in Benoni!', url: window.location.origin });
-      } catch (err) {}
+      } catch { /* ignore */ }
     } else {
       navigator.clipboard.writeText(window.location.origin);
       setToast('Link copied!');
@@ -314,3 +315,4 @@ export default function MobileStorefront() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+ 
 import { ShoppingBag, ReceiptText, ChefHat } from 'lucide-react';
 
 
@@ -21,3 +22,4 @@ export default function EmptyState({ type, title, subtitle, action }) {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+ 
 import { useId } from 'react';
 /* A small inline SVG of the CK mark.
    Accepts a `variant` prop: 'gradient' (default) or 'solid' */
@@ -46,4 +47,5 @@ export default function CKMark({ size = 32, variant = 'gradient' }) {
     </svg>
   );
 }
+
 

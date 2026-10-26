@@ -1,3 +1,4 @@
+ 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, ScanLine, LogOut, Plus, Minus, LayoutDashboard, Trash2, Smartphone, Banknote } from 'lucide-react';

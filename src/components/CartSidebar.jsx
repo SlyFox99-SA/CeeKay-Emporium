@@ -1,3 +1,4 @@
+ 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Minus, Plus, Check, ArrowLeft } from 'lucide-react';
@@ -42,7 +43,7 @@ export default function CartSidebar({ open, onClose, onToast }) {
       if (prefs.confetti) burstConfetti();
       clearCart();
       setNote('');
-    } catch (err) {
+    } catch {
       onToast?.('Failed to place order.');
     } finally {
       setIsPlacing(false);
@@ -179,3 +180,4 @@ export default function CartSidebar({ open, onClose, onToast }) {
     </AnimatePresence>
   );
 }
+

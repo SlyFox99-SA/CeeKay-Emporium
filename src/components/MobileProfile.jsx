@@ -1,3 +1,4 @@
+ 
 import { useState } from 'react';
 import { User, Volume2, Sparkles, Zap, LogOut, Shield, Info, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';

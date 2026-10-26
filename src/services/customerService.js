@@ -1,3 +1,4 @@
+ 
 import { supabase, getDeviceId } from '../lib/supabase';
 
 const PROFILE_KEY = 'ceekay-customer';
@@ -9,7 +10,7 @@ export function getProfile() {
 
 export function saveProfile(profile) {
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
-  catch {}
+  catch { /* ignore */ }
 }
 
 export async function getHistory() {
@@ -84,3 +85,4 @@ export async function redeemLoyalty() {
   if (error) throw error;
   return true;
 }
+

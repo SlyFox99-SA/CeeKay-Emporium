@@ -1,4 +1,5 @@
-﻿import { useEffect } from 'react';
+ 
+import { useEffect } from 'react';
 
 export function useReveal() {
   useEffect(() => {
@@ -21,3 +22,4 @@ export function useReveal() {
     return () => io.disconnect();
   }, []);
 }
+

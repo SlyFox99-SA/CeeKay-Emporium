@@ -1,3 +1,4 @@
+ 
 
 import { motion } from 'framer-motion';
 import { Sandwich } from 'lucide-react';
@@ -46,3 +47,4 @@ export default function BrandLoader() {
     </div>
   );
 }
+

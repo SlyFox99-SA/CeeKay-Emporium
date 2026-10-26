@@ -1,4 +1,5 @@
-﻿import {
+ 
+import {
   Sandwich,
   Star,
   Flame,
@@ -22,3 +23,4 @@ export default function ItemIcon({ name, size = 32, strokeWidth = 1.6, ...rest }
   const Cmp = ICONS[name] ?? Sandwich;
   return <Cmp size={size} strokeWidth={strokeWidth} {...rest} />;
 }
+

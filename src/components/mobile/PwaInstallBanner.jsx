@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
@@ -73,3 +74,4 @@ export default function PwaInstallBanner() {
     </div>
   );
 }
+

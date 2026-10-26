@@ -1,3 +1,4 @@
+ 
 import { ArrowLeft, User, Phone } from 'lucide-react';
 
 export default function CheckoutForm({ cart, total, customer, setCustomer, onBack, onSubmit, isPlacing }) {

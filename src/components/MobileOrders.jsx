@@ -1,3 +1,4 @@
+ 
 import { useEffect, useState } from 'react';
 import { supabase, getDeviceId } from '../lib/supabase';
 import { ChevronRight, ReceiptText } from 'lucide-react';

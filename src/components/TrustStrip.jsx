@@ -1,4 +1,5 @@
-﻿import { Leaf, Flame, Clock, MapPin } from 'lucide-react';
+ 
+import { Leaf, Flame, Clock, MapPin } from 'lucide-react';
 
 const ITEMS = [
   { icon: Leaf,  label: 'Real ingredients',  sub: 'No shortcuts' },
@@ -22,3 +23,4 @@ export default function TrustStrip() {
     </section>
   );
 }
+

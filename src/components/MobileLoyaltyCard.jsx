@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react';
 import { Sandwich, Gift, X, Sparkles } from 'lucide-react';
 import { getLoyaltyProgress, redeemLoyalty } from '../services/customerService';

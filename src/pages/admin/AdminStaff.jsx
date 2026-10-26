@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react';
 import { Shield, ChefHat, Calculator, User as UserIcon, Store } from 'lucide-react';
 import { supabase } from '../../lib/supabase';

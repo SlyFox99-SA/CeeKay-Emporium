@@ -1,3 +1,4 @@
+ 
 // ZERO-DEPENDENCY NATIVE CONFETTI ENGINE
 export function burstConfetti() {
   // 1. Create the canvas element

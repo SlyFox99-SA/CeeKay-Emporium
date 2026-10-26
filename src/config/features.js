@@ -1,3 +1,4 @@
+ 
 export const FEATURES = {
   // --- ACTIVE (Survival Kit) ---
   enablePOS: true,

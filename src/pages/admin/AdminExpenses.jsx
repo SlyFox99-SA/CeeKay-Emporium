@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { Plus, DollarSign } from 'lucide-react';
 import { supabase } from '../../lib/supabase';

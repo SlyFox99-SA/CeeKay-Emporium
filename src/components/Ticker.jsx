@@ -1,9 +1,10 @@
-﻿const ITEMS = [
+ 
+const ITEMS = [
   'Fresh achaar daily',
-  'Est. 2021 · Benoni, Gauteng',
+  'Est. 2021 � Benoni, Gauteng',
   'Kotas from R20',
   "Made like we're feeding family",
-  'Order on WhatsApp · Collect in 15 min',
+  'Order on WhatsApp � Collect in 15 min',
   'Real flavour. Real value.',
 ];
 
@@ -24,3 +25,4 @@ export default function Ticker() {
     </div>
   );
 }
+
