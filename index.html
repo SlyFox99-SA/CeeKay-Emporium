@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CeeKay Emporium — Benoni's Best Kotas</title>
+
+  <!-- ── FONTS (Google Fonts CDN) ── -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700;800;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet"/>
+
+  <!-- ── STYLESHEET ── -->
+  <link rel="stylesheet" href="styles/main.css"/>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════
+       CART OVERLAY & SIDEBAR
+  ══════════════════════════════════════════════ -->
+  <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+
+  <aside class="cart-side" id="cart-side">
+    <div class="cart-head">
+      <span class="cart-title">🛒 Your Order</span>
+      <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty" id="cart-empty">
+        <div class="cart-empty-icon">🍽️</div>
+        <p>Your cart is empty</p>
+      </div>
+    </div>
+
+    <div class="cart-foot">
+      <div class="cart-total-row">
+        <span class="cart-total-label">Order Total</span>
+        <span class="cart-total-val" id="cart-total">R 0.00</span>
+      </div>
+      <div class="cart-note">
+        <textarea id="order-note" placeholder="Special requests, allergies, extra sauce? 🌶️"></textarea>
+      </div>
+      <div class="order-btns">
+        <button class="wa-btn" onclick="orderWhatsApp()">
+          <img src="assets/images/icon-whatsapp.svg" width="16" height="16" alt="WhatsApp"/>
+          Order on WhatsApp
+        </button>
+        <button class="em-btn" onclick="orderEmail()">
+          <img src="assets/images/icon-email.svg" width="14" height="14" alt="Email"/>
+          Send via Email
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════════════ -->
+  <nav>
+    <a class="nb" href="#home">
+      <img src="assets/images/logo.png" alt="CeeKay Emporium logo" class="nav-logo"/>
+      <span class="nb-text">CeeKay <span>Emporium</span></span>
+    </a>
+    <ul class="nl">
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#location">Find Us</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 Order Now
+      <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════════ -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="hero-stripe"></div>
+
+    <div class="hero-inner">
+
+      <!-- LEFT: Text content -->
+      <div class="hero-content">
+        <div class="hero-badge">Benoni's Favourite Kota Spot</div>
+
+        <h1 class="hero-title">
+          <span class="small">Handcrafted with love</span>
+          <span class="accent">CeeKay</span>
+          Emporium
+        </h1>
+
+        <p class="hero-sub">
+          Real flavour. Real value. Real community. Come taste why Benoni can't stop
+          talking about us — loaded kotas from just <strong>R20</strong>.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#menu" class="btn-primary">🍔 See Our Menu</a>
+          <a href="https://wa.me/27780178517"
+             class="btn-secondary" target="_blank" rel="noopener">💬 Chat with Us</a>
+        </div>
+      </div>
+
+      <!-- RIGHT: Logo image -->
+      <div class="hero-logo-wrap">
+        <img src="assets/images/logo.png" alt="CeeKay Emporium — loaded kota" class="hero-logo-img"/>
+      </div>
+
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years Serving</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <div class="stat-num">R20</div>
+        <div class="stat-label">Starting Price</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Made Fresh</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <div class="stat-num">❤️</div>
+        <div class="stat-label">Made with Love</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       TRUST STRIP
+  ══════════════════════════════════════════════ -->
+  <div class="trust-strip">
+    <div class="trust-item"><span class="trust-icon">⚡</span><span class="trust-text">Fast Prep</span></div>
+    <div class="trust-div"></div>
+    <div class="trust-item"><span class="trust-icon">🌶️</span><span class="trust-text">Fresh Ingredients</span></div>
+    <div class="trust-div"></div>
+    <div class="trust-item"><span class="trust-icon">📍</span><span class="trust-text">Benoni, Gauteng</span></div>
+    <div class="trust-div"></div>
+    <div class="trust-item"><span class="trust-icon">💬</span><span class="trust-text">Order on WhatsApp</span></div>
+    <div class="trust-div"></div>
+    <div class="trust-item"><span class="trust-icon">💰</span><span class="trust-text">Best Value</span></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       ABOUT
+  ══════════════════════════════════════════════ -->
+  <section class="about" id="about">
+    <div class="about-inner">
+
+      <div class="about-visual reveal">
+        <div class="about-badge" style="animation:wobble 3s ease-in-out infinite">
+          <span class="ab-yr">Est.</span>
+          <span class="ab-num">2021</span>
+        </div>
+        <div class="about-card">
+          <img src="assets/images/logo.png" alt="CeeKay kota" class="about-logo-img"/>
+          <p class="about-quote">Every kota is made like I'm feeding my own family.</p>
+          <div class="about-sig">— The CeeKay Team</div>
+        </div>
+      </div>
+
+      <div class="reveal" style="transition-delay:.15s">
+        <div class="section-tag">Our Story</div>
+        <h2 class="section-title">Born in <em>Benoni</em>,<br>Built on Flavour</h2>
+        <p class="about-text">
+          CeeKay Emporium started as a passion project right here in Benoni, Gauteng —
+          and grew into the street food spot the whole neighbourhood talks about. We believe
+          everyone deserves a seriously good meal without breaking the bank.
+        </p>
+        <p class="about-text" style="margin-top:.8rem">
+          Every kota is assembled fresh to order, packed full of flavour, and priced so
+          you can come back tomorrow.
+        </p>
+        <div class="about-perks">
+          <div class="perk">
+            <div class="perk-icon">🔥</div>
+            <div>
+              <div class="perk-title">Made Fresh Every Time</div>
+              <div class="perk-desc">No pre-made, no shortcuts — everything is prepared fresh when you order.</div>
+            </div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">💸</div>
+            <div>
+              <div class="perk-title">Unbeatable Value</div>
+              <div class="perk-desc">Huge kotas from just R20. Full flavour, fair price — always.</div>
+            </div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">🤝</div>
+            <div>
+              <div class="perk-title">Community First</div>
+              <div class="perk-desc">We're proud to be part of Benoni and serve our neighbours every single day.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       MENU
+  ══════════════════════════════════════════════ -->
+  <section class="menu" id="menu">
+    <div class="menu-inner">
+
+      <div class="menu-header reveal">
+        <div class="section-tag">What We Serve</div>
+        <h2 class="section-title">Our <em>Menu</em></h2>
+        <p class="section-sub" style="margin:0 auto">
+          Handcrafted street food made to satisfy. Pick your perfect kota and wash it down right.
+        </p>
+      </div>
+
+      <!-- KOTAS — populated by scripts/main.js -->
+      <div class="category reveal" style="transition-delay:.1s">
+        <div class="cat-header">
+          <div class="cat-icon">🥖</div>
+          <div>
+            <div class="cat-name">Signature Kotas</div>
+            <div class="cat-count">3 options · freshly made</div>
+          </div>
+          <div class="cat-line"></div>
+        </div>
+        <div class="dishes-grid" id="kota-grid"></div>
+      </div>
+
+      <!-- DRINKS — populated by scripts/main.js -->
+      <div class="category reveal" style="transition-delay:.2s">
+        <div class="cat-header">
+          <div class="cat-icon">🥤</div>
+          <div>
+            <div class="cat-name">Cold Drinks</div>
+            <div class="cat-count">2 options · always chilled</div>
+          </div>
+          <div class="cat-line"></div>
+        </div>
+        <div class="drinks-grid" id="drink-grid"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       URGENCY BANNER
+  ══════════════════════════════════════════════ -->
+  <div class="urgency reveal">
+    <div class="urgency-label">🔥 Don't Miss Out</div>
+    <h3 class="urgency-title">Hungry? <span>Order Now</span> &amp; We'll Have It Ready!</h3>
+    <p class="urgency-sub">WhatsApp us your order and come collect — freshly made, just for you.</p>
+    <a href="https://wa.me/27780178517"
+       class="btn-primary" target="_blank" rel="noopener"
+       style="text-decoration:none">💬 WhatsApp Order Now</a>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       LOCATION
+  ══════════════════════════════════════════════ -->
+  <section class="location" id="location">
+    <div class="location-inner">
+
+      <div class="reveal">
+        <div class="section-tag">Find Us</div>
+        <h2 class="section-title">Come <em>Visit</em> Us</h2>
+        <p class="section-sub" style="margin-bottom:2rem">
+          We're right here in Benoni, Gauteng. Pop in and taste it for yourself.
+        </p>
+        <div class="loc-info">
+          <div class="loc-card">
+            <div class="loc-card-icon">📍</div>
+            <div>
+              <div class="loc-card-label">Location</div>
+              <div class="loc-card-val">Benoni, Gauteng<br>South Africa</div>
+            </div>
+          </div>
+          <div class="loc-card">
+            <div class="loc-card-icon">📞</div>
+            <div>
+              <div class="loc-card-label">Phone / WhatsApp</div>
+              <div class="loc-card-val"><a href="tel:+27780178517">+27 78 017 8517</a></div>
+            </div>
+          </div>
+          <div class="loc-card">
+            <div class="loc-card-icon">✉️</div>
+            <div>
+              <div class="loc-card-label">Email</div>
+              <div class="loc-card-val">
+                <a href="mailto:info@ceekayemporium.com">info@ceekayemporium.com</a>
+              </div>
+            </div>
+          </div>
+          <div class="loc-card">
+            <div class="loc-card-icon">🌐</div>
+            <div>
+              <div class="loc-card-label">Website</div>
+              <div class="loc-card-val">
+                <a href="https://www.ceekayemporium.com" target="_blank" rel="noopener">
+                  www.ceekayemporium.com
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" style="transition-delay:.15s">
+        <div class="map-wrap">
+          <iframe
+            src="https://maps.google.com/maps?q=Benoni,+Gauteng,+South+Africa&z=14&output=embed"
+            allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="CeeKay Emporium location map">
+          </iframe>
+        </div>
+        <a href="https://maps.google.com/?q=Benoni,+Gauteng,+South+Africa"
+           target="_blank" rel="noopener"
+           class="btn-primary"
+           style="margin-top:1rem;display:inline-flex;text-decoration:none">
+          📍 Open in Google Maps
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       SOCIAL / CONTACT
+  ══════════════════════════════════════════════ -->
+  <section class="social" id="contact">
+    <div class="reveal">
+      <div class="section-tag">Follow Along</div>
+      <h2 class="section-title">Stay <em>Connected</em></h2>
+      <p class="section-sub" style="margin:0 auto">
+        Follow us for daily specials, new items, and behind-the-scenes of what we're cooking up.
+      </p>
+    </div>
+
+    <div class="social-grid reveal" style="transition-delay:.1s">
+      <a class="soc-card fb"
+         href="https://www.facebook.com/CeeKayEmporium"
+         target="_blank" rel="noopener">
+        <img src="assets/images/icon-facebook.svg" width="36" height="36" alt="Facebook"/>
+        <span class="soc-name">Facebook</span>
+        <span class="soc-handle">@CeeKayEmporium</span>
+      </a>
+      <a class="soc-card ig"
+         href="https://www.instagram.com/ceekay_emporium"
+         target="_blank" rel="noopener">
+        <img src="assets/images/icon-instagram.svg" width="36" height="36" alt="Instagram"/>
+        <span class="soc-name">Instagram</span>
+        <span class="soc-handle">@ceekay_emporium</span>
+      </a>
+      <a class="soc-card tt"
+         href="https://www.tiktok.com/@CeeKayEmporium"
+         target="_blank" rel="noopener">
+        <img src="assets/images/icon-tiktok.svg" width="36" height="36" alt="TikTok"/>
+        <span class="soc-name">TikTok</span>
+        <span class="soc-handle">@CeeKayEmporium</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════ -->
+  <footer>
+    <img src="assets/images/logo.png" alt="CeeKay Emporium" class="foot-logo-img"/>
+    <div class="foot-logo">CeeKay Emporium</div>
+    <div class="foot-tagline">Benoni's Beloved Street Food · Est. 2021</div>
+    <div class="foot-socials">
+      <a href="https://www.facebook.com/CeeKayEmporium" target="_blank" rel="noopener" title="Facebook">
+        <img src="assets/images/icon-facebook.svg" width="20" height="20" alt="Facebook"/>
+      </a>
+      <a href="https://www.instagram.com/ceekay_emporium" target="_blank" rel="noopener" title="Instagram">
+        <img src="assets/images/icon-instagram.svg" width="20" height="20" alt="Instagram"/>
+      </a>
+      <a href="https://www.tiktok.com/@CeeKayEmporium" target="_blank" rel="noopener" title="TikTok">
+        <img src="assets/images/icon-tiktok.svg" width="20" height="20" alt="TikTok"/>
+      </a>
+    </div>
+    <div class="foot-copy">© 2021 CeeKay Emporium · Benoni, Gauteng · All Rights Reserved</div>
+  </footer>
+
+  <!-- ── TOAST NOTIFICATION ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── MAIN SCRIPT ── -->
+  <script src="scripts/main.js"></script>
+
+</body>
+</html>
