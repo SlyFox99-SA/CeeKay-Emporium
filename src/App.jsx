@@ -22,6 +22,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminMenu from './pages/admin/AdminMenu';
 
 import AdminFinance from './pages/admin/AdminFinance';
+import AdminCOS from './pages/admin/AdminCOS'; // <-- ADDED IMPORT
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminStores from './pages/admin/AdminStores';
 import AdminStaff from './pages/admin/AdminStaff';
@@ -51,7 +52,7 @@ function AppRoutes() {
   const location = useLocation();
   useDynamicManifest();
 
-  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order') || location.pathname.startsWith('/pos') || location.pathname.startsWith('/login') || location.pathname.startsWith('/log');
+  const isOperational = location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen') || location.pathname.startsWith('/order') || location.pathname.startsWith('/pos') || location.pathname.startsWith('/login') ||location.pathname.startsWith('/log');
   const [isBooting, setIsBooting] = useState(!isOperational);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ function AppRoutes() {
                   <Route path="/log" element={<FamilyLog />} />
                   <Route path="/admin/reset-password" element={<AdminResetPassword />} />
 
-                  {/* POS ROUTE (Isolated) */}
+                  {/* POS ROUTE (Isolated for Cashier role) */}
                   <Route path="/pos" element={
                     <ProtectedRoute allowedRoles={['pos', 'admin']}>
                       <AdminPOS />
@@ -109,8 +110,12 @@ function AppRoutes() {
                   }>
                     <Route index element={<AdminDashboard />} />
                     <Route path="menu" element={<AdminMenu />} />
-                    
                     <Route path="finance" element={<AdminFinance />} />
+                    <Route path="cos" element={<AdminCOS />} /> {/* <-- ADDED ROUTE */}
+                    
+                    {/* Added POS inside admin so the sidebar stays for admins */}
+                    <Route path="pos" element={<AdminPOS />} />
+                    
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="stores" element={<AdminStores />} />
                     <Route path="staff" element={<AdminStaff />} />

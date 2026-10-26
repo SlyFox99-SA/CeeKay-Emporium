@@ -1,11 +1,15 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Wallet } from 'lucide-react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Home, Utensils, Receipt, LogOut, ShoppingCart, Flame, Wallet, Calculator } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FEATURES } from '../../config/features';
 
 export default function AdminLayout() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we are currently on the POS page
+  const isPOS = location.pathname.includes('/admin/pos');
 
   const handleLogout = () => {
     signOut();
@@ -18,12 +22,13 @@ export default function AdminLayout() {
     { to: "/admin/pos", icon: ShoppingCart, label: "Cashier POS", show: FEATURES.enablePOS },
     { to: "/admin/orders", icon: Receipt, label: "Orders" },
     
-    { to: "/admin/finance", icon: Wallet, label: "Finance Ledger" }
+    { to: "/admin/finance", icon: Wallet, label: "Finance Ledger" },
+    { to: "/admin/cos", icon: Calculator, label: "Cost of Sales" }
   ];
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <aside className="admin-sidebar" style={{ flexShrink: 0 }}>
         <div style={{ padding: '32px 24px' }}>
           <h1 style={{ margin: 0, fontSize: '28px', fontFamily: 'var(--ck-font-serif)', color: 'var(--ck-brand-deep)', letterSpacing: '-0.02em' }}>CeeKay</h1>
           <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 800, color: 'var(--ck-warm)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Console</p>
@@ -58,8 +63,14 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="admin-content">
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}><Outlet /></div>
+      {/* DYNAMIC MAIN CONTAINER: Removes max-width and padding for POS */}
+      <main 
+        className="admin-content" 
+        style={isPOS ? { padding: 0, height: '100dvh', overflow: 'hidden', background: 'var(--ck-cream)' } : {}}
+      >
+        <div style={isPOS ? { height: '100%' } : { maxWidth: '1200px', margin: '0 auto' }}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );

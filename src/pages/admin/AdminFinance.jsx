@@ -1,35 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Download, TrendingUp, TrendingDown, DollarSign, Plus, Receipt, ClipboardPaste, Calculator, CheckCircle2, ArrowRight, Trash2, Package, Coins } from 'lucide-react';
+import { Download, TrendingUp, TrendingDown, DollarSign, Receipt, CheckCircle2, Package, Pencil, X, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { getIngredients, addIngredient, addBulkIngredients } from '../../services/cosService';
 import { useHaptics } from '../../hooks/useHaptics';
 
 export default function AdminFinance() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ revenue: 0, expenses: 0, netProfit: 0 });
-  const [orders, setOrders] = useState([]);
-  const [expenses, setExpenses] = useState([]);
-  const [combinedExpenses, setCombinedExpenses] = useState([]);
-  
-  // Form Toggle
-  const [entryMode, setEntryMode] = useState('ingredient');
+  const [ledgerItems, setLedgerItems] = useState([]);
   const haptics = useHaptics();
 
-  // General Expense Form
-  const [desc, setDesc] = useState('');
-  const [amount, setAmount] = useState('');
-
-  // Ingredient Form
-  const [ingName, setIngName] = useState('');
-  const [ingPrice, setIngPrice] = useState('');
-  const [ingYield, setIngYield] = useState('');
-  const [ingUnit, setIngUnit] = useState('slice');
-  
-  // Bulk Parser State
-  const [bulkText, setBulkText] = useState('');
-  const [parsedPreview, setParsedPreview] = useState([]);
-  const [isParsing, setIsParsing] = useState(false);
+  // EDIT MODAL STATE
+  const [editingItem, setEditingItem] = useState(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => { fetchFinancials(); }, []);
 
@@ -39,28 +22,47 @@ export default function AdminFinance() {
       const { data: ordersData } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       const { data: purchasesData } = await supabase.from('purchase_logs').select('*').order('logged_at', { ascending: false });
       const { data: expensesData } = await supabase.from('expenses').select('*').order('logged_at', { ascending: false });
-      
-      setOrders(ordersData || []);
-      setExpenses(expensesData || []);
 
-      // STRICT LEDGER: Only map actual transactions. NO MASTER LISTS.
-      const generalMapped = (expensesData || []).map(e => ({ 
-        id: `exp-${e.id}`, type: 'general', displayName: e.description, displayDate: e.logged_at, amount: e.amount 
+      // 1. Map Sales (Cash In)
+      const salesMapped = (ordersData || []).filter(o => o.status !== 'cancelled').map(o => ({
+        rawId: o.id,
+        id: `sale-${o.id}`,
+        type: 'sale',
+        displayName: o.customer?.name ? `Sale - ${o.customer.name}` : `Walk-in Sale`,
+        displayDate: o.created_at,
+        amount: Number(o.total)
       }));
-      
-      const stockMapped = (purchasesData || []).map(p => ({ 
-        id: `pur-${p.id}`, type: 'purchase', displayName: p.ingredient_name, displayDate: p.logged_at, amount: p.purchase_price, unit: p.unit, yield: p.yield_amount
+
+      // 2. Map General Bills
+      const generalMapped = (expensesData || []).map(e => ({
+        rawId: e.id,
+        id: `exp-${e.id}`,
+        type: 'general',
+        displayName: e.description,
+        displayDate: e.logged_at,
+        amount: Number(e.amount)
       }));
+
+      // 3. Aggregate Stock/COS
+      const totalCOS = (purchasesData || []).reduce((sum, p) => sum + Number(p.purchase_price), 0);
+      const latestPurchaseDate = purchasesData && purchasesData.length > 0 ? purchasesData[0].logged_at : new Date().toISOString();
       
-      const combined = [...generalMapped, ...stockMapped].sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate));
-      setCombinedExpenses(combined);
+      const cosSummary = totalCOS > 0 ? [{
+        rawId: null,
+        id: 'cos-summary',
+        type: 'cos_summary',
+        displayName: 'Stock Purchases (COS Total)',
+        displayDate: latestPurchaseDate,
+        amount: totalCOS
+      }] : [];
+
+      // Combine and Sort
+      const combined = [...salesMapped, ...generalMapped, ...cosSummary].sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate));
+      setLedgerItems(combined);
 
       // Calculate Totals
-      const totalRevenue = (ordersData || []).filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + Number(o.total), 0);
-      const totalPurchases = (purchasesData || []).reduce((sum, p) => sum + Number(p.purchase_price), 0);
-      const totalGeneralExpenses = (expensesData || []).reduce((sum, e) => sum + Number(e.amount), 0);
-      
-      const totalExpenses = totalPurchases + totalGeneralExpenses;
+      const totalRevenue = salesMapped.reduce((sum, o) => sum + o.amount, 0);
+      const totalExpenses = totalCOS + generalMapped.reduce((sum, e) => sum + e.amount, 0);
       const netProfit = totalRevenue - totalExpenses;
 
       setStats({ revenue: totalRevenue, expenses: totalExpenses, netProfit });
@@ -71,131 +73,47 @@ export default function AdminFinance() {
     }
   };
 
-  const handleAddGeneralExpense = async (e) => {
-    e.preventDefault();
-    if (!desc || !amount) return;
+  const handleEditSubmit = async () => {
+    if (!editingItem || editingItem.type !== 'general') return;
+    setIsSavingEdit(true);
     haptics.success();
-    await supabase.from('expenses').insert({ description: desc, amount: Number(amount) });
-    setDesc(''); setAmount('');
-    fetchFinancials();
-  };
 
-  const handleAddIngredient = async (e) => {
-    e.preventDefault();
-    if (!ingName || !ingPrice || !ingYield) return;
-    haptics.success();
-    
-    await addIngredient({ name: ingName, purchase_price: Number(ingPrice), yield_amount: Number(ingYield), unit: ingUnit });
-    await supabase.from('purchase_logs').insert({ ingredient_name: ingName, purchase_price: Number(ingPrice), yield_amount: Number(ingYield), unit: ingUnit });
-
-    setIngName(''); setIngPrice(''); setIngYield('');
-    fetchFinancials();
-  };
-
-  // SMART PARSER V4: Auto-Categorizes and handles mixed notes
-  const parseText = () => {
-    setIsParsing(true);
-    const lines = bulkText.split('\n');
-    const results = [];
-
-    lines.forEach(line => {
-      let clean = line.trim();
-      if (!clean) return;
-
-      // 1. Extract Price
-      let extractedPrice = 0;
-      const priceMatch = clean.match(/(?:R|=)\s*(\d+(?:[.,]\d+)?)(?:\s*-\s*(\d+(?:[.,]\d+)?))?/gi);
-      if (priceMatch) {
-        const lastMatch = priceMatch[priceMatch.length - 1];
-        const nums = lastMatch.match(/\d+(?:[.,]\d+)?/g);
-        if (nums) extractedPrice = Math.max(...nums.map(n => parseFloat(n.replace(',', '.'))));
-      } else {
-        const nums = clean.match(/\d+(?:[.,]\d+)?/g);
-        if (nums) extractedPrice = Math.max(...nums.map(n => parseFloat(n.replace(',', '.'))));
-      }
-      if (extractedPrice === 0) return;
-
-      // 2. Auto-Categorize
-      const isGeneralExpense = /gas|rent|wage|electric|water|packaging|box|poly|cleaning/i.test(clean);
-      let extractedType = isGeneralExpense ? 'general' : 'ingredient';
-      let extractedYield = 1;
-      let extractedUnit = 'unit';
-
-      // 3. Extract Yield/Unit (Only if Ingredient)
-      if (extractedType === 'ingredient') {
-        if (clean.includes('Cheese 54x')) { extractedYield = 54; extractedUnit = 'slice'; }
-        else if (clean.includes('Butter 1kgx2')) { extractedYield = 2; extractedUnit = 'kg'; }
-        else if (clean.includes('24 patties')) { extractedYield = 24; extractedUnit = 'piece'; }
-        else {
-            const yieldMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|l|L|x|patties|slices|pieces|loaf)/i);
-            if (yieldMatch) {
-              extractedYield = parseFloat(yieldMatch[1].replace(',', '.'));
-              const u = yieldMatch[2].toLowerCase();
-              if (u === 'kg') extractedUnit = 'kg';
-              else if (u === 'g') extractedUnit = 'g';
-              else if (u === 'l') extractedUnit = 'L';
-              else if (u === 'x' || u === 'pieces' || u === 'slices' || u === 'patties') extractedUnit = 'piece';
-              else if (u === 'loaf') extractedUnit = 'loaf';
-            }
-        }
-      }
-
-      // 4. Extract Name
-      let extractedName = clean
-        .replace(/(?:R|=)\s*[\d.,]+(?:\s*-\s*(?:R)?\s*[\d.,]+)?/gi, '')
-        .replace(/\d+(?:[.,]\d+)?\s*(?:x|kg|g|l|L|patties|slices|pieces|loaf)/gi, '')
-        .replace(/\d+/g, '')
-        .replace(/[=.-]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      if (extractedPrice > 0 && extractedName.length > 1) {
-        results.push({ 
-          name: extractedName, 
-          purchase_price: extractedPrice, 
-          yield_amount: extractedYield, 
-          unit: extractedUnit, 
-          type: extractedType
-        });
-      }
-    });
-
-    setParsedPreview(results);
-    setIsParsing(false);
-  };
-
-  const handleBulkSubmit = async () => {
-    haptics.success();
-    
-    const ingredientsToSave = parsedPreview.filter(p => p.type === 'ingredient');
-    const expensesToSave = parsedPreview.filter(p => p.type === 'general');
-
-    // Save Ingredients
-    if (ingredientsToSave.length > 0) {
-      await addBulkIngredients(ingredientsToSave);
-      await supabase.from('purchase_logs').insert(ingredientsToSave.map(p => ({
-        ingredient_name: p.name, purchase_price: p.purchase_price, yield_amount: p.yield_amount, unit: p.unit
-      })));
+    try {
+      await supabase.from('expenses').update({
+        description: editingItem.displayName,
+        amount: Number(editingItem.amount)
+      }).eq('id', editingItem.rawId);
+      
+      setEditingItem(null);
+      fetchFinancials();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingEdit(false);
     }
+  };
 
-    // Save General Expenses
-    if (expensesToSave.length > 0) {
-      await supabase.from('expenses').insert(expensesToSave.map(e => ({
-        description: e.name, amount: e.purchase_price
-      })));
+  const handleDelete = async () => {
+    if (!editingItem || editingItem.type !== 'general') return;
+    setIsSavingEdit(true);
+    haptics.success();
+
+    try {
+      await supabase.from('expenses').delete().eq('id', editingItem.rawId);
+      setEditingItem(null);
+      fetchFinancials();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingEdit(false);
     }
-
-    setBulkText('');
-    setParsedPreview([]);
-    fetchFinancials();
   };
 
   const exportToCSV = () => {
     haptics.light();
-    const headers = "Date,Type,Reference,Description,Amount\n";
-    const orderRows = orders.map(o => `${new Date(o.created_at).toLocaleDateString()},Sale,${o.order_number || o.id},"${o.customer?.name || 'Walk-in'}",${o.total}`).join('\n');
-    const expenseRows = combinedExpenses.map(e => `${new Date(e.displayDate).toLocaleDateString()},${e.type === 'general' ? 'Expense' : 'Stock Purchase'},-,"${e.displayName}",${e.amount}`).join('\n');
-    const csvContent = headers + orderRows + '\n' + expenseRows;
+    const headers = "Date,Type,Description,Amount\n";
+    const ledgerRows = ledgerItems.map(e => `${new Date(e.displayDate).toLocaleDateString()},${e.type === 'sale' ? 'Sale' : e.type === 'general' ? 'Expense' : 'Stock Purchase'},"${e.displayName}",${e.type === 'sale' ? '' : '-'}${e.amount}`).join('\n');
+    const csvContent = headers + ledgerRows;
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -208,7 +126,7 @@ export default function AdminFinance() {
   };
 
   return (
-    <div style={{ padding: '24px 20px', minHeight: '100dvh', background: 'var(--ck-cream)' }}>
+    <div className="admin-finance-page" style={{ padding: '24px 20px', minHeight: '100dvh', background: 'var(--ck-cream)' }}>
       <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ck-brand-deep)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Finance</div>
@@ -235,114 +153,122 @@ export default function AdminFinance() {
         </div>
       </div>
 
-      {/* ENTRY FORM */}
-      <div style={{ background: 'white', padding: '24px', borderRadius: '24px', border: '1px solid var(--ck-border)', marginBottom: '32px' }}>
-        <div style={{ display: 'flex', background: 'var(--ck-cream)', borderRadius: '12px', padding: '4px', marginBottom: '20px', maxWidth: '400px' }}>
-          <button onClick={() => setEntryMode('ingredient')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: entryMode === 'ingredient' ? 'white' : 'transparent', color: entryMode === 'ingredient' ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)', fontWeight: 800, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <Package size={16} /> Stock / Ingredients
-          </button>
-          <button onClick={() => setEntryMode('general')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: entryMode === 'general' ? 'white' : 'transparent', color: entryMode === 'general' ? 'var(--ck-brand-deep)' : 'var(--ck-ink-soft)', fontWeight: 800, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <Coins size={16} /> General Bill
-          </button>
-        </div>
+      {/* FINANCIAL LEDGER HISTORY */}
+      <h3 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ck-ink-soft)', textTransform: 'uppercase', marginBottom: '16px', paddingLeft: '4px' }}>Recent Financial Records</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {ledgerItems.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ck-ink-soft)', background: 'white', borderRadius: '20px', border: '1px dashed var(--ck-border)' }}>No financial records found.</div>
+        ) : (
+          ledgerItems.map((item) => {
+            const isSale = item.type === 'sale';
+            const isGeneral = item.type === 'general';
+            const isCOS = item.type === 'cos_summary';
 
-        {entryMode === 'ingredient' && (
-          <AnimatePresence mode="wait">
-            {!parsedPreview.length ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div style={{ background: 'linear-gradient(135deg, #1e5f9c, var(--ck-brand-deep))', borderRadius: '16px', padding: '16px', marginBottom: '20px', color: 'white' }}>
-                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 8px', fontSize: '15px' }}><ClipboardPaste size={18} /> Smart Paste Notes</h3>
-                  <p style={{ fontSize: '12px', opacity: 0.8, margin: '0 0 12px', lineHeight: 1.4 }}>Paste your raw notes. The AI will decipher prices, yields, and automatically categorize items.</p>
-                  <textarea value={bulkText} onChange={(e) => setBulkText(e.target.value)} placeholder="Gas cylinder refill 9kg=R290&#10;Bread per loaf=R14&#10;Cheese 54x = R100-R125" style={{ width: '100%', height: '100px', padding: '12px', borderRadius: '8px', border: 'none', fontSize: '13px', fontFamily: 'monospace', outline: 'none', background: 'rgba(255,255,255,0.9)', color: 'var(--ck-ink)' }} />
-                  <button onClick={parseText} disabled={!bulkText.trim() || isParsing} style={{ width: '100%', padding: '12px', background: 'var(--ck-warm)', color: 'var(--ck-charcoal)', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '13px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
-                    {isParsing ? 'Deciphering...' : 'Decipher Notes'} <ArrowRight size={14} />
-                  </button>
-                </div>
-
-                <form onSubmit={handleAddIngredient} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <input type="text" placeholder="Ingredient Name (e.g. Cheese)" value={ingName} onChange={e => setIngName(e.target.value)} required style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <input type="number" step="0.01" placeholder="Price (R)" value={ingPrice} onChange={e => setIngPrice(e.target.value)} required style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
-                    <input type="number" placeholder="Yield (e.g. 54)" value={ingYield} onChange={e => setIngYield(e.target.value)} required style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
+            return (
+              <motion.div 
+                key={item.id} 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                onClick={() => { 
+                  if (isGeneral) { haptics.light(); setEditingItem(item); }
+                }}
+                style={{ display: 'flex', justifyContent: 'space-between', background: 'white', padding: '16px', borderRadius: '16px', border: '1px solid var(--ck-border)', alignItems: 'center', cursor: isGeneral ? 'pointer' : 'default', transition: 'transform 0.1s' }}
+                whileTap={isGeneral ? { scale: 0.98 } : {}}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '40px', height: '40px', borderRadius: '50%', 
+                    background: isSale ? 'rgba(76, 175, 80, 0.1)' : isGeneral ? 'rgba(229, 57, 53, 0.1)' : 'var(--ck-cream)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    color: isSale ? 'var(--ck-green)' : isGeneral ? 'var(--ck-achaar-red)' : 'var(--ck-brand-deep)' 
+                  }}>
+                    {isSale ? <TrendingUp size={18} /> : isGeneral ? <Receipt size={18} /> : <Package size={18} />}
                   </div>
-                  <input type="text" placeholder="Unit (slice, loaf, gram)" value={ingUnit} onChange={e => setIngUnit(e.target.value)} required style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
-                  <button type="submit" style={{ width: '100%', padding: '16px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '99px', fontWeight: 800, fontSize: '15px', marginTop: '8px' }}><Plus size={18} /> Save Ingredient</button>
-                </form>
-              </motion.div>
-            ) : (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px', fontSize: '16px', fontWeight: 800, color: 'var(--ck-green)' }}><CheckCircle2 size={18} /> Review & Edit (Auto-Categorized)</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-                  {parsedPreview.map((item, i) => (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'var(--ck-cream)', padding: '12px', borderRadius: '12px' }}>
-                      
-                      {/* TYPE TOGGLE */}
-                      <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
-                        <button onClick={() => { const n = [...parsedPreview]; n[i].type = 'ingredient'; setParsedPreview(n); }} style={{ flex: 1, padding: '6px', fontSize: '11px', fontWeight: 800, borderRadius: '6px', border: 'none', background: item.type === 'ingredient' ? 'var(--ck-brand-deep)' : 'rgba(0,0,0,0.05)', color: item.type === 'ingredient' ? 'white' : 'var(--ck-ink-soft)' }}>Ingredient</button>
-                        <button onClick={() => { const n = [...parsedPreview]; n[i].type = 'general'; setParsedPreview(n); }} style={{ flex: 1, padding: '6px', fontSize: '11px', fontWeight: 800, borderRadius: '6px', border: 'none', background: item.type === 'general' ? 'var(--ck-achaar-red)' : 'rgba(0,0,0,0.05)', color: item.type === 'general' ? 'white' : 'var(--ck-ink-soft)' }}>General Bill</button>
-                      </div>
-
-                      <input value={item.name} onChange={(e) => { const n = [...parsedPreview]; n[i].name = e.target.value; setParsedPreview(n); }} placeholder="Name" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px' }} />
-                      <input type="number" value={item.purchase_price} onChange={(e) => { const n = [...parsedPreview]; n[i].purchase_price = Number(e.target.value); setParsedPreview(n); }} placeholder="Price" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px' }} />
-                      
-                      {item.type === 'ingredient' && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <input type="number" value={item.yield_amount} onChange={(e) => { const n = [...parsedPreview]; n[i].yield_amount = Number(e.target.value); setParsedPreview(n); }} placeholder="Yield" style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px' }} />
-                          <input value={item.unit} onChange={(e) => { const n = [...parsedPreview]; n[i].unit = e.target.value; setParsedPreview(n); }} placeholder="Unit" style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--ck-border)', fontSize: '13px' }} />
-                        </div>
-                      )}
-
-                      <button onClick={() => setParsedPreview(parsedPreview.filter((_, idx) => idx !== i))} style={{ padding: '8px', background: 'rgba(229, 57, 53, 0.1)', color: '#E53935', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--ck-ink)' }}>
+                      {item.displayName}
                     </div>
-                  ))}
+                    <div style={{ fontSize: '12px', color: 'var(--ck-ink-soft)', marginTop: '2px' }}>
+                      {new Date(item.displayDate).toLocaleDateString()}
+                      {isCOS && ' • Auto-summarized from Stock'}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button onClick={() => setParsedPreview([])} style={{ flex: 1, padding: '14px', background: 'var(--ck-cream)', color: 'var(--ck-ink)', border: 'none', borderRadius: '99px', fontWeight: 800 }}>Cancel</button>
-                  <button onClick={handleBulkSubmit} style={{ flex: 2, padding: '14px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '99px', fontWeight: 800 }}>Confirm & Save</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '16px', color: isSale ? 'var(--ck-green)' : 'var(--ck-achaar-red)' }}>
+                    {isSale ? '+' : '-'} R {Number(item.amount).toFixed(2)}
+                  </div>
+                  {isGeneral && <Pencil size={16} color="var(--ck-ink-soft)" />}
                 </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-
-        {entryMode === 'general' && (
-          <motion.form onSubmit={handleAddGeneralExpense} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <input type="text" placeholder="Description (e.g. Gas Cylinder, Rent)" value={desc} onChange={e => setDesc(e.target.value)} required style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
-            <input type="number" step="0.01" placeholder="Amount (R)" value={amount} onChange={e => setAmount(e.target.value)} required style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', outline: 'none' }} />
-            <button type="submit" style={{ width: '100%', padding: '16px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '99px', fontWeight: 800, fontSize: '15px', marginTop: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}><Plus size={18} /> Log Expense</button>
-          </motion.form>
+            );
+          })
         )}
       </div>
 
-      {/* STRICT LEDGER HISTORY */}
-      <h3 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ck-ink-soft)', textTransform: 'uppercase', marginBottom: '16px', paddingLeft: '4px' }}>Recent Ledger Activity</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {combinedExpenses.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ck-ink-soft)', background: 'white', borderRadius: '20px', border: '1px dashed var(--ck-border)' }}>No actual financial transactions logged yet.</div>
-        ) : (
-          combinedExpenses.map((item) => (
-            <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', justifyContent: 'space-between', background: 'white', padding: '16px', borderRadius: '16px', border: '1px solid var(--ck-border)', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: item.type === 'general' ? 'rgba(229, 57, 53, 0.1)' : 'var(--ck-cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.type === 'general' ? 'var(--ck-achaar-red)' : 'var(--ck-brand-deep)' }}>
-                  {item.type === 'general' ? <Receipt size={18} /> : <Package size={18} />}
+      {/* EDIT BOTTOM SHEET MODAL (Only for General Bills) */}
+      <AnimatePresence>
+        {editingItem && editingItem.type === 'general' && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setEditingItem(null)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 999 }} 
+            />
+            <motion.div 
+              initial={{ y: '100%' }} 
+              animate={{ y: 0 }} 
+              exit={{ y: '100%' }} 
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '24px', zIndex: 1000, maxWidth: '600px', margin: '0 auto', boxShadow: '0 -10px 40px rgba(0,0,0,0.1)' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: 'var(--ck-ink)' }}>Edit General Bill</h3>
+                <button onClick={() => setEditingItem(null)} style={{ background: 'var(--ck-cream)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={20} color="var(--ck-ink-soft)" /></button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--ck-ink-soft)', marginLeft: '4px' }}>Description</label>
+                  <input 
+                    value={editingItem.displayName} 
+                    onChange={(e) => setEditingItem({ ...editingItem, displayName: e.target.value })}
+                    style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', marginTop: '4px', boxSizing: 'border-box' }} 
+                  />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--ck-ink)' }}>
-                    {item.displayName}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--ck-ink-soft)', marginTop: '2px' }}>
-                    {new Date(item.displayDate).toLocaleDateString()}
-                    {item.type === 'purchase' && ` • ${item.yield} ${item.unit}s`}
-                  </div>
+                  <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--ck-ink-soft)', marginLeft: '4px' }}>Amount (R)</label>
+                  <input 
+                    type="number"
+                    value={editingItem.amount} 
+                    onChange={(e) => setEditingItem({ ...editingItem, amount: e.target.value })}
+                    style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--ck-border)', fontSize: '15px', marginTop: '4px', boxSizing: 'border-box' }} 
+                  />
                 </div>
               </div>
-              <div style={{ fontWeight: 900, fontSize: '16px', color: 'var(--ck-achaar-red)' }}>
-                - R {Number(item.amount).toFixed(2)}
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button 
+                  onClick={handleDelete} 
+                  disabled={isSavingEdit}
+                  style={{ padding: '14px', background: 'rgba(229, 57, 53, 0.1)', color: '#E53935', border: 'none', borderRadius: '99px', fontWeight: 800, flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                >
+                  <Trash2 size={18} /> Delete
+                </button>
+                <button 
+                  onClick={handleEditSubmit} 
+                  disabled={isSavingEdit}
+                  style={{ flex: 2, padding: '14px', background: 'var(--ck-brand-deep)', color: 'white', border: 'none', borderRadius: '99px', fontWeight: 800, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                >
+                  {isSavingEdit ? 'Saving...' : <><CheckCircle2 size={18} /> Save Changes</>}
+                </button>
               </div>
             </motion.div>
-          ))
+          </>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
